@@ -1,3 +1,4 @@
+DROP DATABASE imobiliaria;
 CREATE DATABASE imobiliaria;
 
 USE imobiliaria;
@@ -151,16 +152,70 @@ CONSTRAINT pk_transacao PRIMARY KEY (codigo)
 );/*OK*/
 
 --PROCEDURES PARA INSERT'S--
-CREATE PROCEDURE usp_Imovel 
-(
-  
-)
+CREATE PROCEDURE usp_ImovelInserir
+  @registro INT,
+  @frente_lote VARCHAR(10),
+  @lado_lote VARCHAR(10),
+  @cod_proprietario INT,
+  @rua VARCHAR(100),
+  @num INT,
+  @complN VARCHAR(30),
+  @bairro VARCHAR(100),
+  @cidade VARCHAR(80),
+  @uf CHAR(2),
+  @paisN VARCHAR(50)
 AS
 BEGIN
-  INSERT INTO imovel() VALUES();
-END
-GO
+  --inserir endereço pegar o cod e colocar na tabela imoveis
+  IF @complN IS NULL BEGIN
+    INSERT INTO endereco (logradouro,numero,bairro,cidade,uf,pais) VALUES (@rua,@num,@bairro,@cidade,@uf,@paisN);
+  END
+  IF @paisN IS  NULL BEGIN
+    INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf) VALUES (@rua,@num,@complN,@bairro,@cidade,@uf);
+  END
 
+  INSERT INTO imovel(registro,frente_lote,lado_lote,proprietario_codigo,endereco_codigo) VALUES(@registro,@frente_lote,@lado_lote,@cod_proprietario,(SELECT IDENT_CURRENT('endereco')));/*SELECT IDENT_CURRENT('tbl_name');SELECT @@IDENTITY;SELECT SCOPE_IDENTITY();*/
+END
+GO/*OK*/
+
+CREATE PROCEDURE usp_ProprietarioInserir
+  @cpf VARCHAR(11),
+  @rg VARCHAR(10),
+  @nome VARCHAR(120),
+  @est_civil VARCHAR(15),
+  @tel VARCHAR(14),
+  @tel2 VARCHAR(14),
+  @cel VARCHAR(14),
+  @telComercial VARCHAR(14),
+  @nome_conjuge VARCHAR(120),
+  @est_civil_conjuge VARCHAR(15),
+  @cpf_conjuge VARCHAR(11),
+  @rua VARCHAR(100),
+  @num INT,
+  @complN VARCHAR(30),
+  @bairro VARCHAR(100),
+  @cidade VARCHAR(80),
+  @uf CHAR(2),
+  @paisN VARCHAR(50)
+AS
+BEGIN
+  --inserir endereço pegar o cod e colocar na tabela proprietario
+  IF @complN IS NULL BEGIN
+    INSERT INTO endereco (logradouro,numero,bairro,cidade,uf,pais) VALUES (@rua,@num,@bairro,@cidade,@uf,@paisN);
+  END
+  IF @paisN IS  NULL BEGIN
+    INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf) VALUES (@rua,@num,@complN,@bairro,@cidade,@uf);
+  END
+
+  INSERT INTO proprietario (cpf,rg,nome,estado_civil,telefone,telefone2,celular,tel_comercial,nome_conjuge,estado_civil_conjude,cpf_conjuge,endereco_codigo) VALUES (@cpf,@rg,@nome,@est_civil,@tel,@tel2,@cel,@telComercial,@nome_conjuge,@est_civil_conjuge,@cpf_conjuge,(SELECT IDENT_CURRENT('endereco')));
+END
+GO/*OK*/
+---
+EXEC usp_ProprietarioInserir '13013013013','17777888','IHMHR','Solteiro','88521996',Null,'88521996',Null,'Roberta Martinelli','Solteira','13013013605','Rua Securitarios',115,'Casa','Alipio','BH','MG',Null;
+--SELECT * FROM proprietario UNION SELECT * FROM endereco WHERE codigo = (SELECT endereco_codigo FROM proprietario);
+--SELECT * FROM proprietario JOIN endereco ON endereco.codigo = proprietario.endereco_codigo WHERE endereco.codigo = (SELECT endereco_codigo FROM proprietario);
+SELECT proprietario.codigo,cpf,rg,nome,estado_civil,telefone,telefone,celular,tel_comercial,nome_conjuge,estado_civil_conjude,cpf_conjuge,logradouro,numero,complemento,bairro,cidade,uf,pais FROM proprietario JOIN endereco ON endereco.codigo = proprietario.endereco_codigo WHERE endereco.codigo = (SELECT endereco_codigo FROM proprietario);
+---
 /*
 INSERT INTO imobiliaria (creci, nome_creci, dt_emissao) VALUES (100200,'Igor Martinelli','1996:09:22');
 
