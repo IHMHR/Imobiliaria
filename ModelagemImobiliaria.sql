@@ -15,7 +15,7 @@ PRIMARY KEY (creci)
 
 CREATE TABLE corretores (
 codigo INT UNISGNED NOT NULL IDENTITY(1,1),
-cpf VARCHAR(11) UNSIGNED NOT NULL,
+cpf VARCHAR(11) NOT NULL,
 rg VARCHAR(10) NOT NULL,
 nome_completo VARCHAR(150) NOT NULL,
 telefone VARCHAR(14) NULL,
@@ -31,13 +31,13 @@ imobiliaria(creci)
 
 CREATE TABLE comprador (
 codigo INT UNISGNED NOT NULL IDENTITY(1,1),
-cpf BIGINT UNSIGNED NOT NULL,
+cpf VARCHAR(11) NOT NULL,
+rg VARCHAR(10) NOT NULL,
 nome VARCHAR(120) NOT NULL,
-id TINYTEXT NOT NULL,
 estado_civil VARCHAR(15) NOT NULL, 
 profissao VARCHAR(45) NOT NULL,
 renda_bruta INT UNSIGNED NOT NULL ,
-fgts INT,
+fgts DECIMAL(11,2) NULL,
 telefone VARCHAR(14) NULL,
 telefone2 VARCHAR(14) NULL,
 celular VARCHAR(14) NULL,
@@ -45,30 +45,29 @@ tel_comercial VARCHAR(14) NULL,
 nome_conjuge VARCHAR(120) NOT NULL,
 estado_civil_conjuge VARCHAR(15) NOT NULL,
 renda_bruta_conjuge INT UNSIGNED NOT NULL,
-cpf_conjuge BIGINT UNSIGNED NOT NULL,
-fgts_conjuge INT,
-entrada INT UNSIGNED,
-lista_intereste VARCHAR(45) NOT NULL,
+cpf_conjuge VARCHAR(11) NOT NULL,
+fgts_conjuge DECIMAL(11,2) NULL,
+entrada INT UNSIGNED NULL,
+lista_intereste VARCHAR(50) NULL,
 imobiliaria_creci MEDIUMINT UNSIGNED NOT NULL,
 PRIMARY KEY (cpf),
 FOREIGN KEY (imobiliaria_creci) references
 imobiliaria(creci)
 );/*OK*/
 
-
 CREATE TABLE proprietario (
 codigo INT UNISGNED NOT NULL IDENTITY(1,1),
-cpf BIGINT UNSIGNED NOT NULL,
+cpf VARCHAR(11) NOT NULL,
+rg VARCHAR(10) NOT NULL,
 nome VARCHAR(120) NOT NULL,
-id TINYINT NOT NULL,
 estado_civil VARCHAR(15),
 telefone VARCHAR(14) NULL,
 telefone2 VARCHAR(14) NULL,
 celular VARCHAR(14) NULL,
 tel_comercial VARCHAR(14) NULL,
-nome_conjuge VARCHAR(120),
-estado_civil_conjude VARCHAR(15),
-cpf_conjuge BIGINT,
+nome_conjuge VARCHAR(120) NULL,
+estado_civil_conjude VARCHAR(15) NULL,
+cpf_conjuge VARCHAR(11) NULL,
 PRIMARY KEY (cpf)
 );/*OK*/
 
@@ -77,6 +76,7 @@ codigo MEDIUMINT UNSIGNED AUTO_INCREMENT NULL,
 registro INT UNSIGNED NOT NULL,
 frente_lote VARCHAR(10) NOT NULL,
 lado_lote VARCHAR(10) NOT NULL,
+/**/
 logradouro VARCHAR(60) NOT NULL,
 numero SMALLINT NOT NULL,
 complemento TINYTEXT,
@@ -84,6 +84,7 @@ bairro VARCHAR(60) NOT NULL,
 cep BIGINT,
 cidade VARCHAR(60) NOT NULL,
 uf CHAR(2) NOT NULL,
+/**/
 proprietario_cpf BIGINT UNSIGNED NOT NULL,
 PRIMARY KEY (codigo),
 FOREIGN KEY (proprietario_cpf) references
@@ -94,11 +95,12 @@ CREATE TABLE venda (
 codigo INT UNISGNED NOT NULL IDENTITY(1,1),
 valor INT NOT NULL,
 data DATE NOT NULL,
-banco VARCHAR(20),
-documentos TINYTEXT,
-despachante VARCHAR(50),
-capitador VARCHAR(45),
-porcenta_imobiliaria INT UNSIGNED NOT NULL,
+documentos TINYTEXT NULL,
+/**/
+despachante VARCHAR(50) NULL,
+/**/
+capitador VARCHAR(45) NULL,
+porcenta_imobiliaria DECIMAL(11,2) NOT NULL,
 imobiliaria_creci MEDIUMINT UNSIGNED NOT NULL,
 imovel_codigo MEDIUMINT UNSIGNED AUTO_INCREMENT NULL,
 PRIMARY KEY (valor),
