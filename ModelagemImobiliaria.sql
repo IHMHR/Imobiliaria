@@ -147,8 +147,10 @@ num_conta_digito VARCHAR(2) NOT NULL,
 tipo_conta VARCHAR(25) NOT NULL,
 nome_banco VARCHAR(50) NOT NULL,
 valor DECIMAL(11,2) NOT NULL,
+venda_codigo INT NOT NULL,
 
-CONSTRAINT pk_transacao PRIMARY KEY (codigo)
+CONSTRAINT pk_transacao PRIMARY KEY (codigo),
+CONSTRAINT fk_venda FOREIGN KEY (venda_codigo) REFERENCES venda(codigo)
 );/*OK*/
 
 --PROCEDURES PARA INSERT'S--
@@ -210,19 +212,205 @@ BEGIN
   INSERT INTO proprietario (cpf,rg,nome,estado_civil,telefone,telefone2,celular,tel_comercial,nome_conjuge,estado_civil_conjude,cpf_conjuge,endereco_codigo) VALUES (@cpf,@rg,@nome,@est_civil,@tel,@tel2,@cel,@telComercial,@nome_conjuge,@est_civil_conjuge,@cpf_conjuge,(SELECT IDENT_CURRENT('endereco')));
 END
 GO/*OK*/
----
+
+CREATE PROCEDURE usp_CorretorInserir
+  @cpf VARCHAR(11),
+  @rg VARCHAR(10),
+  @nome VARCHAR(12),
+  @tel VARCHAR(14),
+  @tel2 VARCHAR(14),
+  @cel VARCHAR(14),
+  @telComercial VARCHAR(14),
+  @sexo CHAR(1),
+  @creci VARCHAR(10),
+  @rua VARCHAR(100),
+  @num INT,
+  @complN VARCHAR(30),
+  @bairro VARCHAR(100),
+  @cidade VARCHAR(80),
+  @uf CHAR(2),
+  @paisN VARCHAR(50)
+AS
+BEGIN
+  --inserir endereço pegar o cod e colocar na tabela corretores
+  IF @complN IS NULL BEGIN
+    INSERT INTO endereco (logradouro,numero,bairro,cidade,uf,pais) VALUES (@rua,@num,@bairro,@cidade,@uf,@paisN);
+  END
+  IF @paisN IS  NULL BEGIN
+    INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf) VALUES (@rua,@num,@complN,@bairro,@cidade,@uf);
+  END
+
+  IF @creci IS NULL BEGIN
+  INSERT INTO corretor(cpf,rg,nome_completo,telefone,telefone2,celular,tel_comercial,sexo,imobiliaria_creci,endereco_codigo) VALUES(@cpf,@rg,@nome,@tel,@tel2,@cel,@telComercial,@sexo,(SELECT creci FROM imobiliaria),(SELECT IDENT_CURRENT('endereco')));
+  END
+  ELSE BEGIN
+  INSERT INTO corretor(cpf,rg,nome_completo,telefone,telefone2,celular,tel_comercial,sexo,imobiliaria_creci,endereco_codigo) VALUES(@cpf,@rg,@nome,@tel,@tel2,@cel,@telComercial,@sexo,@creci,(SELECT IDENT_CURRENT('endereco')));
+  END
+END
+GO/*OK*/
+
+CREATE PROCEDURE usp_CompradorInserir
+  @cpf VARCHAR(11),
+  @rg VARCHAR(10),
+  @nome VARCHAR(12),
+  @estado_Civil VARCHAR(15),
+  @profissao varchar(45),
+  @renda_bruta INT,
+  @fgts DECIMAL(11,2),
+  @tel VARCHAR(14),
+  @tel2 VARCHAR(14),
+  @cel VARCHAR(14),
+  @telComercial VARCHAR(14),
+  @nome_conjuge VARCHAR(120),
+  @estado_civil_conjuge VARCHAR(15),
+  @renda_bruta_conjuge INT,
+  @cpf_conjuge VARCHAR(11),
+  @fgts_conjuge DECIMAL(11,2),
+  @entrada INT,
+  @lista_intereste VARCHAR(50),
+  @creci VARCHAR(10),
+  @rua VARCHAR(100),
+  @num INT,
+  @complN VARCHAR(30),
+  @bairro VARCHAR(100),
+  @cidade VARCHAR(80),
+  @uf CHAR(2),
+  @paisN VARCHAR(50)
+AS
+BEGIN
+  --inserir endereço pegar o cod e colocar na tabela comprador
+  IF @complN IS NULL BEGIN
+    INSERT INTO endereco (logradouro,numero,bairro,cidade,uf,pais) VALUES (@rua,@num,@bairro,@cidade,@uf,@paisN);
+  END
+  IF @paisN IS  NULL BEGIN
+    INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf) VALUES (@rua,@num,@complN,@bairro,@cidade,@uf);
+  END
+  
+  IF @creci IS NULL BEGIN
+    INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,nome_conjuge,estado_civil_conjuge,renda_bruta_conjuge,cpf_conjuge,fgts_conjuge,entrada,lista_intereste,imobiliaria_creci,endereco_codigo) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@nome_conjuge,@estado_civil_conjuge,@renda_bruta_conjuge,@cpf_conjuge,@fgts_conjuge,@entrada,@lista_intereste,(SELECT creci FROM imobiliaria),(SELECT IDENT_CURRENT('endereco')));
+  END
+  ELSE BEGIN
+    INSERT INTO comprador(cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,nome_conjuge,estado_civil_conjuge,renda_bruta_conjuge,cpf_conjuge,fgts_conjuge,entrada,lista_intereste,imobiliaria_creci,endereco_codigo) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@nome_conjuge,@estado_civil_conjuge,@renda_bruta_conjuge,@cpf_conjuge,@fgts_conjuge,@entrada,@lista_intereste,@creci,(SELECT IDENT_CURRENT('endereco')));
+  END
+END
+GO/*OK*/
+
+CREATE PROCEDURE usp_VendaInserir
+  @valor INT,
+  @data DATE,
+  @documentos VARCHAR(80),
+  @capitador VARCHAR(45),
+  @porcenta_imobiliaria DECIMAL(11,2),
+  @imovel_codigo INT,
+  @despachante_codigo INT,
+  @creci VARCHAR(10),
+  @rua VARCHAR(100),
+  @num INT,
+  @complN VARCHAR(30),
+  @bairro VARCHAR(100),
+  @cidade VARCHAR(80),
+  @uf CHAR(2),
+  @paisN VARCHAR(50)
+AS
+BEGIN
+  --inserir endereço pegar o cod e colocar na tabela venda
+  IF @complN IS NULL BEGIN
+    INSERT INTO endereco (logradouro,numero,bairro,cidade,uf,pais) VALUES (@rua,@num,@bairro,@cidade,@uf,@paisN);
+  END
+  IF @paisN IS NULL BEGIN
+    INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf) VALUES (@rua,@num,@complN,@bairro,@cidade,@uf);
+  END
+  
+  IF @creci IS NOT NULL BEGIN
+    INSERT INTO venda (valor,data,documentos,capitador,porcenta_imobiliaria,imobiliaria_creci,imovel_codigo,despachante_codigo,endereco_codigo) VALUES (@valor,@data,@documentos,@capitador,@porcenta_imobiliaria,@imovel_codigo,@despachante_codigo,@creci,(SELECT IDENT_CURRENT('endereco')));
+  END
+  ELSE BEGIN
+    INSERT INTO venda (valor,data,documentos,capitador,porcenta_imobiliaria,imobiliaria_creci,imovel_codigo,despachante_codigo,endereco_codigo) VALUES (@valor,@data,@documentos,@capitador,@porcenta_imobiliaria,@imovel_codigo,@despachante_codigo,(SELECT creci FROM imobiliaria),(SELECT IDENT_CURRENT('endereco')));
+  END
+END
+GO/*OK*/
+
+CREATE PROCEDURE usp_DespachanteInserir
+  @nome VARCHAR(120),
+  @preco DECIMAL(10,2),
+  @servicos_completos SMALLINT,
+  @servicos_pendentes SMALLINT,
+  @rua VARCHAR(100),
+  @num INT,
+  @complN VARCHAR(30),
+  @bairro VARCHAR(100),
+  @cidade VARCHAR(80),
+  @uf CHAR(2),
+  @paisN VARCHAR(50)
+AS
+BEGIN
+  --inserir endereço pegar o cod e colocar na tabela despachante
+  IF @complN IS NULL BEGIN
+    INSERT INTO endereco (logradouro,numero,bairro,cidade,uf,pais) VALUES (@rua,@num,@bairro,@cidade,@uf,@paisN);
+  END
+  IF @paisN IS NULL BEGIN
+    INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf) VALUES (@rua,@num,@complN,@bairro,@cidade,@uf);
+  END
+
+  INSERT INTO despachante (nome,preco,servicos_completos,servicos_pendentes,endereco_codigo) VALUES(@nome,@preco,@servicos_completos,@servicos_pendentes,(SELECT IDENT_CURRENT('endereco')));
+END
+GO/*OK*/
+
+CREATE PROCEDURE usp_TransacaoInserir
+  @agencia VARCHAR(6),
+  @num_conta VARCHAR(8),
+  @digito VARCHAR(2),
+  @tipo_conta VARCHAR(25),
+  @nome_banco VARCHAR(50),
+  @valor DECIMAL(11,2),
+  @venda INT
+AS
+BEGIN
+  INSERT INTO transacao_bancaria (agencia,num_conta_bancaria,num_conta_digito,tipo_conta,nome_banco,valor,venda_codigo) VALUES (@agencia,@num_conta,@digito,@tipo_conta,@nome_banco,@valor,(SELECT codigo FROM venda WHERE codigo = @venda));
+END
+GO/*OK*/
+
+CREATE PROCEDURE usp_ImobiliariaInserir
+  @creci VARCHAR(10),
+  @nome VARCHAR(120),
+  @data_emissao DATE,
+  @razao VARCHAR(120),
+  @apelido VARCHAR(80),
+  @dono VARCHAR(120),
+  @co_dono VARCHAR(120),
+  @rua VARCHAR(100),
+  @num INT,
+  @complN VARCHAR(30),
+  @bairro VARCHAR(100),
+  @cidade VARCHAR(80),
+  @uf CHAR(2),
+  @paisN VARCHAR(50)
+AS
+BEGIN
+  --inserir endereço pegar o cod e colocar na tabela imobiliaria
+  IF @complN IS NULL BEGIN
+    INSERT INTO endereco (logradouro,numero,bairro,cidade,uf,pais) VALUES (@rua,@num,@bairro,@cidade,@uf,@paisN);
+  END
+  IF @paisN IS NULL BEGIN
+    INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf) VALUES (@rua,@num,@complN,@bairro,@cidade,@uf);
+  END
+  
+  INSERT INTO imobiliaria (creci,nome_creci,dt_emissao,razao,apelido,dono,co_dono,endereco_codigo) VALUES (@creci,@nome,@data_emissao,@razao,@apelido,@dono,@co_dono,(SELECT IDENT_CURRENT('endereco')));
+END
+GO/*OK*/
+
+/*
 EXEC usp_ProprietarioInserir '13013013013','17777888','IHMHR','Solteiro','88521996',Null,'88521996',Null,'Roberta Martinelli','Solteira','13013013605','Rua Securitarios',115,'Casa','Alipio','BH','MG',Null;
 --SELECT * FROM proprietario UNION SELECT * FROM endereco WHERE codigo = (SELECT endereco_codigo FROM proprietario);
 --SELECT * FROM proprietario JOIN endereco ON endereco.codigo = proprietario.endereco_codigo WHERE endereco.codigo = (SELECT endereco_codigo FROM proprietario);
 SELECT proprietario.codigo,cpf,rg,nome,estado_civil,telefone,telefone,celular,tel_comercial,nome_conjuge,estado_civil_conjude,cpf_conjuge,logradouro,numero,complemento,bairro,cidade,uf,pais FROM proprietario JOIN endereco ON endereco.codigo = proprietario.endereco_codigo WHERE endereco.codigo = (SELECT endereco_codigo FROM proprietario);
----
+*/
 /*
 INSERT INTO imobiliaria (creci, nome_creci, dt_emissao) VALUES (100200,'Igor Martinelli','1996:09:22');
 
 INSERT INTO imobiliaria (creci, nome_creci, dt_emissao, capitador) VALUES (001, 'Ederson Ramos', '2013:05:25', 'Marlene');
 
 sql = "INSERT INTO corretores (cpf, rg, nome, logradouro, numero, bairro, cep, uf, sexo, num_conta_bancaria, imobiliaria_creci) VALUES (" + int.Parse(txtCPF.Text) + "," + int.Parse(txtRG.Text) + ",'" + txtNome.Text + "','" + txtLogradouro.Text + "'," + int.Parse(txtNPorta.Text) + ",'" + txtBairro.Text + "'," + int.Parse(txtCEP.Text) + ",'" + cmbUF.ToString() + "','" + a + "'," + int.Parse(txtConta_Bancaria.Text) + ",001)";
-
 INSERT INTO corretores (cpf, rg, nome, logradouro, numero, bairro, cep, uf, sexo, num_conta_bancaria, imobiliaria_creci)
 VALUES (130899026, 17771868, 'Igor HMHR', 'securitarios', 115, 'alipo de melo', 30840760, 'MG', 'M', 20766, 001);
 */
