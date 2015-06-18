@@ -25,6 +25,7 @@ nome_creci VARCHAR(120) NOT NULL,
 dt_emissao DATE NOT NULL,
 razao VARCHAR(120) NOT NULL,
 apelido VARCHAR(80) NULL,
+telefone VARCHAR(14) NOT NULL,
 dono VARCHAR(120) NOT NULL,
 co_dono VARCHAR(120) NOT NULL,
 endereco_codigo INT NOT NULL,
@@ -474,6 +475,7 @@ CREATE PROCEDURE usp_ImobiliariaInserir
   @data_emissao DATE,
   @razao VARCHAR(120),
   @apelido VARCHAR(80),
+  @tel VARCHAR(14),
   @dono VARCHAR(120),
   @co_dono VARCHAR(120),
   @rua VARCHAR(100),
@@ -495,7 +497,7 @@ BEGIN
          INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
        END
 
-       INSERT INTO imobiliaria (creci,nome_creci,dt_emissao,razao,apelido,dono,co_dono,endereco_codigo,created) VALUES (@creci,@nome,@data_emissao,@razao,@apelido,@dono,@co_dono,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+       INSERT INTO imobiliaria (creci,nome_creci,dt_emissao,razao,apelido,telefone,dono,co_dono,endereco_codigo,created) VALUES (@creci,@nome,@data_emissao,@razao,@apelido,@tel,@dono,@co_dono,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
 
 	   SELECT IDENT_CURRENT('imobiliaria') AS 'Código da Imobiliária';
 	COMMIT TRAN
@@ -773,6 +775,7 @@ CREATE PROCEDURE usp_ImobiliariaAlterar
   @data_emissao DATE,
   @razao VARCHAR(120),
   @apelido VARCHAR(80),
+  @tel VARCHAR(14),
   @dono VARCHAR(120),
   @co_dono VARCHAR(120),
   @cod_endereco INT,
@@ -790,7 +793,7 @@ BEGIN
 	   --alteração do endereço
 	  UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;
 
-	  UPDATE imobiliaria SET nome_creci=@creci,dt_emissao=@data_emissao,razao=@razao,apelido=@apelido,dono=@dono,co_dono=@co_dono,modified=(SELECT CURRENT_TIMESTAMP) WHERE creci=@creci;
+	  UPDATE imobiliaria SET nome_creci=@creci,dt_emissao=@data_emissao,razao=@razao,apelido=@apelido,telefone=@tel,dono=@dono,co_dono=@co_dono,modified=(SELECT CURRENT_TIMESTAMP) WHERE creci=@creci;
 
 	  SELECT IDENT_CURRENT('imobiliaria') AS 'Código da Imobiliária';
 	COMMIT TRAN
@@ -1284,44 +1287,642 @@ END
 GO/*OK*/
 
 CREATE PROCEDURE usp_CorretorPorCod
+  @cod INT
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT corretor.codigo AS 'Código do corretor',nome_completo AS 'Nome do corretor',telefone AS 'Telefone corretor',telefone2 AS 'Telefone 2 corretor',celular AS 'Celular corretor',tel_comercial AS 'Telefone comercial corretor',sexo AS 'Sexo',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM corretor JOIN endereco ON  corretor.codigo = endereco_codigo WHERE corretor.codigo = @cod;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_CorretorPorNome
+  @nome VARCHAR(150)
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT corretor.codigo AS 'Código do corretor',nome_completo AS 'Nome do corretor',telefone AS 'Telefone corretor',telefone2 AS 'Telefone 2 corretor',celular AS 'Celular corretor',tel_comercial AS 'Telefone comercial corretor',sexo AS 'Sexo',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM corretor JOIN endereco ON  corretor.codigo = endereco_codigo WHERE nome_completo = @nome;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_CorretorPorImobiliaria
+  @creci VARCHAR(10)
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT corretor.codigo AS 'Código do corretor',nome_completo AS 'Nome do corretor',telefone AS 'Telefone corretor',telefone2 AS 'Telefone 2 corretor',celular AS 'Celular corretor',tel_comercial AS 'Telefone comercial corretor',sexo AS 'Sexo',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM corretor JOIN endereco ON  corretor.codigo = endereco_codigo WHERE imobiliaria_creci = @creci;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_CorretorPorEndereco
+  @rua VARCHAR(100),
+  @num INT,
+  @compl VARCHAR(30) = NULL,
+  @bairro VARCHAR(100),
+  @cidade VARCHAR(80),
+  @uf CHAR(2),
+  @pais VARCHAR(50) = NULL
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT corretor.codigo AS 'Código do corretor',nome_completo AS 'Nome do corretor',telefone AS 'Telefone corretor',telefone2 AS 'Telefone 2 corretor',celular AS 'Celular corretor',tel_comercial AS 'Telefone comercial corretor',sexo AS 'Sexo',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM corretor JOIN endereco ON  corretor.codigo = endereco_codigo WHERE endereco.logradouro LIKE '%'+@rua+'%' OR endereco.numero = @num OR endereco.complemento LIKE '%'+@compl+'%' OR endereco.bairro LIKE '%'+@bairro+'%' OR endereco.cidade LIKE '%'+@cidade+'%' OR endereco.uf = @uf OR endereco.pais LIKE '%'+@pais+'%';
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_CorretorPorTelefone
+  @tel VARCHAR(14),
+  @tel2 VARCHAR(14),
+  @cel VARCHAR(14),
+  @telComercial VARCHAR(14)
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT corretor.codigo AS 'Código do corretor',nome_completo AS 'Nome do corretor',telefone AS 'Telefone corretor',telefone2 AS 'Telefone 2 corretor',celular AS 'Celular corretor',tel_comercial AS 'Telefone comercial corretor',sexo AS 'Sexo',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM corretor JOIN endereco ON  corretor.codigo = endereco_codigo WHERE telefone LIKE '%'+@tel+'%' OR telefone2 LIKE '%'+@tel2+'%' OR celular LIKE '%'+@cel+'%' OR tel_comercial LIKE '%'+@telComercial+'%';
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_CorretorPorCpfOuRg
+  @cpf VARCHAR(11),
+  @rg VARCHAR(10)
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT corretor.codigo AS 'Código do corretor',nome_completo AS 'Nome do corretor',telefone AS 'Telefone corretor',telefone2 AS 'Telefone 2 corretor',celular AS 'Celular corretor',tel_comercial AS 'Telefone comercial corretor',sexo AS 'Sexo',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM corretor JOIN endereco ON  corretor.codigo = endereco_codigo WHERE cpf = @cpf OR rg = @rg;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_CorretorPorTodos
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT corretor.codigo AS 'Código do corretor',nome_completo AS 'Nome do corretor',telefone AS 'Telefone corretor',telefone2 AS 'Telefone 2 corretor',celular AS 'Celular corretor',tel_comercial AS 'Telefone comercial corretor',sexo AS 'Sexo',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM corretor JOIN endereco ON  corretor.codigo = endereco_codigo ORDER BY corretor.created DESC;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 
 
 CREATE PROCEDURE usp_DespachantePorCod
+  @cod VARCHAR(10)
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT despachante.codigo AS 'Código do despachante',nome AS 'Nome do despachante',preco AS 'Preço do despachante',servicos_pendentes AS 'Serviços pendentes', servicos_completos AS 'Serviços completos',telefone AS 'Telefone do Despachante',telefone2 AS 'Telefone 2',celular AS 'Celular do Despachante',tel_comercial AS 'Telefone Comercial',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM despachante JOIN endereco ON despachante.codigo = endereco_codigo WHERE despachante.codigo = @cod;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_DespachantePorNome
+  @nome VARCHAR(120)
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT despachante.codigo AS 'Código do despachante',nome AS 'Nome do despachante',preco AS 'Preço do despachante',servicos_pendentes AS 'Serviços pendentes', servicos_completos AS 'Serviços completos',telefone AS 'Telefone do Despachante',telefone2 AS 'Telefone 2',celular AS 'Celular do Despachante',tel_comercial AS 'Telefone Comercial',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM despachante JOIN endereco ON despachante.codigo = endereco_codigo WHERE nome LIKE '%'+@nome+'%';
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_DespachantePorTelefone
+  @tel VARCHAR(14),
+  @tel2 VARCHAR(14),
+  @cel VARCHAR(14),
+  @telComercial VARCHAR(14)
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT despachante.codigo AS 'Código do despachante',nome AS 'Nome do despachante',preco AS 'Preço do despachante',servicos_pendentes AS 'Serviços pendentes', servicos_completos AS 'Serviços completos',telefone AS 'Telefone do Despachante',telefone2 AS 'Telefone 2',celular AS 'Celular do Despachante',tel_comercial AS 'Telefone Comercial',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM despachante JOIN endereco ON despachante.codigo = endereco_codigo WHERE telefone LIKE '%'+@tel+'%' OR telefone2 LIKE '%'+@tel2+'%' OR celular LIKE '%'+@cel+'%' OR tel_comercial LIKE '%'+@telComercial+'%';
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_DespachantePorServicosPendentes
+  @servPendentes SMALLINT
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT despachante.codigo AS 'Código do despachante',nome AS 'Nome do despachante',preco AS 'Preço do despachante',servicos_pendentes AS 'Serviços pendentes', servicos_completos AS 'Serviços completos',telefone AS 'Telefone do Despachante',telefone2 AS 'Telefone 2',celular AS 'Celular do Despachante',tel_comercial AS 'Telefone Comercial',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM despachante JOIN endereco ON despachante.codigo = endereco_codigo WHERE servicos_pendentes = @servPendentes;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_DespachantePorServicosCompletos
+  @servCompletos SMALLINT
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT despachante.codigo AS 'Código do despachante',nome AS 'Nome do despachante',preco AS 'Preço do despachante',servicos_pendentes AS 'Serviços pendentes', servicos_completos AS 'Serviços completos',telefone AS 'Telefone do Despachante',telefone2 AS 'Telefone 2',celular AS 'Celular do Despachante',tel_comercial AS 'Telefone Comercial',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM despachante JOIN endereco ON despachante.codigo = endereco_codigo WHERE servicos_pendentes = @servCompletos;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_DespachantePorEndereco
+  @rua VARCHAR(100),
+  @num INT,
+  @compl VARCHAR(30) = NULL,
+  @bairro VARCHAR(100),
+  @cidade VARCHAR(80),
+  @uf CHAR(2),
+  @pais VARCHAR(50) = NULL
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT despachante.codigo AS 'Código do despachante',nome AS 'Nome do despachante',preco AS 'Preço do despachante',servicos_pendentes AS 'Serviços pendentes', servicos_completos AS 'Serviços completos',telefone AS 'Telefone do Despachante',telefone2 AS 'Telefone 2',celular AS 'Celular do Despachante',tel_comercial AS 'Telefone Comercial',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM despachante JOIN endereco ON despachante.codigo = endereco_codigo WHERE endereco.logradouro LIKE '%'+@rua+'%' OR endereco.numero = @num OR endereco.complemento LIKE '%'+@compl+'%' OR endereco.bairro LIKE '%'+@bairro+'%' OR endereco.cidade LIKE '%'+@cidade+'%' OR endereco.uf = @uf OR endereco.pais LIKE '%'+@pais+'%';
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_DespachantePorTodos
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT despachante.codigo AS 'Código do despachante',nome AS 'Nome do despachante',preco AS 'Preço do despachante',servicos_pendentes AS 'Serviços pendentes', servicos_completos AS 'Serviços completos',telefone AS 'Telefone do Despachante',telefone2 AS 'Telefone 2',celular AS 'Celular do Despachante',tel_comercial AS 'Telefone Comercial',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM despachante JOIN endereco ON despachante.codigo = endereco_codigo ORDER BY despachante.created DESC;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 
 
 CREATE PROCEDURE usp_ImobiliariaPorCreci
+  @cod INT
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissão AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE imobiliaria.creci = @cod;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_ImobiliariaPorRazao
+  @razao VARCHAR(120)
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissão AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE imobiliaria.razao LIKE '%' + @razao + '%';
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_ImobiliariaPorApelido
+  @apelido VARCHAR(80)
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissão AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE imobiliaria.apelido LIKE '%' + @apelido + '%';
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_ImobiliariaPorDono
+  @dono VARCHAR(120),
+  @co_dono VARCHAR(120)
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissão AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE imobiliaria.dono LIKE '%' + @dono + '%' OR co_dono = '%' + @co_dono + '%';
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_ImobiliariaPorEndereco
+  @rua VARCHAR(100),
+  @num INT,
+  @compl VARCHAR(30) = NULL,
+  @bairro VARCHAR(100),
+  @cidade VARCHAR(80),
+  @uf CHAR(2),
+  @pais VARCHAR(50) = NULL
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissão AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE endereco.logradouro LIKE '%'+@rua+'%' OR endereco.numero = @num OR endereco.complemento LIKE '%'+@compl+'%' OR endereco.bairro LIKE '%'+@bairro+'%' OR endereco.cidade LIKE '%'+@cidade+'%' OR endereco.uf = @uf OR endereco.pais LIKE '%'+@pais+'%';
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_ImobiliariaPorTodos
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissão AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo ORDER BY imobiliaria.created DESC;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 
 CREATE PROCEDURE usp_VendaPorCod
+  @cod INT
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', capitador AS 'Capitador do imovél',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',imovel_codigo AS 'Código do Imovél',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM venda JOIN endereco ON venda.codigo = endereco_codigo JOIN imobiliaria ON venda.codigo = imobiliaria_creci JOIN imovel ON venda.codigo = imovel_codigo JOIN despachante ON venda.codigo = despachante_codigo WHERE venda.codigo = @cod;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_VendaPorValor
+  @valor INT
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', capitador AS 'Capitador do imovél',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',imovel_codigo AS 'Código do Imovél',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM venda JOIN endereco ON venda.codigo = endereco_codigo JOIN imobiliaria ON venda.codigo = imobiliaria_creci JOIN imovel ON venda.codigo = imovel_codigo JOIN despachante ON venda.codigo = despachante_codigo WHERE venda.valor = @valor;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_VendaPorData
+  @data DATE
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', capitador AS 'Capitador do imovél',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',imovel_codigo AS 'Código do Imovél',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM venda JOIN endereco ON venda.codigo = endereco_codigo JOIN imobiliaria ON venda.codigo = imobiliaria_creci JOIN imovel ON venda.codigo = imovel_codigo JOIN despachante ON venda.codigo = despachante_codigo WHERE venda.data = @data;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_VendaPorPocentagemImobiliaria
+  @porcenta_imobiliaria DECIMAL
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', capitador AS 'Capitador do imovél',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',imovel_codigo AS 'Código do Imovél',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM venda JOIN endereco ON venda.codigo = endereco_codigo JOIN imobiliaria ON venda.codigo = imobiliaria_creci JOIN imovel ON venda.codigo = imovel_codigo JOIN despachante ON venda.codigo = despachante_codigo WHERE venda.porcenta_imobiliaria = @porcenta_imobiliaria;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_VendaPorEndereco
+  @rua VARCHAR(100),
+  @num INT,
+  @compl VARCHAR(30) = NULL,
+  @bairro VARCHAR(100),
+  @cidade VARCHAR(80),
+  @uf CHAR(2),
+  @pais VARCHAR(50) = NULL
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', capitador AS 'Capitador do imovél',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',imovel_codigo AS 'Código do Imovél',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM venda JOIN endereco ON venda.codigo = endereco_codigo JOIN imobiliaria ON venda.codigo = imobiliaria_creci JOIN imovel ON venda.codigo = imovel_codigo JOIN despachante ON venda.codigo = despachante_codigo WHERE endereco.logradouro LIKE '%'+@rua+'%' OR endereco.numero = @num OR endereco.complemento LIKE '%'+@compl+'%' OR endereco.bairro LIKE '%'+@bairro+'%' OR endereco.cidade LIKE '%'+@cidade+'%' OR endereco.uf = @uf OR endereco.pais LIKE '%'+@pais+'%';
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_VendaPorTodos
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', capitador AS 'Capitador do imovél',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',imovel_codigo AS 'Código do Imovél',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM venda JOIN endereco ON venda.codigo = endereco_codigo JOIN imobiliaria ON venda.codigo = imobiliaria_creci JOIN imovel ON venda.codigo = imovel_codigo JOIN despachante ON venda.codigo = despachante_codigo ORDER BY venda.created DESC;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 
 CREATE PROCEDURE usp_TransacaoPorCod
+  @cod INT
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' FROM transacao_bancaria JOIN venda ON transacao_bancaria.codigo = venda_codigo WHERE transacao_bancaria.codigo = @cod;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_TransacaoPorAgencia
+  @agencia VARCHAR(6)
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' FROM transacao_bancaria JOIN venda ON transacao_bancaria.codigo = venda_codigo WHERE transacao_bancaria.agencia = @agencia;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_TransacaoPorBanco
+  @banco VARCHAR(50)
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' FROM transacao_bancaria JOIN venda ON transacao_bancaria.codigo = venda_codigo WHERE transacao_bancaria.nome_banco LIKE '%' + @banco + '%';
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_TransacaoPorValor
+  @valor DECIMAL
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' FROM transacao_bancaria JOIN venda ON transacao_bancaria.codigo = venda_codigo WHERE transacao_bancaria.valor = @valor;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_TransacaoPorData
+  @data DATETIME
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' FROM transacao_bancaria JOIN venda ON transacao_bancaria.codigo = venda_codigo WHERE transacao_bancaria.created = @data;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_TransacaoPorTipoConta
+  @tipo_conta VARCHAR(25)
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' FROM transacao_bancaria JOIN venda ON transacao_bancaria.codigo = venda_codigo WHERE transacao_bancaria.tipo_conta = @tipo_conta;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
 CREATE PROCEDURE usp_TransacaoPorTodos
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' FROM transacao_bancaria JOIN venda ON transacao_bancaria.codigo = venda_codigo ORDER BY transacao_bancaria.created DESC;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
+
+--TRIGGER'S PARA EVITAR EXCLUSÃO PERMANENTE--
+/*CREATE TRIGGER [NOME DO TRIGGER]
+ON [NOME DA TABELA]
+[FOR/AFTER/INSTEAD OF] [INSERT/UPDATE/DELETE]
+AS*/
+CREATE TRIGGER utg_MoveComprador
+ON comprador
+INSTEAD OF DELETE
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+	  SELECT * INTO bk_comprador WHERE comprador.codigo = @cod;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
+
+
+
+/*
+usp_ImovelApagar
+usp_ProprietarioApagar
+usp_CorretorApagar
+usp_CompradorApagar
+usp_VendaApagarCREATE TRIGGER [NOME DO TRIGGER]
+ON [NOME DA TABELA]
+[FOR/AFTER/INSTEAD OF] [INSERT/UPDATE/DELETE]
+AS
+
+
+Leia mais em: Triggers no SQL Server: teoria e prática aplicada em uma situação real http://www.devmedia.com.br/triggers-no-sql-server-teoria-e-pratica-aplicada-em-uma-situacao-real/28194#ixzz3dNv8o6Pz
+_DespachanteApagar
+usp_TransacaoApagar
+usp_ImobiliariaApagar
+*/
 
 /*pesquisas: Imovel,Proprietario,Comprad
 EXEC usp_ProprietarioInserir '13013013013','17777888','IHMHR','Solteiro','88521996',Null,'88521996',Null,'Roberta Martinelli','Solteira','13013013605','Rua Securitarios',115,'Casa','Alipio','BH','MG',Null;
