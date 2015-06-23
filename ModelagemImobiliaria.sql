@@ -69,11 +69,6 @@ telefone VARCHAR(14) NULL,
 telefone2 VARCHAR(14) NULL,
 celular VARCHAR(14) NULL,
 tel_comercial VARCHAR(14) NULL,
-nome_conjuge VARCHAR(120) NOT NULL,
-estado_civil_conjuge VARCHAR(15) NOT NULL,
-renda_bruta_conjuge INT NOT NULL,
-cpf_conjuge VARCHAR(11) NOT NULL UNIQUE,
-fgts_conjuge DECIMAL(11,2) NULL,
 entrada INT NULL,
 lista_intereste VARCHAR(50) NULL,
 imobiliaria_creci VARCHAR(10) NOT NULL,
@@ -86,6 +81,27 @@ CONSTRAINT fk_creci_comprador FOREIGN KEY (imobiliaria_creci) REFERENCES imobili
 CONSTRAINT fk_endereco_comprador FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo)
 );/*OK*/
 
+CREATE TABLE comprador_conjuge (
+codigo INT NOT NULL IDENTITY(1,1),
+cpf VARCHAR(11) NOT NULL UNIQUE,
+rg VARCHAR(10) NOT NULL,
+nome VARCHAR(120) NOT NULL,
+estado_civil VARCHAR(15) NOT NULL, 
+profissao VARCHAR(45) NOT NULL,
+renda_bruta INT NOT NULL ,
+fgts DECIMAL(11,2) NULL,
+telefone VARCHAR(14) NULL,
+telefone2 VARCHAR(14) NULL,
+celular VARCHAR(14) NULL,
+tel_comercial VARCHAR(14) NULL,
+comprador_codigo INT NOT NULL,
+created DATETIME NOT NULL,
+modified DATETIME NULL,
+
+CONSTRAINT pk_comprador_conjuge PRIMARY KEY (codigo),
+CONSTRAINT fk_comprador FOREIGN KEY (comprador_codigo) REFERENCES comprador(codigo)
+);/*OK*/
+
 CREATE TABLE proprietario (
 codigo INT NOT NULL IDENTITY(1,1),
 cpf VARCHAR(11) NOT NULL UNIQUE,
@@ -96,15 +112,30 @@ telefone VARCHAR(14) NULL,
 telefone2 VARCHAR(14) NULL,
 celular VARCHAR(14) NULL,
 tel_comercial VARCHAR(14) NULL,
-nome_conjuge VARCHAR(120) NULL,
-estado_civil_conjude VARCHAR(15) NULL,
-cpf_conjuge VARCHAR(11) NULL,
 endereco_codigo INT NOT NULL,
 created DATETIME NOT NULL,
 modified DATETIME NULL,
 
 CONSTRAINT pk_proprietario PRIMARY KEY (codigo),
 CONSTRAINT fk_endereco_proprietario FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo)
+);/*OK*/
+
+CREATE TABLE proprietario_conjuge (
+codigo INT NOT NULL IDENTITY(1,1),
+cpf VARCHAR(11) NOT NULL UNIQUE,
+rg VARCHAR(10) NOT NULL,
+nome VARCHAR(120) NOT NULL,
+estado_civil VARCHAR(15),
+telefone VARCHAR(14) NULL,
+telefone2 VARCHAR(14) NULL,
+celular VARCHAR(14) NULL,
+tel_comercial VARCHAR(14) NULL,
+proprietario_codigo INT NOT NULL,
+created DATETIME NOT NULL,
+modified DATETIME NULL,
+
+CONSTRAINT pk_proprietario_conjuge PRIMARY KEY (codigo),
+CONSTRAINT fk_proprietario1 FOREIGN KEY (proprietario_codigo) REFERENCES proprietario(codigo)
 );/*OK*/
 
 CREATE TABLE imovel (
@@ -223,9 +254,6 @@ CREATE PROCEDURE usp_ProprietarioInserir
   @tel2 VARCHAR(14),
   @cel VARCHAR(14),
   @telComercial VARCHAR(14),
-  @nome_conjuge VARCHAR(120),
-  @est_civil_conjuge VARCHAR(15),
-  @cpf_conjuge VARCHAR(11),
   @rua VARCHAR(100),
   @num INT,
   @compl VARCHAR(30) = NULL,
@@ -245,9 +273,36 @@ BEGIN
          INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
        END
 
-       INSERT INTO proprietario (cpf,rg,nome,estado_civil,telefone,telefone2,celular,tel_comercial,nome_conjuge,estado_civil_conjude,cpf_conjuge,endereco_codigo,created) VALUES (@cpf,@rg,@nome,@est_civil,@tel,@tel2,@cel,@telComercial,@nome_conjuge,@est_civil_conjuge,@cpf_conjuge,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+       INSERT INTO proprietario (cpf,rg,nome,estado_civil,telefone,telefone2,celular,tel_comercial,endereco_codigo,created) VALUES (@cpf,@rg,@nome,@est_civil,@tel,@tel2,@cel,@telComercial,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
 
 	   SELECT IDENT_CURRENT('prorietario') AS 'Código do Proprietário';
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
+
+CREATE PROCEDURE usp_ProprietarioConjugeInserir
+  @cpf VARCHAR(11),
+  @rg VARCHAR(10),
+  @nome VARCHAR(120),
+  @est_civil VARCHAR(15),
+  @tel VARCHAR(14),
+  @tel2 VARCHAR(14),
+  @cel VARCHAR(14),
+  @telComercial VARCHAR(14),
+  @proprietarioCodigo INT
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+
+       INSERT INTO proprietario_conjuge (cpf,rg,nome,estado_civil,telefone,telefone2,celular,tel_comercial,proprietario_codigo,created) VALUES (@cpf,@rg,@nome,@est_civil,@tel,@tel2,@cel,@telComercial,@proprietarioCodigo,(SELECT CURRENT_TIMESTAMP));
+
+	   SELECT IDENT_CURRENT('proprietario_conjuge') AS 'Código do(a) Conjuge do(a) Proprietário(a)';
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -302,11 +357,12 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-
+--EXEC usp_CompradorInserir '130899902605','MG17771868','Igor Martinelli','Solteiro','Estagiario TI',600,0,'03134746398','-','03188521996','03132475808','-','-',0,'',0,0,'0-1-2-3',NULL,'Rua dos Securitários',115,NULL,'Alipio de Melo','Belo Horizonte','MG',NULL
+--SELECT * FROM comprador
 CREATE PROCEDURE usp_CompradorInserir
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
-  @nome VARCHAR(12),
+  @nome VARCHAR(120),
   @estado_Civil VARCHAR(15),
   @profissao varchar(45),
   @renda_bruta INT,
@@ -315,11 +371,6 @@ CREATE PROCEDURE usp_CompradorInserir
   @tel2 VARCHAR(14),
   @cel VARCHAR(14),
   @telComercial VARCHAR(14),
-  @nome_conjuge VARCHAR(120),
-  @estado_civil_conjuge VARCHAR(15),
-  @renda_bruta_conjuge INT,
-  @cpf_conjuge VARCHAR(11),
-  @fgts_conjuge DECIMAL(11,2),
   @entrada INT,
   @lista_intereste VARCHAR(50),
   @creci VARCHAR(10) = NULL,
@@ -343,13 +394,43 @@ BEGIN
        END
 
        IF @creci IS NULL BEGIN
-         INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,nome_conjuge,estado_civil_conjuge,renda_bruta_conjuge,cpf_conjuge,fgts_conjuge,entrada,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@nome_conjuge,@estado_civil_conjuge,@renda_bruta_conjuge,@cpf_conjuge,@fgts_conjuge,@entrada,@lista_intereste,(SELECT creci FROM imobiliaria),(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,entrada,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@entrada,@lista_intereste,(SELECT creci FROM imobiliaria),(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
        END
        ELSE BEGIN
-         INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,nome_conjuge,estado_civil_conjuge,renda_bruta_conjuge,cpf_conjuge,fgts_conjuge,entrada,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@nome_conjuge,@estado_civil_conjuge,@renda_bruta_conjuge,@cpf_conjuge,@fgts_conjuge,@entrada,@lista_intereste,@creci,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,entrada,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@entrada,@lista_intereste,@creci,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
        END
 
-	   SELECT IDENT_CURRENT('comprador') AS 'Código do Comprador';
+	   SELECT IDENT_CURRENT('comprador') AS 'Código do(a) Comprador(a)';
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
+
+CREATE PROCEDURE usp_CompradorConjugeInserir
+  @cpf VARCHAR(11),
+  @rg VARCHAR(10),
+  @nome VARCHAR(120),
+  @estado_Civil VARCHAR(15),
+  @profissao varchar(45),
+  @renda_bruta INT,
+  @fgts DECIMAL(11,2),
+  @tel VARCHAR(14),
+  @tel2 VARCHAR(14),
+  @cel VARCHAR(14),
+  @telComercial VARCHAR(14),
+  @compradorCodigo INT
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	  
+       INSERT INTO comprador_conjuge (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,comprador_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@compradorCodigo,(SELECT CURRENT_TIMESTAMP));
+       
+	   SELECT IDENT_CURRENT('comprador_conjuge') AS 'Código do(a) Conjuge do(a) Comprador(a)';
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -468,7 +549,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-
+--EXEC usp_ImobiliariaInserir '01234567890','Igor Martinelli Ramos','2013/09/22','IHMHR Imoveis','IHMHR I','03134746398','Igor Martinelli Ramos','-','Rua Sem Nome',10,NULL,'Sem bairro','City','MM',NULL
+--SELECT * FROM imobiliaria
 CREATE PROCEDURE usp_ImobiliariaInserir
   @creci VARCHAR(10),
   @nome VARCHAR(120),
@@ -889,7 +971,11 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-
+/*EXEC usp_CompradorApagar NULL,'13089902605';
+DELETE FROM comprador WHERE comprador.codigo = 4;
+There is already an object named 'bk_comprador' in the database.
+SELECT * FROM comprador
+SELECT * FROM bk_comprador*/
 CREATE PROCEDURE usp_CompradorApagar
   @cod INT = NULL,
   @cpf VARCHAR(11) = NULL
@@ -1180,7 +1266,7 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Proprietário nome',profissao AS 'Profissão do comprador',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo WHERE comprador.codigo = @cod;
+	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo WHERE comprador.codigo = @cod;
 
 	COMMIT TRAN
   END TRY
@@ -1198,7 +1284,7 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Proprietário nome',profissao AS 'Profissão do comprador',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo WHERE cpf = @cpf OR rg = @rg;
+	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo WHERE cpf = @cpf OR rg = @rg;
 
 	COMMIT TRAN
   END TRY
@@ -1216,7 +1302,7 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Proprietário nome',profissao AS 'Profissão do comprador',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo WHERE nome LIKE '%'+@nome+'%' OR nome_conjuge LIKE '%'+@nomeC+'%';
+	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo WHERE nome LIKE '%'+@nome+'%' OR nome_conjuge LIKE '%'+@nomeC+'%';
 
 	COMMIT TRAN
   END TRY
@@ -1236,7 +1322,7 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Proprietário nome',profissao AS 'Profissão do comprador',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo WHERE telefone LIKE '%'+@tel+'%' OR telefone2 LIKE '%'+@tel2+'%' OR celular LIKE '%'+@cel+'%' OR tel_comercial LIKE '%'+@telComercial+'%';
+	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo WHERE comprador.telefone LIKE '%' + @tel + '%' OR comprador.telefone2 LIKE '%' + @tel2 + '%' OR celular LIKE '%'+@cel+'%' OR comprador.tel_comercial LIKE '%' + @telComercial + '%';
 
 	COMMIT TRAN
   END TRY
@@ -1259,7 +1345,7 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Proprietário nome',profissao AS 'Profissão do comprador',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo WHERE endereco.logradouro LIKE '%'+@rua+'%' OR endereco.numero = @num OR endereco.complemento LIKE '%'+@compl+'%' OR endereco.bairro LIKE '%'+@bairro+'%' OR endereco.cidade LIKE '%'+@cidade+'%' OR endereco.uf = @uf OR endereco.pais LIKE '%'+@pais+'%';
+	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo WHERE endereco.logradouro LIKE '%'+@rua+'%' OR endereco.numero = @num OR endereco.complemento LIKE '%'+@compl+'%' OR endereco.bairro LIKE '%'+@bairro+'%' OR endereco.cidade LIKE '%'+@cidade+'%' OR endereco.uf = @uf OR endereco.pais LIKE '%'+@pais+'%';
 
 	COMMIT TRAN
   END TRY
@@ -1275,7 +1361,7 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Proprietário nome',profissao AS 'Profissão do comprador',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo ORDER BY comprador.codigo DESC;
+	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo ORDER BY comprador.codigo DESC;
 
 	COMMIT TRAN
   END TRY
@@ -1415,7 +1501,6 @@ BEGIN
 END
 GO/*OK*/
 
-
 CREATE PROCEDURE usp_DespachantePorCod
   @cod VARCHAR(10)
 AS
@@ -1544,7 +1629,6 @@ BEGIN
 END
 GO/*OK*/
 
-
 CREATE PROCEDURE usp_ImobiliariaPorCreci
   @cod INT
 AS
@@ -1552,7 +1636,7 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissão AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE imobiliaria.creci = @cod;
+	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE imobiliaria.creci = @cod;
 
 	COMMIT TRAN
   END TRY
@@ -1569,7 +1653,7 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissão AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE imobiliaria.razao LIKE '%' + @razao + '%';
+	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE imobiliaria.razao LIKE '%' + @razao + '%';
 
 	COMMIT TRAN
   END TRY
@@ -1586,7 +1670,7 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissão AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE imobiliaria.apelido LIKE '%' + @apelido + '%';
+	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE imobiliaria.apelido LIKE '%' + @apelido + '%';
 
 	COMMIT TRAN
   END TRY
@@ -1604,7 +1688,7 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissão AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE imobiliaria.dono LIKE '%' + @dono + '%' OR co_dono = '%' + @co_dono + '%';
+	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE imobiliaria.dono LIKE '%' + @dono + '%' OR co_dono = '%' + @co_dono + '%';
 
 	COMMIT TRAN
   END TRY
@@ -1627,7 +1711,7 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissão AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE endereco.logradouro LIKE '%'+@rua+'%' OR endereco.numero = @num OR endereco.complemento LIKE '%'+@compl+'%' OR endereco.bairro LIKE '%'+@bairro+'%' OR endereco.cidade LIKE '%'+@cidade+'%' OR endereco.uf = @uf OR endereco.pais LIKE '%'+@pais+'%';
+	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE endereco.logradouro LIKE '%'+@rua+'%' OR endereco.numero = @num OR endereco.complemento LIKE '%'+@compl+'%' OR endereco.bairro LIKE '%'+@bairro+'%' OR endereco.cidade LIKE '%'+@cidade+'%' OR endereco.uf = @uf OR endereco.pais LIKE '%'+@pais+'%';
 
 	COMMIT TRAN
   END TRY
@@ -1643,7 +1727,7 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissão AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo ORDER BY imobiliaria.created DESC;
+	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo ORDER BY imobiliaria.created DESC;
 
 	COMMIT TRAN
   END TRY
@@ -1886,26 +1970,40 @@ GO/*OK*/
 ON [NOME DA TABELA]
 [FOR/AFTER/INSTEAD OF] [INSERT/UPDATE/DELETE]
 AS*/
-CREATE TRIGGER utg_MoveComprador
-ON comprador
-INSTEAD OF DELETE
+
+CREATE TRIGGER PrevineDropDatabase
+ON ALL SERVER
+FOR DROP_DATABASE 
 AS
 BEGIN
-  BEGIN TRY
-    BEGIN TRAN
-	  
-	  SELECT * INTO bk_comprador WHERE comprador.codigo = @cod;
-
-	COMMIT TRAN
-  END TRY
-  BEGIN CATCH
-    ROLLBACK TRAN;
-	SELECT ERROR_MESSAGE() AS 'Erro na transação';
-  END CATCH
+  PRINT 'Você não tem permissão!.'
+  ROLLBACK
+END
+GO/*OK*/
+CREATE TRIGGER PrevineAlterDropTable 
+ON DATABASE 
+FOR DROP_TABLE, ALTER_TABLE 
+AS
+BEGIN
+  PRINT 'Você não tem permissão!.'
+  ROLLBACK
 END
 GO/*OK*/
 
-
+CREATE TRIGGER MoveComprador
+ON comprador
+INSTEAD OF DELETE
+AS
+  BEGIN
+    INSERT INTO bk_comprador (codigo,cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,nome_conjuge,estado_civil_conjuge,renda_bruta_conjuge,cpf_conjuge,fgts_conjuge,entrada,lista_intereste,imobiliaria_creci,endereco_codigo,created,modified) VALUES ((SELECT deleted.codigo FROM deleted),(SELECT deleted.cpf FROM deleted),(SELECT deleted.rg FROM deleted),(SELECT deleted.nome FROM deleted),(SELECT deleted.estado_civil FROM deleted),(SELECT deleted.profissao FROM deleted),(SELECT deleted.renda_bruta FROM deleted),(SELECT deleted.fgts FROM deleted),(SELECT deleted.telefone FROM deleted),(SELECT deleted.telefone2 FROM deleted),(SELECT deleted.celular FROM deleted),(SELECT deleted.tel_comercial FROM deleted),(SELECT deleted.nome_conjuge FROM deleted),(SELECT deleted.estado_civil_conjuge FROM deleted),(SELECT deleted.renda_bruta_conjuge FROM deleted),(SELECT deleted.cpf_conjuge FROM deleted),(SELECT deleted.fgts_conjuge FROM deleted),(SELECT deleted.entrada FROM deleted),(SELECT deleted.lista_intereste FROM deleted),(SELECT deleted.imobiliaria_creci FROM deleted),(SELECT deleted.endereco_codigo FROM deleted),(SELECT deleted.created FROM deleted),(SELECT deleted.modified FROM deleted));
+	DELETE FROM comprador WHERE comprador.codigo = @@IDENTITY;--IDENT_CURRENT('bk_comprador');
+  END
+GO
+EXEC usp_CompradorApagar 'NULL','13089902605';
+SET IDENTITY_INSERT [imobiliaria].[dbo].[bk_comprador] ON;
+SELECT * FROM comprador;
+SELECT * FROM bk_comprador;
+--Cannot insert explicit value for identity column in table 'bk_comprador' when IDENTITY_INSERT is set to OFF.
 
 /*
 usp_ImovelApagar
@@ -1918,7 +2016,7 @@ ON [NOME DA TABELA]
 AS
 
 
-Leia mais em: Triggers no SQL Server: teoria e prática aplicada em uma situação real http://www.devmedia.com.br/triggers-no-sql-server-teoria-e-pratica-aplicada-em-uma-situacao-real/28194#ixzz3dNv8o6Pz
+
 _DespachanteApagar
 usp_TransacaoApagar
 usp_ImobiliariaApagar
