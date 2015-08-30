@@ -1,5 +1,6 @@
 USE master;
-DROP DATABASE imobiliaria;
+IF EXISTS(SELECT * FROM sys.databases WHERE name='imobiliaria')
+    DROP DATABASE imobiliaria;
 CREATE DATABASE imobiliaria;
 
 USE imobiliaria;
@@ -176,7 +177,7 @@ codigo INT IDENTITY(1,1) NOT NULL,
 valor INT NOT NULL,
 data DATE NOT NULL,
 documentos VARCHAR(80) NULL,
-capitador VARCHAR(45) NULL,
+vendedor VARCHAR(45) NULL,
 porcenta_imobiliaria DECIMAL(11,2) NOT NULL,
 imobiliaria_creci VARCHAR(10) NOT NULL,
 imovel_codigo INT NOT NULL,
@@ -193,7 +194,7 @@ CONSTRAINT fk_endereco_venda FOREIGN KEY (endereco_codigo) REFERENCES endereco(c
 );/*OK*/
 
 CREATE TABLE transacao_bancaria (
-codigo INT NOT NULL,
+codigo INT IDENTITY(1,1) NOT NULL,
 agencia VARCHAR(6) NOT NULL,
 num_conta_bancaria VARCHAR(8) NOT NULL,
 num_conta_digito VARCHAR(2) NOT NULL,
@@ -207,6 +208,9 @@ modified DATETIME NULL,
 CONSTRAINT pk_transacao PRIMARY KEY (codigo),
 CONSTRAINT fk_venda FOREIGN KEY (venda_codigo) REFERENCES venda(codigo)
 );/*OK*/
+
+-- quantidade de tabelas criadas
+SELECT COUNT(name) AS 'Tables created' FROM SYSOBJECTS WHERE xtype = 'U'
 
 --PROCEDURES PARA INSERT'S--
 CREATE PROCEDURE usp_ImovelInserir
@@ -235,7 +239,7 @@ BEGIN
 
        INSERT INTO imovel(registro,frente_lote,lado_lote,proprietario_codigo,endereco_codigo,created) VALUES(@registro,@frente_lote,@lado_lote,@cod_proprietario,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));/*SELECT IDENT_CURRENT('tbl_name');SELECT @@IDENTITY;SELECT SCOPE_IDENTITY();*/
 
-	   SELECT IDENT_CURRENT('imovel') AS 'Código do Imóvel';
+	   SELECT @@IDENTITY AS 'Código do Imóvel';
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -244,7 +248,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-
+--EXEC usp_ImovelInserir 000001,'12','10',5,'Rua dos Securitários',115,'Casa','Alípio de Melo','Belo Horizonte','MG','Brasil'
+--SELECT * FROM imovel WHERE codigo = 3;
 CREATE PROCEDURE usp_ProprietarioInserir
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
@@ -275,7 +280,7 @@ BEGIN
 
        INSERT INTO proprietario (cpf,rg,nome,estado_civil,telefone,telefone2,celular,tel_comercial,endereco_codigo,created) VALUES (@cpf,@rg,@nome,@est_civil,@tel,@tel2,@cel,@telComercial,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
 
-	   SELECT IDENT_CURRENT('prorietario') AS 'Código do Proprietário';
+	   SELECT @@IDENTITY AS 'Código do Proprietário';
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -284,7 +289,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-
+--EXEC usp_ProprietarioInserir '12345678903','RG10110101','Proprietario 01','Casado','3134343434','3133334343','31988888888','3134331511','Rua da Mamae', 864,'Casa','Santa Helena','Belo Horizonte','MG','Brasil';
+--SELECT * FROM proprietario WHERE proprietario.codigo = 5;
 CREATE PROCEDURE usp_ProprietarioConjugeInserir
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
@@ -302,7 +308,7 @@ BEGIN
 
        INSERT INTO proprietario_conjuge (cpf,rg,nome,estado_civil,telefone,telefone2,celular,tel_comercial,proprietario_codigo,created) VALUES (@cpf,@rg,@nome,@est_civil,@tel,@tel2,@cel,@telComercial,@proprietarioCodigo,(SELECT CURRENT_TIMESTAMP));
 
-	   SELECT IDENT_CURRENT('proprietario_conjuge') AS 'Código do(a) Conjuge do(a) Proprietário(a)';
+	   SELECT @@IDENTITY AS 'Código do(a) Conjuge do(a) Proprietário(a)';
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -311,7 +317,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-
+--EXEC usp_ProprietarioConjugeInserir '98765412300','RG78771888','Mulher do proprietário', 'Casada', '3134343434','3133334343','31985288528','3132433342',5
+--SELECT * FROM proprietario_conjuge WHERE codigo = 1;
 CREATE PROCEDURE usp_CorretorInserir
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
@@ -342,13 +349,13 @@ BEGIN
        END
 
        IF @creci IS NULL BEGIN
-         INSERT INTO corretor(cpf,rg,nome_completo,telefone,telefone2,celular,tel_comercial,sexo,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@tel,@tel2,@cel,@telComercial,@sexo,(SELECT creci FROM imobiliaria),(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO corretor(cpf,rg,nome_completo,telefone,telefone2,celular,tel_comercial,sexo,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@tel,@tel2,@cel,@telComercial,@sexo,(SELECT creci FROM imobiliaria WHERE imobiliaria.creci LIKE '%1'),(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
        END
        ELSE BEGIN
          INSERT INTO corretor(cpf,rg,nome_completo,telefone,telefone2,celular,tel_comercial,sexo,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@tel,@tel2,@cel,@telComercial,@sexo,@creci,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
        END
 
-	   SELECT IDENT_CURRENT('corretor') AS 'Código do Corretor';
+	   SELECT @@IDENTITY AS 'Código do Corretor';
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -357,8 +364,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_CompradorInserir '130899902605','MG17771868','Igor Martinelli','Solteiro','Estagiario TI',600,0,'03134746398','-','03188521996','03132475808','-','-',0,'',0,0,'0-1-2-3',NULL,'Rua dos Securitários',115,NULL,'Alipio de Melo','Belo Horizonte','MG',NULL
---SELECT * FROM comprador
+--EXEC usp_CorretorInserir '13089902608','MG17771868','Igor Martinelli','3134746398','5808','3188521996','3132477400','M',NULL,'Rua dos Securitários',115,'Casa','Alipio de Melo','Belo Horizonte','MG','Brasil'
+--SELECT * FROM corretor WHERE corretor.codigo = 5;
 CREATE PROCEDURE usp_CompradorInserir
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
@@ -394,13 +401,13 @@ BEGIN
        END
 
        IF @creci IS NULL BEGIN
-         INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,entrada,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@entrada,@lista_intereste,(SELECT creci FROM imobiliaria),(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,entrada,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@entrada,@lista_intereste,(SELECT creci FROM imobiliaria WHERE imobiliaria.creci LIKE '%1'),(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
        END
        ELSE BEGIN
          INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,entrada,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@entrada,@lista_intereste,@creci,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
        END
 
-	   SELECT IDENT_CURRENT('comprador') AS 'Código do(a) Comprador(a)';
+	   SELECT @@IDENTITY AS 'Código do(a) Comprador(a)';
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -409,7 +416,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-
+--EXEC usp_CompradorInserir '13013013001','RG17117811','Comprador 01','Solteiro','Analista de Suporte','1400',0,'3134746398','3132477400','31988521996','5808',1500,'Imovel 01,05 e 08',NULL,'Rua dos Securitários',115,'Casa','Alipio de Melo','Belo Horizonte','MG','Brasil'
+--SELECT * FROM comprador WHERE codigo = 2;
 CREATE PROCEDURE usp_CompradorConjugeInserir
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
@@ -430,7 +438,7 @@ BEGIN
 	  
        INSERT INTO comprador_conjuge (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,comprador_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@compradorCodigo,(SELECT CURRENT_TIMESTAMP));
        
-	   SELECT IDENT_CURRENT('comprador_conjuge') AS 'Código do(a) Conjuge do(a) Comprador(a)';
+	   SELECT @@IDENTITY AS 'Código do(a) Conjuge do(a) Comprador(a)';
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -439,43 +447,30 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-
+--EXEC usp_CompradorConjugeInserir '12345678201','RG71114565','Mulher do comprador','Solteira','Advogada',1000,0,'3134747441','3134343434','31985211452','3133215520',2
+--SELECT * FROM comprador_conjuge WHERE codigo = 1;
 CREATE PROCEDURE usp_VendaInserir
   @valor INT,
   @data DATE,
   @documentos VARCHAR(80),
-  @capitador VARCHAR(45),
+  @vendedor VARCHAR(45),
   @porcenta_imobiliaria DECIMAL(11,2),
+  @creci VARCHAR(10) = NULL,
   @imovel_codigo INT,
   @despachante_codigo INT,
-  @creci VARCHAR(10) = NULL,
-  @rua VARCHAR(100),
-  @num INT,
-  @compl VARCHAR(30) = NULL,
-  @bairro VARCHAR(100),
-  @cidade VARCHAR(80),
-  @uf CHAR(2),
-  @pais VARCHAR(50) = NULL
+  @endereco_codigo INT
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	  --inserir endereço pegar o cod e colocar na tabela imoveis
-       IF @compl IS NULL BEGIN
-         INSERT INTO endereco (logradouro,numero,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
-       END
-       IF @pais IS  NULL BEGIN
-         INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
-       END
-
        IF @creci IS NOT NULL BEGIN
-         INSERT INTO venda (valor,data,documentos,capitador,porcenta_imobiliaria,imobiliaria_creci,imovel_codigo,despachante_codigo,endereco_codigo,created) VALUES (@valor,@data,@documentos,@capitador,@porcenta_imobiliaria,@imovel_codigo,@despachante_codigo,@creci,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO venda (valor,data,documentos,vendedor,porcenta_imobiliaria,imobiliaria_creci,imovel_codigo, despachante_codigo,endereco_codigo,created) VALUES (@valor,@data,@documentos,@vendedor,@porcenta_imobiliaria,@creci,@imovel_codigo,@despachante_codigo,@endereco_codigo,(SELECT CURRENT_TIMESTAMP));
        END
        ELSE BEGIN
-         INSERT INTO venda (valor,data,documentos,capitador,porcenta_imobiliaria,imobiliaria_creci,imovel_codigo,despachante_codigo,endereco_codigo,created) VALUES (@valor,@data,@documentos,@capitador,@porcenta_imobiliaria,@imovel_codigo,@despachante_codigo,(SELECT creci FROM imobiliaria),(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO venda (valor,data,documentos,vendedor,porcenta_imobiliaria,imobiliaria_creci,imovel_codigo,despachante_codigo,endereco_codigo,created) VALUES (@valor,@data,@documentos,@vendedor,@porcenta_imobiliaria,@imovel_codigo,@despachante_codigo,(SELECT TOP 1 creci FROM imobiliaria WHERE creci LIKE '%1'),@endereco_codigo,(SELECT CURRENT_TIMESTAMP));
        END
 
-	   SELECT IDENT_CURRENT('venda') AS 'Código da Venda';
+	   SELECT @@IDENTITY AS 'Código da Venda';
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -484,7 +479,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-
+--EXEC usp_VendaInserir 250000,'2015-08-22','3 copias contrato, cpf, rg','Igor Martinelli Ramos',6,'0000000001',3,1,4
+--SELECT * FROM venda WHERE codigo = 7
 CREATE PROCEDURE usp_DespachanteInserir
   @nome VARCHAR(120),
   @preco DECIMAL(10,2),
@@ -515,7 +511,7 @@ BEGIN
 
        INSERT INTO despachante (nome,preco,servicos_completos,servicos_pendentes,telefone,telefone2,celular,tel_comercial,endereco_codigo,created) VALUES(@nome,@preco,@servicos_completos,@servicos_pendentes,@tel,@tel2,@cel,@telComercial,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
 	   
-	   SELECT IDENT_CURRENT('despachante') AS 'Código do Despachante';
+	   SELECT @@IDENTITY AS 'Código do Despachante';
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -524,7 +520,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-
+--EXEC usp_DespachanteInserir 'Despachante 01', 120,0,0,'3134445351','313474441','31988554466','3134115549','Rua Tranversal',330,'Loja 02','Bairro Central','Belo Horizonte','MG','Brasil'
+--SELECT * FROM despachante WHERE codigo = 1;
 CREATE PROCEDURE usp_TransacaoInserir
   @agencia VARCHAR(6),
   @num_conta VARCHAR(8),
@@ -540,7 +537,7 @@ BEGIN
 
        INSERT INTO transacao_bancaria (agencia,num_conta_bancaria,num_conta_digito,tipo_conta,nome_banco,valor,venda_codigo,created) VALUES (@agencia,@num_conta,@digito,@tipo_conta,@nome_banco,@valor,(SELECT codigo FROM venda WHERE codigo = @venda),(SELECT CURRENT_TIMESTAMP));
 
-	   SELECT IDENT_CURRENT('transacao_bancaria') AS 'Código da Transação Bancária';
+	   SELECT @@IDENTITY AS 'Código da Transação Bancária';
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -549,8 +546,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_ImobiliariaInserir '01234567890','Igor Martinelli Ramos','2013/09/22','IHMHR Imoveis','IHMHR I','03134746398','Igor Martinelli Ramos','-','Rua Sem Nome',10,NULL,'Sem bairro','City','MM',NULL
---SELECT * FROM imobiliaria
+--EXEC usp_TransacaoInserir '1203','0020766',7,'Conta Corrente','Bradesco',25000,7
+--SELECT * FROM transacao_bancaria WHERE codigo = 1;
 CREATE PROCEDURE usp_ImobiliariaInserir
   @creci VARCHAR(10),
   @nome VARCHAR(120),
@@ -581,7 +578,7 @@ BEGIN
 
        INSERT INTO imobiliaria (creci,nome_creci,dt_emissao,razao,apelido,telefone,dono,co_dono,endereco_codigo,created) VALUES (@creci,@nome,@data_emissao,@razao,@apelido,@tel,@dono,@co_dono,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
 
-	   SELECT IDENT_CURRENT('imobiliaria') AS 'Código da Imobiliária';
+	   SELECT TOP 1 creci AS 'Código da Imobiliária' FROM imobiliaria ORDER BY created DESC;
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -590,6 +587,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
+--EXEC usp_ImobiliariaInserir '0000000003','Imobiliaria Teste Venda e Aluguel', '2010-12-01', 'Imobiliaria Teste','Imobiliaria Teste','3133333333','Igor Martinelli Ramos','Igor Henrique Heredia','Avenida Principal',1921,NULL,'Centro da Cidade','Imovis City','MG','Brasil'
+--SELECT * FROM imobiliaria;
 
 --PROCEDURES PARA UPDATES'S--
 CREATE PROCEDURE usp_ImovelAlterar
@@ -2014,9 +2013,6 @@ usp_VendaApagarCREATE TRIGGER [NOME DO TRIGGER]
 ON [NOME DA TABELA]
 [FOR/AFTER/INSTEAD OF] [INSERT/UPDATE/DELETE]
 AS
-
-
-
 _DespachanteApagar
 usp_TransacaoApagar
 usp_ImobiliariaApagar
@@ -2030,9 +2026,7 @@ SELECT proprietario.codigo,cpf,rg,nome,estado_civil,telefone,telefone,celular,te
 */
 /*
 INSERT INTO imobiliaria (creci, nome_creci, dt_emissao) VALUES (100200,'Igor Martinelli','1996:09:22');
-
 INSERT INTO imobiliaria (creci, nome_creci, dt_emissao, capitador) VALUES (001, 'Ederson Ramos', '2013:05:25', 'Marlene');
-
 sql = "INSERT INTO corretores (cpf, rg, nome, logradouro, numero, bairro, cep, uf, sexo, num_conta_bancaria, imobiliaria_creci) VALUES (" + int.Parse(txtCPF.Text) + "," + int.Parse(txtRG.Text) + ",'" + txtNome.Text + "','" + txtLogradouro.Text + "'," + int.Parse(txtNPorta.Text) + ",'" + txtBairro.Text + "'," + int.Parse(txtCEP.Text) + ",'" + cmbUF.ToString() + "','" + a + "'," + int.Parse(txtConta_Bancaria.Text) + ",001)";
 INSERT INTO corretores (cpf, rg, nome, logradouro, numero, bairro, cep, uf, sexo, num_conta_bancaria, imobiliaria_creci)
 VALUES (130899026, 17771868, 'Igor HMHR', 'securitarios', 115, 'alipo de melo', 30840760, 'MG', 'M', 20766, 001);
