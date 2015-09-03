@@ -45,8 +45,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FrmCompradores.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCompradores.Designer.cs">
+      <DependentUpon>FrmCompradores.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmInserirComprador.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmInserirComprador.Designer.cs">
+      <DependentUpon>FrmInserirComprador.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="FrmCompradores.resx">
+      <DependentUpon>FrmCompradores.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmInserirComprador.resx">
+      <DependentUpon>FrmInserirComprador.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -68,6 +86,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BLL\BLL.csproj">
+      <Project>{46075cbc-625e-487e-ab64-9d6be0ec397a}</Project>
+      <Name>BLL</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

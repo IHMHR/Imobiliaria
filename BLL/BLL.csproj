@@ -39,7 +39,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClsImovelNegocio.cs" />
+    <Compile Include="ClsComprador.cs" />
+    <Compile Include="ClsCorretor.cs" />
+    <Compile Include="ClsDespachante.cs" />
+    <Compile Include="ClsEndereco.cs" />
+    <Compile Include="ClsImobiliaria.cs" />
+    <Compile Include="ClsImovel.cs" />
+    <Compile Include="ClsProprietario.cs" />
+    <Compile Include="ClsTransacaoBancaria.cs" />
+    <Compile Include="ClsVenda.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

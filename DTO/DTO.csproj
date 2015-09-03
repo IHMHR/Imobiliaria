@@ -39,24 +39,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClsComprador.cs" />
-    <Compile Include="ClsCompradoresColecao.cs" />
-    <Compile Include="ClsCorretor.cs" />
-    <Compile Include="ClsCorretoresColecao.cs" />
-    <Compile Include="ClsDespachante.cs" />
-    <Compile Include="ClsDespachantesColecao.cs" />
-    <Compile Include="ClsEndereco.cs" />
-    <Compile Include="ClsEnderecosColecao.cs" />
-    <Compile Include="ClsImobiliaria.cs" />
-    <Compile Include="ClsImobiliariasColecao.cs" />
-    <Compile Include="ClsImoveisColecao.cs" />
-    <Compile Include="ClsImovel.cs" />
-    <Compile Include="ClsProprietario.cs" />
-    <Compile Include="ClsProprietariosColecao.cs" />
-    <Compile Include="ClsTransacaoBancaria.cs" />
-    <Compile Include="ClsTransacoesBancariasColecao.cs" />
-    <Compile Include="ClsVenda.cs" />
-    <Compile Include="ClsVendasColecao.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

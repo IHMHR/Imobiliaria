@@ -1,7 +1,11 @@
 USE master;
+
 IF EXISTS(SELECT * FROM sys.databases WHERE name='imobiliaria')
     DROP DATABASE imobiliaria;
-CREATE DATABASE imobiliaria;
+
+CREATE DATABASE imobiliaria ON (NAME = 'ImobiliariaDB', FILENAME = 'C:\Users\Martinelli\Documents\GitHub\Imobiliaria\Banco de Dados\Imobiliaria.mdf', SIZE = 10MB, MAXSIZE = 25MB, FILEGROWTH = 35% )
+LOG ON (NAME = 'ImobiliariaLOG', FILENAME = 'C:\Users\Martinelli\Documents\GitHub\Imobiliaria\Banco de Dados\Imobiliaria.ldf', SIZE = 5MB, MAXSIZE = 10MB, FILEGROWTH = 20%);
+GO
 
 USE imobiliaria;
 
@@ -70,7 +74,6 @@ telefone VARCHAR(14) NULL,
 telefone2 VARCHAR(14) NULL,
 celular VARCHAR(14) NULL,
 tel_comercial VARCHAR(14) NULL,
-entrada INT NULL,
 lista_intereste VARCHAR(50) NULL,
 imobiliaria_creci VARCHAR(10) NOT NULL,
 endereco_codigo INT NOT NULL,
@@ -175,6 +178,7 @@ CONSTRAINT fk_endereco_despachante FOREIGN KEY (endereco_codigo) REFERENCES ende
 CREATE TABLE venda (
 codigo INT IDENTITY(1,1) NOT NULL,
 valor INT NOT NULL,
+entrada INT NOT NULL,
 data DATE NOT NULL,
 documentos VARCHAR(80) NULL,
 vendedor VARCHAR(45) NULL,
@@ -211,6 +215,8 @@ CONSTRAINT fk_venda FOREIGN KEY (venda_codigo) REFERENCES venda(codigo)
 
 -- quantidade de tabelas criadas
 SELECT COUNT(name) AS 'Tables created' FROM SYSOBJECTS WHERE xtype = 'U'
+-- visualizar procedures criadas
+SELECT * FROM sys.procedures
 
 --PROCEDURES PARA INSERT'S--
 CREATE PROCEDURE usp_ImovelInserir
@@ -236,6 +242,9 @@ BEGIN
        IF @pais IS  NULL BEGIN
          INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
        END
+	   IF @pais IS NOT NULL AND @compl IS NOT NULL BEGIN
+	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
+	   END
 
        INSERT INTO imovel(registro,frente_lote,lado_lote,proprietario_codigo,endereco_codigo,created) VALUES(@registro,@frente_lote,@lado_lote,@cod_proprietario,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));/*SELECT IDENT_CURRENT('tbl_name');SELECT @@IDENTITY;SELECT SCOPE_IDENTITY();*/
 
@@ -248,7 +257,7 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_ImovelInserir 000001,'12','10',5,'Rua dos Securitários',115,'Casa','Alípio de Melo','Belo Horizonte','MG','Brasil'
+--EXEC usp_ImovelInserir 000001,'12','10',1,'Rua dos Securitários',115,'Casa','Alípio de Melo','Belo Horizonte','MG','Brasil'
 --SELECT * FROM imovel WHERE codigo = 3;
 CREATE PROCEDURE usp_ProprietarioInserir
   @cpf VARCHAR(11),
@@ -277,6 +286,9 @@ BEGIN
        IF @pais IS  NULL BEGIN
          INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
        END
+	   IF @pais IS NOT NULL AND @compl IS NOT NULL BEGIN
+	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
+	   END
 
        INSERT INTO proprietario (cpf,rg,nome,estado_civil,telefone,telefone2,celular,tel_comercial,endereco_codigo,created) VALUES (@cpf,@rg,@nome,@est_civil,@tel,@tel2,@cel,@telComercial,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
 
@@ -290,7 +302,7 @@ BEGIN
 END
 GO/*OK*/
 --EXEC usp_ProprietarioInserir '12345678903','RG10110101','Proprietario 01','Casado','3134343434','3133334343','31988888888','3134331511','Rua da Mamae', 864,'Casa','Santa Helena','Belo Horizonte','MG','Brasil';
---SELECT * FROM proprietario WHERE proprietario.codigo = 5;
+--SELECT * FROM proprietario WHERE proprietario.codigo = 1;
 CREATE PROCEDURE usp_ProprietarioConjugeInserir
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
@@ -317,12 +329,12 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_ProprietarioConjugeInserir '98765412300','RG78771888','Mulher do proprietário', 'Casada', '3134343434','3133334343','31985288528','3132433342',5
+--EXEC usp_ProprietarioConjugeInserir '98765412300','RG78771888','Mulher do proprietário', 'Casada', '3134343434','3133334343','31985288528','3132433342',1
 --SELECT * FROM proprietario_conjuge WHERE codigo = 1;
 CREATE PROCEDURE usp_CorretorInserir
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
-  @nome VARCHAR(12),
+  @nome VARCHAR(150),
   @tel VARCHAR(14),
   @tel2 VARCHAR(14),
   @cel VARCHAR(14),
@@ -347,9 +359,12 @@ BEGIN
        IF @pais IS  NULL BEGIN
          INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
        END
+	   IF @pais IS NOT NULL AND @compl IS NOT NULL BEGIN
+	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
+	   END
 
        IF @creci IS NULL BEGIN
-         INSERT INTO corretor(cpf,rg,nome_completo,telefone,telefone2,celular,tel_comercial,sexo,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@tel,@tel2,@cel,@telComercial,@sexo,(SELECT creci FROM imobiliaria WHERE imobiliaria.creci LIKE '%1'),(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO corretor(cpf,rg,nome_completo,telefone,telefone2,celular,tel_comercial,sexo,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@tel,@tel2,@cel,@telComercial,@sexo,(SELECT TOP 1 creci FROM imobiliaria ORDER BY imobiliaria.created DESC),(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
        END
        ELSE BEGIN
          INSERT INTO corretor(cpf,rg,nome_completo,telefone,telefone2,celular,tel_comercial,sexo,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@tel,@tel2,@cel,@telComercial,@sexo,@creci,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
@@ -365,7 +380,7 @@ BEGIN
 END
 GO/*OK*/
 --EXEC usp_CorretorInserir '13089902608','MG17771868','Igor Martinelli','3134746398','5808','3188521996','3132477400','M',NULL,'Rua dos Securitários',115,'Casa','Alipio de Melo','Belo Horizonte','MG','Brasil'
---SELECT * FROM corretor WHERE corretor.codigo = 5;
+--SELECT * FROM corretor WHERE corretor.codigo = 2;
 CREATE PROCEDURE usp_CompradorInserir
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
@@ -378,7 +393,6 @@ CREATE PROCEDURE usp_CompradorInserir
   @tel2 VARCHAR(14),
   @cel VARCHAR(14),
   @telComercial VARCHAR(14),
-  @entrada INT,
   @lista_intereste VARCHAR(50),
   @creci VARCHAR(10) = NULL,
   @rua VARCHAR(100),
@@ -399,12 +413,15 @@ BEGIN
        IF @pais IS  NULL BEGIN
          INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
        END
+	   IF @pais IS NOT NULL AND @compl IS NOT NULL BEGIN
+	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
+	   END
 
        IF @creci IS NULL BEGIN
-         INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,entrada,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@entrada,@lista_intereste,(SELECT creci FROM imobiliaria WHERE imobiliaria.creci LIKE '%1'),(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@lista_intereste,(SELECT TOP 1 creci FROM imobiliaria ORDER BY imobiliaria.created DESC),(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
        END
        ELSE BEGIN
-         INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,entrada,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@entrada,@lista_intereste,@creci,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@lista_intereste,@creci,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
        END
 
 	   SELECT @@IDENTITY AS 'Código do(a) Comprador(a)';
@@ -416,7 +433,7 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_CompradorInserir '13013013001','RG17117811','Comprador 01','Solteiro','Analista de Suporte','1400',0,'3134746398','3132477400','31988521996','5808',1500,'Imovel 01,05 e 08',NULL,'Rua dos Securitários',115,'Casa','Alipio de Melo','Belo Horizonte','MG','Brasil'
+--EXEC usp_CompradorInserir '13013013299','RG17117811','Comprador 01','Solteiro','Analista de Suporte','1400',500,'3134746398','3132477400','31988521996','5808','Imovel 01,05 e 08',NULL,'Rua dos Securitários',115,'Casa','Alipio de Melo','Belo Horizonte','MG','Brasil'
 --SELECT * FROM comprador WHERE codigo = 2;
 CREATE PROCEDURE usp_CompradorConjugeInserir
   @cpf VARCHAR(11),
@@ -448,9 +465,10 @@ BEGIN
 END
 GO/*OK*/
 --EXEC usp_CompradorConjugeInserir '12345678201','RG71114565','Mulher do comprador','Solteira','Advogada',1000,0,'3134747441','3134343434','31985211452','3133215520',2
---SELECT * FROM comprador_conjuge WHERE codigo = 1;
+--SELECT * FROM comprador_conjuge WHERE codigo = 7;
 CREATE PROCEDURE usp_VendaInserir
   @valor INT,
+  @entrada INT,
   @data DATE,
   @documentos VARCHAR(80),
   @vendedor VARCHAR(45),
@@ -464,10 +482,10 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
        IF @creci IS NOT NULL BEGIN
-         INSERT INTO venda (valor,data,documentos,vendedor,porcenta_imobiliaria,imobiliaria_creci,imovel_codigo, despachante_codigo,endereco_codigo,created) VALUES (@valor,@data,@documentos,@vendedor,@porcenta_imobiliaria,@creci,@imovel_codigo,@despachante_codigo,@endereco_codigo,(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO venda (valor,entrada,data,documentos,vendedor,porcenta_imobiliaria,imobiliaria_creci,imovel_codigo, despachante_codigo,endereco_codigo,created) VALUES (@valor,@entrada,@data,@documentos,@vendedor,@porcenta_imobiliaria,@creci,@imovel_codigo,@despachante_codigo,@endereco_codigo,(SELECT CURRENT_TIMESTAMP));
        END
        ELSE BEGIN
-         INSERT INTO venda (valor,data,documentos,vendedor,porcenta_imobiliaria,imobiliaria_creci,imovel_codigo,despachante_codigo,endereco_codigo,created) VALUES (@valor,@data,@documentos,@vendedor,@porcenta_imobiliaria,@imovel_codigo,@despachante_codigo,(SELECT TOP 1 creci FROM imobiliaria WHERE creci LIKE '%1'),@endereco_codigo,(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO venda (valor,entrada,data,documentos,vendedor,porcenta_imobiliaria,imobiliaria_creci,imovel_codigo,despachante_codigo,endereco_codigo,created) VALUES (@valor,@entrada,@data,@documentos,@vendedor,@porcenta_imobiliaria,@imovel_codigo,@despachante_codigo,(SELECT TOP 1 creci FROM imobiliaria WHERE creci LIKE '%1'),@endereco_codigo,(SELECT CURRENT_TIMESTAMP));
        END
 
 	   SELECT @@IDENTITY AS 'Código da Venda';
@@ -479,8 +497,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_VendaInserir 250000,'2015-08-22','3 copias contrato, cpf, rg','Igor Martinelli Ramos',6,'0000000001',3,1,4
---SELECT * FROM venda WHERE codigo = 7
+--EXEC usp_VendaInserir 250000,50000,'2015-08-22','3 copias contrato, cpf, rg','Igor Martinelli Ramos',6,'0000000002',3,1,7
+--SELECT * FROM venda WHERE codigo = 5
 CREATE PROCEDURE usp_DespachanteInserir
   @nome VARCHAR(120),
   @preco DECIMAL(10,2),
@@ -508,6 +526,9 @@ BEGIN
        IF @pais IS  NULL BEGIN
          INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
        END
+	   IF @pais IS NOT NULL AND @compl IS NOT NULL BEGIN
+	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
+	   END
 
        INSERT INTO despachante (nome,preco,servicos_completos,servicos_pendentes,telefone,telefone2,celular,tel_comercial,endereco_codigo,created) VALUES(@nome,@preco,@servicos_completos,@servicos_pendentes,@tel,@tel2,@cel,@telComercial,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
 	   
@@ -546,8 +567,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_TransacaoInserir '1203','0020766',7,'Conta Corrente','Bradesco',25000,7
---SELECT * FROM transacao_bancaria WHERE codigo = 1;
+--EXEC usp_TransacaoInserir '1203','0020766',7,'Conta Corrente','Bradesco',25000,5
+--SELECT * FROM transacao_bancaria WHERE codigo = 2;
 CREATE PROCEDURE usp_ImobiliariaInserir
   @creci VARCHAR(10),
   @nome VARCHAR(120),
@@ -575,6 +596,9 @@ BEGIN
        IF @pais IS  NULL BEGIN
          INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
        END
+	   IF @pais IS NOT NULL AND @compl IS NOT NULL BEGIN
+	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
+	   END
 
        INSERT INTO imobiliaria (creci,nome_creci,dt_emissao,razao,apelido,telefone,dono,co_dono,endereco_codigo,created) VALUES (@creci,@nome,@data_emissao,@razao,@apelido,@tel,@dono,@co_dono,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
 
@@ -587,7 +611,7 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_ImobiliariaInserir '0000000003','Imobiliaria Teste Venda e Aluguel', '2010-12-01', 'Imobiliaria Teste','Imobiliaria Teste','3133333333','Igor Martinelli Ramos','Igor Henrique Heredia','Avenida Principal',1921,NULL,'Centro da Cidade','Imovis City','MG','Brasil'
+--EXEC usp_ImobiliariaInserir '0000000002','Imobiliaria2 Teste Venda e Aluguel', '2010-12-01', 'Imobiliaria Teste','Imobiliaria Teste','3133333333','Igor Martinelli Ramos','Igor Henrique Heredia','Avenida Principal',1921,NULL,'Centro da Cidade','Imovis City','MG','Brasil'
 --SELECT * FROM imobiliaria;
 
 --PROCEDURES PARA UPDATES'S--
@@ -597,24 +621,29 @@ CREATE PROCEDURE usp_ImovelAlterar
   @frente_lote VARCHAR(10),
   @lado_lote VARCHAR(10),
   @cod_proprietario INT,
-  @cod_endereco INT,
-  @rua VARCHAR(100),
-  @num INT,
-  @compl VARCHAR(30) = NULL,
-  @bairro VARCHAR(100),
-  @cidade VARCHAR(80),
-  @uf CHAR(2),
-  @pais VARCHAR(50) = NULL
+  @cod_endereco INT
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
+	  /*--inserir novo endereço e inutilizar o antigo
+       IF @compl IS NULL BEGIN
+         INSERT INTO endereco (logradouro,numero,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
+       END
+       IF @pais IS  NULL BEGIN
+         INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
+       END
+	   IF @pais IS NOT NULL AND @compl IS NOT NULL BEGIN
+	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
+	   END
 	  --alteração do endereço
-	  UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;
+	  --UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;
+	  --Criar variavel local para guardar o id do endereço criado
+	  DECLARE @newEndereco INT = (SELECT IDENT_CURRENT('endereco'));*/
+	  
+      UPDATE imovel SET registro = @registro, frente_lote = @frente_lote, lado_lote = @lado_lote, proprietario_codigo = @cod_proprietario, endereco_codigo = @cod_endereco, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod;
 
-      UPDATE imovel SET registro = @registro, frente_lote = @frente_lote, lado_lote = @lado_lote, proprietario_codigo = @cod_proprietario, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod;
-
-	  SELECT IDENT_CURRENT('imobiliaria') AS 'Código da Imobiliária';
+	  SELECT imovel.codigo AS 'Código do Imovel Alterado' FROM imovel WHERE imovel.codigo = @cod;
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -623,7 +652,10 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-
+/*SELECT * INTO imovel_teste FROM imovel
+SELECT * FROM imovel_teste;
+--EXEC usp_ImovelAlterar 3,1,'35','22',1,8
+SELECT * FROM imovel*/
 CREATE PROCEDURE usp_ProprietarioAlterar
   @cod INT,
   @cpf VARCHAR(11),
@@ -634,27 +666,29 @@ CREATE PROCEDURE usp_ProprietarioAlterar
   @tel2 VARCHAR(14),
   @cel VARCHAR(14),
   @telComercial VARCHAR(14),
-  @nome_conjuge VARCHAR(120),
-  @est_civil_conjuge VARCHAR(15),
-  @cpf_conjuge VARCHAR(11),
-  @cod_endereco INT,
-  @rua VARCHAR(100),
-  @num INT,
-  @compl VARCHAR(30) = NULL,
-  @bairro VARCHAR(100),
-  @cidade VARCHAR(80),
-  @uf CHAR(2),
-  @pais VARCHAR(50) = NULL
+  @cod_endereco INT
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	   --alteração do endereço
-	  UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;
+	  /*--alteração do endereço
+	  --UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;
+	  --inserir novo endereço e inutilizar o antigo
+       IF @compl IS NULL BEGIN
+         INSERT INTO endereco (logradouro,numero,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
+       END
+       IF @pais IS  NULL BEGIN
+         INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
+       END
+	   IF @pais IS NOT NULL AND @compl IS NOT NULL BEGIN
+	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
+	   END
+	   
+	   DECLARE @newEndereco INT = (SELECT IDENT_CURRENT('endereco'));*/
 
-      UPDATE proprietario SET cpf=@cpf,rg=@rg,nome=@nome,estado_civil=@est_civil,telefone=@tel,telefone2=@tel2,celular=@cel,@telComercial=@telComercial,nome_conjuge=@nome_conjuge,cpf_conjuge=@cpf_conjuge,estado_civil_conjude=@est_civil_conjuge,modified=(SELECT CURRENT_TIMESTAMP) WHERE codigo=@cod;
+       UPDATE proprietario SET cpf=@cpf,rg=@rg,nome=@nome,estado_civil=@est_civil,telefone=@tel,telefone2=@tel2,celular=@cel,@telComercial=@telComercial,endereco_codigo=@cod_endereco,modified=(SELECT CURRENT_TIMESTAMP) WHERE codigo=@cod;
 
-	  SELECT IDENT_CURRENT('prorietario') AS 'Código do Proprietário';
+	   SELECT proprietario.codigo AS 'Código do Proprietário Alterado' FROM proprietario WHERE proprietario.codigo = @cod;
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -663,36 +697,48 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-
+/*SELECT * INTO proprietario_teste FROM proprietario
+SELECT * FROM proprietario
+SELECT * FROM proprietario_teste
+EXEC usp_ProprietarioAlterar 1,'13089902605','MG17771868','Igor Martinelli','Solteiro','3134746398','3188343318','3188521996','3132475808',11*/
 CREATE PROCEDURE usp_CorretorAlterar
   @cod INT,
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
-  @nome VARCHAR(12),
+  @nome VARCHAR(150),
   @tel VARCHAR(14),
   @tel2 VARCHAR(14),
   @cel VARCHAR(14),
   @telComercial VARCHAR(14),
   @sexo CHAR(1),
   @creci VARCHAR(10) = NULL,
-  @cod_endereco INT,
-  @rua VARCHAR(100),
-  @num INT,
-  @compl VARCHAR(30) = NULL,
-  @bairro VARCHAR(100),
-  @cidade VARCHAR(80),
-  @uf CHAR(2),
-  @pais VARCHAR(50) = NULL
+  @cod_endereco INT
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	   --alteração do endereço
-	  UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;
+	   /*--alteração do endereço
+	   --UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;
+	   --inserir novo endereço e inutilizar o antigo
+       IF @compl IS NULL BEGIN
+         INSERT INTO endereco (logradouro,numero,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
+       END
+       IF @pais IS  NULL BEGIN
+         INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
+       END
+	   IF @pais IS NOT NULL AND @compl IS NOT NULL BEGIN
+	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
+	   END
 
-      UPDATE corretor SET cpf=@cpf,rg=@rg,nome_completo=@nome,telefone=@tel,telefone2=@tel2,celular=@cel,@telComercial=@telComercial,sexo=@sexo,modified=(SELECT CURRENT_TIMESTAMP) WHERE codigo=@cod
+	   DECLARE @newEndereco INT = (SELECT IDENT_CURRENT('endereco'));*/
 
-	  SELECT IDENT_CURRENT('corretor') AS 'Código do Corretor';
+	   IF @creci IS NULL BEGIN
+         UPDATE corretor SET cpf=@cpf,rg=@rg,nome_completo=@nome,telefone=@tel,telefone2=@tel2,celular=@cel,@telComercial=@telComercial,endereco_codigo=@cod_endereco,sexo=@sexo,modified=(SELECT CURRENT_TIMESTAMP) WHERE codigo=@cod;
+	   END ELSE BEGIN
+	     UPDATE corretor SET cpf=@cpf,rg=@rg,nome_completo=@nome,telefone=@tel,telefone2=@tel2,celular=@cel,@telComercial=@telComercial,endereco_codigo=@cod_endereco,sexo=@sexo,imobiliaria_creci=@creci,modified=(SELECT CURRENT_TIMESTAMP) WHERE codigo=@cod;
+	   END
+
+	   SELECT corretor.codigo AS 'Código do Corretor Alterado' FROM corretor WHERE corretor.codigo = @cod;
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -701,12 +747,15 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-
+/*SELECT * INTO corretor_teste FROM corretor
+SELECT * FROM corretor
+SELECT * FROM corretor_teste
+EXEC usp_CorretorAlterar 2,'13089902605','MG17771868','Igor Martinelli Ramos','3134746398','3188343318','3188521996','3132477400','M',NULL,11*/
 CREATE PROCEDURE usp_CompradorAlterar
   @cod INT,
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
-  @nome VARCHAR(12),
+  @nome VARCHAR(120),
   @estado_Civil VARCHAR(15),
   @profissao varchar(45),
   @renda_bruta INT,
@@ -715,32 +764,35 @@ CREATE PROCEDURE usp_CompradorAlterar
   @tel2 VARCHAR(14),
   @cel VARCHAR(14),
   @telComercial VARCHAR(14),
-  @nome_conjuge VARCHAR(120),
-  @estado_civil_conjuge VARCHAR(15),
-  @renda_bruta_conjuge INT,
-  @cpf_conjuge VARCHAR(11),
-  @fgts_conjuge DECIMAL(11,2),
-  @entrada INT,
   @lista_intereste VARCHAR(50),
   @creci VARCHAR(10) = NULL,
-  @cod_endereco INT,
-  @rua VARCHAR(100),
-  @num INT,
-  @compl VARCHAR(30) = NULL,
-  @bairro VARCHAR(100),
-  @cidade VARCHAR(80),
-  @uf CHAR(2),
-  @pais VARCHAR(50) = NULL
+  @cod_endereco INT
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	   --alteração do endereço
-	  UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;
+	   /*--alteração do endereço
+	   --UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;
+	   --inserir novo endereço e inutilizar o antigo
+       IF @compl IS NULL BEGIN
+         INSERT INTO endereco (logradouro,numero,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
+       END
+       IF @pais IS  NULL BEGIN
+         INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
+       END
+	   IF @pais IS NOT NULL AND @compl IS NOT NULL BEGIN
+	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
+	   END
 
-      UPDATE comprador SET cpf=@cpf,rg=rg,nome=@nome,estado_civil=@estado_Civil,profissao=@profissao,renda_bruta=@renda_bruta,fgts=@fgts,telefone=@tel,telefone2=@tel2,celular=@cel,tel_comercial=@telComercial,nome_conjuge=@nome_conjuge,estado_civil_conjuge=@estado_civil_conjuge,renda_bruta_conjuge=@renda_bruta_conjuge,fgts_conjuge=@fgts_conjuge,cpf_conjuge=@cpf_conjuge,entrada=@entrada,lista_intereste=@lista_intereste,imobiliaria_creci=@creci,modified=(SELECT CURRENT_TIMESTAMP) WHERE codigo=@cod;
+	   DECLARE @newEndereco INT = (SELECT IDENT_CURRENT('endereco'));*/
 
-	  SELECT IDENT_CURRENT('comprador') AS 'Código do Comprador';
+       IF @creci IS NULL BEGIN
+	     UPDATE comprador SET cpf=@cpf,rg=rg,nome=@nome,estado_civil=@estado_Civil,profissao=@profissao,renda_bruta=@renda_bruta,fgts=@fgts,telefone=@tel,telefone2=@tel2,celular=@cel,tel_comercial=@telComercial,lista_intereste=@lista_intereste,endereco_codigo=@cod_endereco,modified=(SELECT CURRENT_TIMESTAMP) WHERE codigo=@cod;
+	   END ELSE BEGIN
+	     UPDATE comprador SET cpf=@cpf,rg=rg,nome=@nome,estado_civil=@estado_Civil,profissao=@profissao,renda_bruta=@renda_bruta,fgts=@fgts,telefone=@tel,telefone2=@tel2,celular=@cel,tel_comercial=@telComercial,lista_intereste=@lista_intereste,endereco_codigo=@cod_endereco,imobiliaria_creci=@creci,modified=(SELECT CURRENT_TIMESTAMP) WHERE codigo=@cod;
+	   END
+
+	   SELECT comprador.codigo AS 'Código do Comprador Alterado' FROM comprador WHERE comprador.codigo = @cod;
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -749,35 +801,36 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-
+/*SELECT * INTO comprador_teste FROM comprador
+SELECT * FROM comprador
+SELECT * FROM comprador_teste
+EXEC usp_CompradorAlterar 2,'13013013299','RG17117811','Ederson Ramos', 'Casado', 'Eletricista', 1250,10000,'3134746398','3188343318','3191130192','','Casas em Esmeralda',NULL,11*/
 CREATE PROCEDURE usp_VendaAlterar
   @cod INT,
   @valor INT,
+  @entrada INT,
   @data DATE,
   @documentos VARCHAR(80),
-  @capitador VARCHAR(45),
+  @vendedor VARCHAR(45),
   @porcenta_imobiliaria DECIMAL(11,2),
   @imovel_codigo INT,
   @despachante_codigo INT,
   @creci VARCHAR(10) = NULL,
-  @cod_endereco INT,
-  @rua VARCHAR(100),
-  @num INT,
-  @compl VARCHAR(30) = NULL,
-  @bairro VARCHAR(100),
-  @cidade VARCHAR(80),
-  @uf CHAR(2),
-  @pais VARCHAR(50) = NULL
+  @cod_endereco INT
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	   --alteração do endereço
-	  UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;
+	   /*--alteração do endereço
+	   UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;*/
 
-      UPDATE venda SET valor=@valor,data=@data,documentos=@documentos,capitador=@capitador,porcenta_imobiliaria=@porcenta_imobiliaria,imobiliaria_creci=@creci,despachante_codigo=@despachante_codigo,modified=(SELECT CURRENT_TIMESTAMP) WHERE  codigo = @cod;
+       IF @creci IS NULL BEGIN
+	     UPDATE venda SET @entrada=entrada,@vendedor=vendedor,valor=@valor,data=@data,documentos=@documentos,porcenta_imobiliaria=@porcenta_imobiliaria,despachante_codigo=@despachante_codigo,modified=(SELECT CURRENT_TIMESTAMP) WHERE  codigo = @cod;
+	   END ELSE BEGIN
+	     UPDATE venda SET @entrada=entrada,@vendedor=vendedor,valor=@valor,data=@data,documentos=@documentos,porcenta_imobiliaria=@porcenta_imobiliaria,imobiliaria_creci=@creci,despachante_codigo=@despachante_codigo,modified=(SELECT CURRENT_TIMESTAMP) WHERE  codigo = @cod;
+	   END
 
-	  SELECT IDENT_CURRENT('venda') AS 'Código da Venda';
+	   SELECT venda.codigo AS 'Código da Venda Alterada' FROM venda WHERE venda.codigo = @cod;
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -786,7 +839,10 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-
+/*SELECT * INTO venda_teste FROM venda
+SELECT * FROM venda
+SELECT * FROM venda_teste
+EXEC usp_VendaAlterar 5,300000,'2015-02-05','documentos conferidos e entregue ao cartorio','Daisy Ramos',6,1,1,NULL,8*/
 CREATE PROCEDURE usp_DespachanteAlterar
   @cod INT,
   @nome VARCHAR(120),
@@ -822,7 +878,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 CREATE PROCEDURE usp_TransacaoAlterar
   @cod INT,
@@ -848,7 +904,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 CREATE PROCEDURE usp_ImobiliariaAlterar
   @creci VARCHAR(10),
@@ -884,7 +940,11 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
+/*
+   TODO
+   alterar tables CONJUGES
+*/
 
 --PROCEDURES PARA DELETE'S--
 CREATE PROCEDURE usp_ImovelApagar
@@ -913,7 +973,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na Alteração de dados';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 CREATE PROCEDURE usp_ProprietarioApagar
   @cod INT = NULL,
@@ -941,7 +1001,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 CREATE PROCEDURE usp_CorretorApagar
   @cod INT = NULL,
@@ -969,7 +1029,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 /*EXEC usp_CompradorApagar NULL,'13089902605';
 DELETE FROM comprador WHERE comprador.codigo = 4;
 There is already an object named 'bk_comprador' in the database.
@@ -1001,7 +1061,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 CREATE PROCEDURE usp_VendaApagar
   @cod INT
@@ -1020,7 +1080,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 CREATE PROCEDURE usp_DespachanteApagar
   @cod INT
@@ -1039,7 +1099,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 CREATE PROCEDURE usp_TransacaoApagar
   @cod INT
@@ -1058,7 +1118,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 CREATE PROCEDURE usp_ImobiliariaApagar
   @creci VARCHAR(10)
@@ -1077,7 +1137,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 --PROCEDURES PARA PESQUISA--
 CREATE PROCEDURE usp_ImovelPorCod
@@ -1092,7 +1152,7 @@ BEGIN
 	          (SELECT logradouro,numero,complemento,bairro,cidade,uf FROM endereco WHERE endereco.codigo = proprietario.endereco_codigo)
 	              FROM proprietario WHERE proprietario.codigo = imovel.proprietario_codigo)
       FROM imovel WHERE imovel.codigo = @cod;*/
-	  SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario.nome_conjuge AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imovel LEFT JOIN proprietario ON proprietario_codigo = imovel.codigo JOIN endereco ON imovel.endereco_codigo = imovel.codigo WHERE imovel.codigo = @cod;
+	  SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo WHERE imovel.codigo = @cod;
 
 	COMMIT TRAN
   END TRY
@@ -1102,9 +1162,10 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
+--EXEC usp_ImovelPorCod 3
 CREATE PROCEDURE usp_ImovelPorEndereco
   @rua VARCHAR(100),
-  @num INT,
+  @num INT = NULL,
   @compl VARCHAR(30) = NULL,
   @bairro VARCHAR(100),
   @cidade VARCHAR(80),
@@ -1115,7 +1176,7 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario.nome_conjuge AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imovel LEFT JOIN proprietario ON proprietario_codigo = imovel.codigo JOIN endereco ON imovel.endereco_codigo = imovel.codigo WHERE endereco.logradouro LIKE '%'+@rua+'%' OR endereco.numero = @num OR endereco.complemento LIKE '%'+@compl+'%' OR endereco.bairro LIKE '%'+@bairro+'%' OR endereco.cidade LIKE '%'+@cidade+'%' OR endereco.uf = @uf OR endereco.pais LIKE '%'+@pais+'%';
+	  SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo WHERE endereco.logradouro LIKE '%'+@rua+'%' OR endereco.numero = @num OR endereco.complemento LIKE '%'+@compl+'%' OR endereco.bairro LIKE '%'+@bairro+'%' OR endereco.cidade LIKE '%'+@cidade+'%' OR endereco.uf = @uf OR endereco.pais LIKE '%'+@pais+'%';
 
 	COMMIT TRAN
   END TRY
@@ -1124,7 +1185,8 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO
+EXEC usp_ImovelPorEndereco '',null,'','','','',''
 CREATE PROCEDURE usp_ImovelPorProprietario
   @nome VARCHAR(120),
   @cpf VARCHAR(11),
@@ -1135,7 +1197,7 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario.nome_conjuge AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imovel LEFT JOIN proprietario ON proprietario_codigo = imovel.codigo JOIN endereco ON imovel.endereco_codigo = imovel.codigo WHERE proprietario.nome LIKE '%'+@nome+'%' OR proprietario.cpf = @cpf OR proprietario.telefone LIKE '%'+@tel+'%' OR proprietario.celular LIKE '%'+@cel+'%';
+	  SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imovel LEFT JOIN proprietario ON imovel.proprietario_codigo = proprietario.codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo WHERE proprietario.nome LIKE '%'+@nome+'%' OR proprietario.cpf = @cpf OR proprietario.telefone LIKE '%'+@tel+'%' OR proprietario.celular LIKE '%'+@cel+'%';
 
 	COMMIT TRAN
   END TRY
@@ -1144,7 +1206,9 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
+EXEC usp_ImovelPorProprietario 'Igor','13089902605','',''/**/
+SELECT * FROM proprietario
 CREATE PROCEDURE usp_ImovelTodos
 AS
 BEGIN
@@ -1160,7 +1224,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 CREATE PROCEDURE usp_ProprietarioPorCod
   @cod INT
@@ -1170,7 +1234,7 @@ BEGIN
     BEGIN TRAN
 	  
 	  --SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario.nome_conjuge AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imovel LEFT JOIN proprietario ON proprietario_codigo = imovel.codigo JOIN endereco ON imovel.endereco_codigo = imovel.codigo WHERE imovel.codigo = @cod;
-	  SELECT proprietario.codigo AS 'Código do proprietário',nome AS 'Proprietário nome',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',nome_conjuge AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM proprietario JOIN endereco ON  proprietario.codigo = endereco_codigo WHERE proprietario.codigo = @cod;
+	  SELECT proprietario.codigo AS 'Código do proprietário',nome AS 'Proprietário nome',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo WHERE proprietario.codigo = @cod ORDER BY proprietario.codigo DESC;
 
 	COMMIT TRAN
   END TRY
@@ -1180,15 +1244,15 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
+--EXEC usp_ProprietarioPorCod 1
 CREATE PROCEDURE usp_ProprietarioPorNome
-  @nome VARCHAR(120),
-  @nomeConjuge VARCHAR(120) = NULL
+  @nome VARCHAR(120)
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT proprietario.codigo AS 'Código do proprietário',nome AS 'Proprietário nome',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',nome_conjuge AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM proprietario JOIN endereco ON  proprietario.codigo = endereco_codigo WHERE nome LIKE '%'+@nome+'%' OR nome_conjuge LIKE '%'+@nomeConjuge+'%';
+	  SELECT proprietario.codigo AS 'Código do proprietário',nome AS 'Proprietário nome',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo WHERE nome LIKE '%'+@nome+'%';
 
 	COMMIT TRAN
   END TRY
@@ -1198,6 +1262,7 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
+--EXEC usp_ProprietarioPorNome 'casa'
 CREATE PROCEDURE usp_ProprietarioPorTelefone
   @tel VARCHAR(15) = NULL,
   @tel2 VARCHAR(15) = NULL,
@@ -1217,7 +1282,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_ProprietarioPorEndereco
   @rua VARCHAR(100),
   @num INT,
@@ -1240,7 +1305,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_ProprietarioTodos
 AS
 BEGIN
@@ -1256,7 +1321,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 CREATE PROCEDURE usp_CompradorPorCod
   @cod INT
@@ -1274,7 +1339,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_CompradorPorCpfOuRg
   @cpf VARCHAR(11) = NULL,
   @rg VARCHAR(10) = NULL
@@ -1292,7 +1357,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_CompradorPorNome
   @nome VARCHAR(120),
   @nomeC VARCHAR(120) = NULL
@@ -1310,7 +1375,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_CompradorPorTelefone
   @tel VARCHAR(14),
   @tel2 VARCHAR(14),
@@ -1330,7 +1395,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_CompradorPorEndereco
   @rua VARCHAR(100),
   @num INT,
@@ -1353,15 +1418,15 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_CompradorPorTodos
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo ORDER BY comprador.codigo DESC;
-
+	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN endereco ON endereco.codigo = comprador.endereco_codigo LEFT JOIN imobiliaria ON imobiliaria.creci = comprador.imobiliaria_creci ORDER BY comprador.codigo DESC;
+	  
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -1369,8 +1434,10 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
-
+GO/*TODO*/
+EXEC usp_CompradorPorTodos
+DELETE FROM comprador WHERE comprador.codigo <> 1;
+EXEC usp_CompradorInserir '959552255111','mg17771868','Igor Ramos','Solteirão','Gerente de TI',8000,5000,'3134743698','3188343318','3188521996','3132477400','todos as casas',NULL,'rua sem nome',115,'casa','alipio de melo','beaga','mg','Brasil'
 CREATE PROCEDURE usp_CorretorPorCod
   @cod INT
 AS
@@ -1387,7 +1454,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_CorretorPorNome
   @nome VARCHAR(150)
 AS
@@ -1404,7 +1471,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_CorretorPorImobiliaria
   @creci VARCHAR(10)
 AS
@@ -1421,7 +1488,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_CorretorPorEndereco
   @rua VARCHAR(100),
   @num INT,
@@ -1444,7 +1511,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_CorretorPorTelefone
   @tel VARCHAR(14),
   @tel2 VARCHAR(14),
@@ -1464,7 +1531,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_CorretorPorCpfOuRg
   @cpf VARCHAR(11),
   @rg VARCHAR(10)
@@ -1482,7 +1549,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_CorretorPorTodos
 AS
 BEGIN
@@ -1498,7 +1565,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 CREATE PROCEDURE usp_DespachantePorCod
   @cod VARCHAR(10)
@@ -1516,7 +1583,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_DespachantePorNome
   @nome VARCHAR(120)
 AS
@@ -1533,7 +1600,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_DespachantePorTelefone
   @tel VARCHAR(14),
   @tel2 VARCHAR(14),
@@ -1553,7 +1620,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_DespachantePorServicosPendentes
   @servPendentes SMALLINT
 AS
@@ -1570,7 +1637,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_DespachantePorServicosCompletos
   @servCompletos SMALLINT
 AS
@@ -1587,7 +1654,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_DespachantePorEndereco
   @rua VARCHAR(100),
   @num INT,
@@ -1610,7 +1677,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_DespachantePorTodos
 AS
 BEGIN
@@ -1626,7 +1693,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 CREATE PROCEDURE usp_ImobiliariaPorCreci
   @cod INT
@@ -1644,7 +1711,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_ImobiliariaPorRazao
   @razao VARCHAR(120)
 AS
@@ -1661,7 +1728,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_ImobiliariaPorApelido
   @apelido VARCHAR(80)
 AS
@@ -1678,7 +1745,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_ImobiliariaPorDono
   @dono VARCHAR(120),
   @co_dono VARCHAR(120)
@@ -1696,7 +1763,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_ImobiliariaPorEndereco
   @rua VARCHAR(100),
   @num INT,
@@ -1719,7 +1786,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_ImobiliariaPorTodos
 AS
 BEGIN
@@ -1735,7 +1802,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 CREATE PROCEDURE usp_VendaPorCod
   @cod INT
@@ -1753,7 +1820,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_VendaPorValor
   @valor INT
 AS
@@ -1770,7 +1837,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_VendaPorData
   @data DATE
 AS
@@ -1787,7 +1854,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_VendaPorPocentagemImobiliaria
   @porcenta_imobiliaria DECIMAL
 AS
@@ -1804,7 +1871,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_VendaPorEndereco
   @rua VARCHAR(100),
   @num INT,
@@ -1827,7 +1894,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_VendaPorTodos
 AS
 BEGIN
@@ -1843,7 +1910,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 CREATE PROCEDURE usp_TransacaoPorCod
   @cod INT
@@ -1861,7 +1928,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_TransacaoPorAgencia
   @agencia VARCHAR(6)
 AS
@@ -1878,7 +1945,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_TransacaoPorBanco
   @banco VARCHAR(50)
 AS
@@ -1895,7 +1962,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_TransacaoPorValor
   @valor DECIMAL
 AS
@@ -1912,7 +1979,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_TransacaoPorData
   @data DATETIME
 AS
@@ -1929,7 +1996,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_TransacaoPorTipoConta
   @tipo_conta VARCHAR(25)
 AS
@@ -1946,7 +2013,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 CREATE PROCEDURE usp_TransacaoPorTodos
 AS
 BEGIN
@@ -1962,7 +2029,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*TODO*/
 
 --TRIGGER'S PARA EVITAR EXCLUSÃO PERMANENTE--
 /*CREATE TRIGGER [NOME DO TRIGGER]
