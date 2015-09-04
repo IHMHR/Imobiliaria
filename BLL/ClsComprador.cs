@@ -47,7 +47,7 @@ namespace BLL
                 sqlserver.AdicionarParametro("cel", cel);
                 sqlserver.AdicionarParametro("telComercial", telComercial);
                 sqlserver.AdicionarParametro("fgts", fgts);
-                sqlserver.AdicionarParametro("entrada", entrada);
+                //sqlserver.AdicionarParametro("entrada", entrada);
                 sqlserver.AdicionarParametro("lista_intereste", lista_intereste);
                 sqlserver.AdicionarParametro("creci", creci);
                 sqlserver.AdicionarParametro("rua", logradouro);

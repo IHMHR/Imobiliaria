@@ -38,7 +38,7 @@ created DATETIME NOT NULL,
 modified DATETIME NULL,
 
 CONSTRAINT pk_imobiliaria PRIMARY KEY (creci),
-CONSTRAINT fk_endereco FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo)
+CONSTRAINT fk_endereco FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo) ON DELETE NO ACTION
 );/*OK*/
 
 CREATE TABLE corretor (
@@ -57,8 +57,8 @@ created DATETIME NOT NULL,
 modified DATETIME NULL,
 
 CONSTRAINT pk_corretor PRIMARY KEY (codigo),
-CONSTRAINT fk_creci FOREIGN KEY (imobiliaria_creci) REFERENCES imobiliaria(creci),
-CONSTRAINT fk_endereco_corretor FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo)
+CONSTRAINT fk_creci FOREIGN KEY (imobiliaria_creci) REFERENCES imobiliaria(creci) ON DELETE NO ACTION,
+CONSTRAINT fk_endereco_corretor FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo) ON DELETE NO ACTION
 );/*OK*/
 
 CREATE TABLE comprador (
@@ -81,8 +81,8 @@ created DATETIME NOT NULL,
 modified DATETIME NULL,
 
 CONSTRAINT pk_comprador PRIMARY KEY (codigo),
-CONSTRAINT fk_creci_comprador FOREIGN KEY (imobiliaria_creci) REFERENCES imobiliaria(creci),
-CONSTRAINT fk_endereco_comprador FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo)
+CONSTRAINT fk_creci_comprador FOREIGN KEY (imobiliaria_creci) REFERENCES imobiliaria(creci) ON DELETE NO ACTION,
+CONSTRAINT fk_endereco_comprador FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo) ON DELETE NO ACTION
 );/*OK*/
 
 CREATE TABLE comprador_conjuge (
@@ -103,7 +103,7 @@ created DATETIME NOT NULL,
 modified DATETIME NULL,
 
 CONSTRAINT pk_comprador_conjuge PRIMARY KEY (codigo),
-CONSTRAINT fk_comprador FOREIGN KEY (comprador_codigo) REFERENCES comprador(codigo)
+CONSTRAINT fk_comprador FOREIGN KEY (comprador_codigo) REFERENCES comprador(codigo) ON DELETE NO ACTION
 );/*OK*/
 
 CREATE TABLE proprietario (
@@ -121,7 +121,7 @@ created DATETIME NOT NULL,
 modified DATETIME NULL,
 
 CONSTRAINT pk_proprietario PRIMARY KEY (codigo),
-CONSTRAINT fk_endereco_proprietario FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo)
+CONSTRAINT fk_endereco_proprietario FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo) ON DELETE NO ACTION
 );/*OK*/
 
 CREATE TABLE proprietario_conjuge (
@@ -139,7 +139,7 @@ created DATETIME NOT NULL,
 modified DATETIME NULL,
 
 CONSTRAINT pk_proprietario_conjuge PRIMARY KEY (codigo),
-CONSTRAINT fk_proprietario1 FOREIGN KEY (proprietario_codigo) REFERENCES proprietario(codigo)
+CONSTRAINT fk_proprietario1 FOREIGN KEY (proprietario_codigo) REFERENCES proprietario(codigo) ON DELETE NO ACTION
 );/*OK*/
 
 CREATE TABLE imovel (
@@ -153,8 +153,8 @@ created DATETIME NOT NULL,
 modified DATETIME NULL,
 
 CONSTRAINT pk_imovel PRIMARY KEY (codigo),
-CONSTRAINT fk_proprietario FOREIGN KEY (proprietario_codigo) REFERENCES proprietario(codigo),
-CONSTRAINT fk_endereco_imovel FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo)
+CONSTRAINT fk_proprietario FOREIGN KEY (proprietario_codigo) REFERENCES proprietario(codigo) ON DELETE NO ACTION,
+CONSTRAINT fk_endereco_imovel FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo) ON DELETE NO ACTION
 );/*OK*/
 
 CREATE TABLE despachante (
@@ -172,7 +172,7 @@ created DATETIME NOT NULL,
 modified DATETIME NULL,
 
 CONSTRAINT pk_despachante PRIMARY KEY (codigo),
-CONSTRAINT fk_endereco_despachante FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo)
+CONSTRAINT fk_endereco_despachante FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo) ON DELETE NO ACTION
 );/*OK*/
 
 CREATE TABLE venda (
@@ -191,10 +191,10 @@ created DATETIME NOT NULL,
 modified DATETIME NULL,
 
 CONSTRAINT pk_venda PRIMARY KEY (codigo),
-CONSTRAINT fk_creci_venda FOREIGN KEY (imobiliaria_creci) REFERENCES imobiliaria(creci),
-CONSTRAINT fk_imovel FOREIGN KEY (imovel_codigo) REFERENCES imovel(codigo),
-CONSTRAINT fk_despachante FOREIGN KEY (despachante_codigo) REFERENCES despachante(codigo),
-CONSTRAINT fk_endereco_venda FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo)
+CONSTRAINT fk_creci_venda FOREIGN KEY (imobiliaria_creci) REFERENCES imobiliaria(creci) ON DELETE NO ACTION,
+CONSTRAINT fk_imovel FOREIGN KEY (imovel_codigo) REFERENCES imovel(codigo) ON DELETE NO ACTION,
+CONSTRAINT fk_despachante FOREIGN KEY (despachante_codigo) REFERENCES despachante(codigo) ON DELETE NO ACTION,
+CONSTRAINT fk_endereco_venda FOREIGN KEY (endereco_codigo) REFERENCES endereco(codigo) ON DELETE NO ACTION
 );/*OK*/
 
 CREATE TABLE transacao_bancaria (
@@ -210,7 +210,7 @@ created DATETIME NOT NULL,
 modified DATETIME NULL,
 
 CONSTRAINT pk_transacao PRIMARY KEY (codigo),
-CONSTRAINT fk_venda FOREIGN KEY (venda_codigo) REFERENCES venda(codigo)
+CONSTRAINT fk_venda FOREIGN KEY (venda_codigo) REFERENCES venda(codigo) ON DELETE NO ACTION
 );/*OK*/
 
 -- quantidade de tabelas criadas
@@ -257,7 +257,7 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_ImovelInserir 000001,'12','10',1,'Rua dos Securitários',115,'Casa','Alípio de Melo','Belo Horizonte','MG','Brasil'
+--EXEC usp_ImovelInserir 052769,'12','10',1,'Rua dos Securitários',115,'Casa','Alípio de Melo','Belo Horizonte','MG','Brasil'
 --SELECT * FROM imovel WHERE codigo = 3;
 CREATE PROCEDURE usp_ProprietarioInserir
   @cpf VARCHAR(11),
@@ -611,7 +611,7 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_ImobiliariaInserir '0000000002','Imobiliaria2 Teste Venda e Aluguel', '2010-12-01', 'Imobiliaria Teste','Imobiliaria Teste','3133333333','Igor Martinelli Ramos','Igor Henrique Heredia','Avenida Principal',1921,NULL,'Centro da Cidade','Imovis City','MG','Brasil'
+--EXEC usp_ImobiliariaInserir '0000000001','Imobiliaria2 Teste Venda e Aluguel', '2010-12-01', 'Imobiliaria Teste','Imobiliaria Teste','3133333333','Igor Martinelli Ramos','Igor Henrique Heredia','Avenida Principal',1921,NULL,'Centro da Cidade','Imovis City','MG','Brasil'
 --SELECT * FROM imobiliaria;
 
 --PROCEDURES PARA UPDATES'S--
@@ -654,7 +654,7 @@ END
 GO/*OK*/
 /*SELECT * INTO imovel_teste FROM imovel
 SELECT * FROM imovel_teste;
---EXEC usp_ImovelAlterar 3,1,'35','22',1,8
+--EXEC usp_ImovelAlterar 2,1,'35','22',1,7
 SELECT * FROM imovel*/
 CREATE PROCEDURE usp_ProprietarioAlterar
   @cod INT,
@@ -700,7 +700,7 @@ GO/*OK*/
 /*SELECT * INTO proprietario_teste FROM proprietario
 SELECT * FROM proprietario
 SELECT * FROM proprietario_teste
-EXEC usp_ProprietarioAlterar 1,'13089902605','MG17771868','Igor Martinelli','Solteiro','3134746398','3188343318','3188521996','3132475808',11*/
+EXEC usp_ProprietarioAlterar 1,'13089902605','MG17771868','Igor Martinelli','Solteiro','3134746398','3188343318','3188521996','3132475808',4*/
 CREATE PROCEDURE usp_CorretorAlterar
   @cod INT,
   @cpf VARCHAR(11),
@@ -750,7 +750,7 @@ GO/*OK*/
 /*SELECT * INTO corretor_teste FROM corretor
 SELECT * FROM corretor
 SELECT * FROM corretor_teste
-EXEC usp_CorretorAlterar 2,'13089902605','MG17771868','Igor Martinelli Ramos','3134746398','3188343318','3188521996','3132477400','M',NULL,11*/
+EXEC usp_CorretorAlterar 1,'13089902605','MG17771868','Igor Martinelli Ramos','3134746398','3188343318','3188521996','3132477400','M',NULL,6*/
 CREATE PROCEDURE usp_CompradorAlterar
   @cod INT,
   @cpf VARCHAR(11),
@@ -804,7 +804,7 @@ GO/*OK*/
 /*SELECT * INTO comprador_teste FROM comprador
 SELECT * FROM comprador
 SELECT * FROM comprador_teste
-EXEC usp_CompradorAlterar 2,'13013013299','RG17117811','Ederson Ramos', 'Casado', 'Eletricista', 1250,10000,'3134746398','3188343318','3191130192','','Casas em Esmeralda',NULL,11*/
+EXEC usp_CompradorAlterar 1,'13013013299','RG17117811','Ederson Ramos', 'Casado', 'Eletricista', 1250,10000,'3134746398','3188343318','3191130192','','Casas em Esmeralda',NULL,7*/
 CREATE PROCEDURE usp_VendaAlterar
   @cod INT,
   @valor INT,
@@ -842,7 +842,7 @@ GO/*OK*/
 /*SELECT * INTO venda_teste FROM venda
 SELECT * FROM venda
 SELECT * FROM venda_teste
-EXEC usp_VendaAlterar 5,300000,'2015-02-05','documentos conferidos e entregue ao cartorio','Daisy Ramos',6,1,1,NULL,8*/
+EXEC usp_VendaAlterar 5,300000,50000,'2015-02-05','documentos conferidos e entregue ao cartorio','Daisy Ramos',6,1,1,NULL,8*/
 CREATE PROCEDURE usp_DespachanteAlterar
   @cod INT,
   @nome VARCHAR(120),
@@ -853,24 +853,17 @@ CREATE PROCEDURE usp_DespachanteAlterar
   @tel2 VARCHAR(14),
   @cel VARCHAR(14),
   @telComercial VARCHAR(14),
-  @cod_endereco INT,
-  @rua VARCHAR(100),
-  @num INT,
-  @compl VARCHAR(30) = NULL,
-  @bairro VARCHAR(100),
-  @cidade VARCHAR(80),
-  @uf CHAR(2),
-  @pais VARCHAR(50) = NULL
+  @cod_endereco INT
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	   --alteração do endereço
-	  UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;
+	   /*--alteração do endereço
+	   UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;*/
 
-	  UPDATE despachante SET nome=@nome,preco=@preco,servicos_completos=@servicos_completos,servicos_pendentes=@servicos_pendentes,telefone=@tel,telefone2=@tel2,celular=@cel,tel_comercial=@telComercial,modified=(SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod;
+	   UPDATE despachante SET nome=@nome,preco=@preco,servicos_completos=@servicos_completos,servicos_pendentes=@servicos_pendentes,telefone=@tel,telefone2=@tel2,celular=@cel,tel_comercial=@telComercial,endereco_codigo=@cod_endereco,modified=(SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod;
 	   
-	  SELECT IDENT_CURRENT('despachante') AS 'Código do Despachante';
+	   SELECT despachante.codigo AS 'Código do Despachante Alterado' FROM despachante WHERE despachante.codigo = @cod;
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -878,8 +871,11 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
-
+GO/*OK*/
+/*SELECT * INTO despachante_teste FROM despachante
+SELECT * FROM despachante
+SELECT * FROM despachante_teste
+EXEC usp_DespachanteAlterar 1,'Despache Aqui Ltd',145,12,2,'3134445351','313474441','31988554466','3134115549',1*/
 CREATE PROCEDURE usp_TransacaoAlterar
   @cod INT,
   @agencia VARCHAR(6),
@@ -896,7 +892,7 @@ BEGIN
 
        UPDATE transacao_bancaria SET agencia=@agencia,num_conta_bancaria=@num_conta,num_conta_digito=@digito,tipo_conta=@tipo_conta,nome_banco=@nome_banco,valor=@valor,venda_codigo=@venda,modified=(SELECT CURRENT_TIMESTAMP) WHERE codigo=@cod;
 
-	   SELECT IDENT_CURRENT('transacao_bancaria') AS 'Código da Transação Bancária';
+	   SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária Alterado' FROM transacao_bancaria WHERE transacao_bancaria.codigo = @cod;
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -904,8 +900,11 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
-
+GO/*OK*/
+/*SELECT * INTO transacao_bancaria_teste FROM transacao_bancaria
+SELECT * FROM transacao_bancaria
+SELECT * FROM transacao_bancaria_teste
+EXEC usp_TransacaoAlterar 1,'1804','1025711','2','Conta Poupança','Bradesco',50000,5*/
 CREATE PROCEDURE usp_ImobiliariaAlterar
   @creci VARCHAR(10),
   @nome VARCHAR(120),
@@ -915,24 +914,17 @@ CREATE PROCEDURE usp_ImobiliariaAlterar
   @tel VARCHAR(14),
   @dono VARCHAR(120),
   @co_dono VARCHAR(120),
-  @cod_endereco INT,
-  @rua VARCHAR(100),
-  @num INT,
-  @compl VARCHAR(30) = NULL,
-  @bairro VARCHAR(100),
-  @cidade VARCHAR(80),
-  @uf CHAR(2),
-  @pais VARCHAR(50) = NULL
+  @cod_endereco INT
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	   --alteração do endereço
-	  UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;
+	   /*--alteração do endereço
+	   UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;*/
 
-	  UPDATE imobiliaria SET nome_creci=@creci,dt_emissao=@data_emissao,razao=@razao,apelido=@apelido,telefone=@tel,dono=@dono,co_dono=@co_dono,modified=(SELECT CURRENT_TIMESTAMP) WHERE creci=@creci;
+	   UPDATE imobiliaria SET nome_creci=@nome,dt_emissao=@data_emissao,razao=@razao,apelido=@apelido,telefone=@tel,dono=@dono,co_dono=@co_dono,modified=(SELECT CURRENT_TIMESTAMP) WHERE creci=@creci;
 
-	  SELECT IDENT_CURRENT('imobiliaria') AS 'Código da Imobiliária';
+	   SELECT imobiliaria.creci AS 'Creci da Imobiliária Alterada' FROM imobiliaria WHERE imobiliaria.creci = @creci;
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -940,32 +932,110 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
-/*
-   TODO
-   alterar tables CONJUGES
-*/
+GO/*OK*/
+/*SELECT * INTO imobiliaria_teste FROM imobiliaria
+SELECT * FROM imobiliaria
+SELECT * FROM imobiliaria_teste
+EXEC usp_ImobiliariaAlterar '0000000001','Imobiliaria Teste Venda e Aluguel de Imoveis','2010-09-22','Imobiliaria Teste','Imobiliaria Teste','31 33333333','Igor Martinelli Ramos','Igor Henrique Heredia',2*/
+CREATE PROCEDURE usp_CompradorConjugeAlterar
+  @cod INT,
+  @cpf VARCHAR(11),
+  @rg VARCHAR(10),
+  @nome VARCHAR(120),
+  @estadoCivil VARCHAR(15),
+  @profissao VARCHAR(45),
+  @fgts INT,
+  @renda INT,
+  @tel VARCHAR(15),
+  @tel2 VARCHAR(15),
+  @cel VARCHAR(15),
+  @telComercial VARCHAR(15),
+  @compradorCod INT
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	   /*--alteração do endereço
+	   UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;*/
+
+	   UPDATE comprador_conjuge SET cpf=@cpf,rg=@rg,nome=@nome,estado_civil=@estadoCivil,profissao=@profissao,fgts=@fgts,renda_bruta=@renda,telefone=@tel,telefone2=@tel2,celular=@cel,tel_comercial=@telComercial,modified=(SELECT CURRENT_TIMESTAMP) WHERE codigo=@cod;
+
+	   SELECT comprador_conjuge.codigo AS 'Código do(a) Conjuge do(a) Comprador Alterada' FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod;
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
+/*SELECT * INTO comprador_conjuge_teste FROM comprador_conjuge
+SELECT * FROM comprador_conjuge
+SELECT * FROM comprador_conjuge_teste
+EXEC usp_CompradorConjugeAlterar 2,'13089902605','RG12345678','Daleska Pereira Ramos','Casada','Médico',10000,2000,'31345746398','3188558855','3185888588','3188554466',2*/
+CREATE PROCEDURE usp_ProprietarioConjugeAlterar
+  @cod INT,
+  @cpf VARCHAR(11),
+  @rg VARCHAR(10),
+  @nome VARCHAR(120),
+  @estadoCivil VARCHAR(15),
+  @tel VARCHAR(15),
+  @tel2 VARCHAR(15),
+  @cel VARCHAR(15),
+  @telComercial VARCHAR(15),
+  @proprietarioCod INT
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	   /*--alteração do endereço
+	   UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;*/
+
+	   UPDATE proprietario_conjuge SET cpf=@cpf,rg=@rg,nome=@nome,estado_civil=@estadoCivil,telefone=@tel,telefone2=@tel2,celular=@cel,tel_comercial=@telComercial,modified=(SELECT CURRENT_TIMESTAMP) WHERE codigo=@cod;
+
+	   SELECT proprietario_conjuge.codigo AS 'Código do(a) Conjuge do(a) Proprietário Alterada' FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod;
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO/*OK*/
+/*SELECT * INTO proprietario_conjuge_teste FROM proprietario_conjuge
+SELECT * FROM proprietario_conjuge
+SELECT * FROM proprietario_conjuge_teste
+EXEC usp_ProprietarioConjugeAlterar 1,'96302587410','RG98798798','Marlene Martinelli da Silva','Viuva','3134746398','3188521996','3199559975','',1*/
+
+--ALTERANDO AS TABELAS *_teste--
+--Exemplo: ALTER TABLE dbo.doc_exa ADD column_b VARCHAR(20) NULL, column_c INT NULL;--
+ALTER TABLE comprador_teste ADD dt_exclusao DATETIME NULL;
+ALTER TABLE comprador_conjuge_teste ADD dt_exclusao DATETIME NULL;
+ALTER TABLE corretor_teste ADD dt_exclusao DATETIME NULL;
+ALTER TABLE despachante_teste ADD dt_exclusao DATETIME NULL;
+ALTER TABLE imobiliaria_teste ADD dt_exclusao DATETIME NULL;
+ALTER TABLE imovel_teste ADD dt_exclusao DATETIME NULL;
+ALTER TABLE proprietario_teste ADD dt_exclusao DATETIME NULL;
+ALTER TABLE proprietario_conjuge_teste ADD dt_exclusao DATETIME NULL;
+ALTER TABLE transacao_bancaria_teste ADD dt_exclusao DATETIME NULL;
+ALTER TABLE venda_teste ADD dt_exclusao DATETIME NULL;
 
 --PROCEDURES PARA DELETE'S--
 CREATE PROCEDURE usp_ImovelApagar
-  @cod INT = NULL,
-  @registro INT = NULL
+  @cod INT
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  IF @cod IS NULL AND @registro IS NOT NULL BEGIN
-        DELETE FROM imovel WHERE registro = @registro;
-	  END
-	  ELSE IF @cod IS NOT NULL AND @registro IS NULL BEGIN
-	    DELETE FROM imovel WHERE codigo = @cod;
-	  END
-	  ELSE BEGIN
-	    ROLLBACK TRAN;
-	  END
+	  SELECT imovel.codigo AS 'Código do Imóvel Apagado' FROM imovel WHERE imovel.codigo = @cod;
+	  
+	  --TRANSFERINDO OS DADOS PARA OUTRA TABELA
+	  SET IDENTITY_INSERT imovel_teste ON
+	  INSERT INTO imovel_teste (codigo,registro,frente_lote,lado_lote,proprietario_codigo,endereco_codigo,created,modified,dt_exclusao) VALUES (@cod,(SELECT registro FROM imovel WHERE codigo = @cod),(SELECT frente_lote FROM imovel WHERE codigo = @cod),(SELECT lado_lote FROM imovel WHERE codigo = @cod),(SELECT proprietario_codigo FROM imovel WHERE codigo = @cod),(SELECT endereco_codigo FROM imovel WHERE codigo = @cod),(SELECT created FROM imovel WHERE codigo = @cod),(SELECT modified FROM imovel WHERE codigo = @cod),(SELECT GETDATE()));
+	  SET IDENTITY_INSERT imovel_teste OFF
 
-	  SELECT IDENT_CURRENT('imobiliaria') AS 'Código da Imobiliária';
+	  DELETE FROM imovel WHERE codigo = @cod;
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -973,27 +1043,23 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na Alteração de dados';
   END CATCH
 END
-GO/*TODO*/
-
+GO/*OK*/
+/*EXEC usp_ImovelApagar 5*/
 CREATE PROCEDURE usp_ProprietarioApagar
-  @cod INT = NULL,
-  @cpf VARCHAR(11) =  NULL
+  @cod INT
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 
-	  IF @cod IS NULL AND @cpf IS NOT NULL BEGIN
-        DELETE FROM proprietario WHERE cpf = @cpf;
-	  END
-	  ELSE IF @cod IS NOT NULL AND @cpf IS NULL BEGIN
-	    DELETE FROM proprietario WHERE codigo = @cod;
-	  END
-	  ELSE BEGIN
-	    ROLLBACK TRAN;
-	  END
+	  SELECT proprietario.codigo AS 'Código do Proprietário Apagado' FROM proprietario WHERE proprietario.codigo = @cod;
 
-	  SELECT IDENT_CURRENT('prorietario') AS 'Código do Proprietário';
+	  --TRANSFERINDO OS DADOS PARA OUTRA TABELA
+      SET IDENTITY_INSERT proprietario_teste ON	
+      INSERT INTO proprietario_teste VALUES (@cod,(SELECT cpf FROM proprietario_teste WHERE codigo = @cod),(SELECT rg FROM proprietario_teste WHERE codigo = @cod),(SELECT nome FROM proprietario_teste WHERE codigo = @cod),(SELECT estado_civil FROM proprietario_teste WHERE codigo = @cod),(SELECT telefone FROM proprietario_teste WHERE codigo = @cod),(SELECT telefone2 FROM proprietario_teste WHERE codigo = @cod),(SELECT celular FROM proprietario_teste WHERE codigo = @cod),(SELECT tel_comercial FROM proprietario_teste WHERE codigo = @cod),(SELECT endereco_codigo FROM proprietario_teste WHERE codigo = @cod),(SELECT created FROM proprietario_teste WHERE codigo = @cod),(SELECT modified FROM proprietario_teste WHERE codigo = @cod),(SELECT GETDATE()));
+	  SET IDENTITY_INSERT proprietario_teste OFF
+
+	  DELETE FROM proprietario WHERE codigo = @cod;
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -1001,27 +1067,23 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
-
+GO/*ON*/
+/*EXEC*/
 CREATE PROCEDURE usp_CorretorApagar
-  @cod INT = NULL,
-  @cpf VARCHAR(11) = NULL
+  @cod INT
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 
-	  IF @cod IS NULL AND @cpf IS NOT NULL BEGIN
-        DELETE FROM corretor WHERE cpf = @cpf;
-	  END
-	  ELSE IF @cod IS NOT NULL AND @cpf IS NULL BEGIN
-	    DELETE FROM corretor WHERE codigo = @cod;
-	  END
-	  ELSE BEGIN
-	    ROLLBACK TRAN;
-	  END
+	  SELECT corretor.codigo AS 'Código do Corretor Apagado' FROM corretor WHERE corretor.codigo = @cod;
+	  
+	  --TRANSFERINDO OS DADOS PARA OUTRA TABELA
+      SET IDENTITY_INSERT proprietario_teste ON	
+      INSERT INTO proprietario_teste VALUES (@cod,(SELECT cpf FROM proprietario_teste WHERE codigo = @cod),(SELECT rg FROM proprietario_teste WHERE codigo = @cod),(SELECT nome FROM proprietario_teste WHERE codigo = @cod),(SELECT estado_civil FROM proprietario_teste WHERE codigo = @cod),(SELECT telefone FROM proprietario_teste WHERE codigo = @cod),(SELECT telefone2 FROM proprietario_teste WHERE codigo = @cod),(SELECT celular FROM proprietario_teste WHERE codigo = @cod),(SELECT tel_comercial FROM proprietario_teste WHERE codigo = @cod),(SELECT endereco_codigo FROM proprietario_teste WHERE codigo = @cod),(SELECT created FROM proprietario_teste WHERE codigo = @cod),(SELECT modified FROM proprietario_teste WHERE codigo = @cod),(SELECT GETDATE()));
+	  SET IDENTITY_INSERT proprietario_teste OFF
 
-	  SELECT IDENT_CURRENT('corretor') AS 'Código do Corretor';
+	  DELETE FROM corretor WHERE codigo = @cod
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -1030,30 +1092,22 @@ BEGIN
   END CATCH
 END
 GO/*TODO*/
-/*EXEC usp_CompradorApagar NULL,'13089902605';
-DELETE FROM comprador WHERE comprador.codigo = 4;
-There is already an object named 'bk_comprador' in the database.
-SELECT * FROM comprador
-SELECT * FROM bk_comprador*/
+
 CREATE PROCEDURE usp_CompradorApagar
-  @cod INT = NULL,
-  @cpf VARCHAR(11) = NULL
+  @cod INT
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-		
-	  IF @cod IS NULL AND @cpf IS NOT NULL BEGIN
-        DELETE FROM comprador WHERE cpf = @cpf;
-	  END
-	  ELSE IF @cod IS NOT NULL AND @cpf IS NULL BEGIN
-	    DELETE FROM comprador WHERE codigo = @cod;
-	  END
-	  ELSE BEGIN
-	    ROLLBACK TRAN;
-	  END
+	  
+	  SELECT comprador.codigo AS 'Código do Comprador Apagado' FROM comprador WHERE comprador.codigo = @cod;
 
-	  SELECT IDENT_CURRENT('comprador') AS 'Código do Comprador';
+	  --TRANSFERINDO OS DADOS PARA OUTRA TABELA
+      SET IDENTITY_INSERT proprietario_teste ON	
+      INSERT INTO proprietario_teste VALUES (@cod,(SELECT cpf FROM proprietario_teste WHERE codigo = @cod),(SELECT rg FROM proprietario_teste WHERE codigo = @cod),(SELECT nome FROM proprietario_teste WHERE codigo = @cod),(SELECT estado_civil FROM proprietario_teste WHERE codigo = @cod),(SELECT telefone FROM proprietario_teste WHERE codigo = @cod),(SELECT telefone2 FROM proprietario_teste WHERE codigo = @cod),(SELECT celular FROM proprietario_teste WHERE codigo = @cod),(SELECT tel_comercial FROM proprietario_teste WHERE codigo = @cod),(SELECT endereco_codigo FROM proprietario_teste WHERE codigo = @cod),(SELECT created FROM proprietario_teste WHERE codigo = @cod),(SELECT modified FROM proprietario_teste WHERE codigo = @cod),(SELECT GETDATE()));
+	  SET IDENTITY_INSERT proprietario_teste OFF
+
+	  DELETE FROM comprador WHERE codigo = @cod
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -1070,9 +1124,14 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-      DELETE FROM venda WHERE codigo = @cod;
+      SELECT venda.codigo AS 'Código da Venda Apagada' FROM venda WHERE venda.codigo = @cod;
+
+	  --TRANSFERINDO OS DADOS PARA OUTRA TABELA
+      SET IDENTITY_INSERT proprietario_teste ON	
+      INSERT INTO proprietario_teste VALUES (@cod,(SELECT cpf FROM proprietario_teste WHERE codigo = @cod),(SELECT rg FROM proprietario_teste WHERE codigo = @cod),(SELECT nome FROM proprietario_teste WHERE codigo = @cod),(SELECT estado_civil FROM proprietario_teste WHERE codigo = @cod),(SELECT telefone FROM proprietario_teste WHERE codigo = @cod),(SELECT telefone2 FROM proprietario_teste WHERE codigo = @cod),(SELECT celular FROM proprietario_teste WHERE codigo = @cod),(SELECT tel_comercial FROM proprietario_teste WHERE codigo = @cod),(SELECT endereco_codigo FROM proprietario_teste WHERE codigo = @cod),(SELECT created FROM proprietario_teste WHERE codigo = @cod),(SELECT modified FROM proprietario_teste WHERE codigo = @cod),(SELECT GETDATE()));
+	  SET IDENTITY_INSERT proprietario_teste OFF
 	  
-	  SELECT IDENT_CURRENT('venda') AS 'Código da Venda';
+	  DELETE FROM venda WHERE codigo = @cod;
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -1089,9 +1148,14 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
+	  SELECT despachante.codigo AS 'Código do Despachante Apagado' FROM despachante WHERE despachante.codigo = @cod;
+
+	  --TRANSFERINDO OS DADOS PARA OUTRA TABELA
+      SET IDENTITY_INSERT proprietario_teste ON	
+      INSERT INTO proprietario_teste VALUES (@cod,(SELECT cpf FROM proprietario_teste WHERE codigo = @cod),(SELECT rg FROM proprietario_teste WHERE codigo = @cod),(SELECT nome FROM proprietario_teste WHERE codigo = @cod),(SELECT estado_civil FROM proprietario_teste WHERE codigo = @cod),(SELECT telefone FROM proprietario_teste WHERE codigo = @cod),(SELECT telefone2 FROM proprietario_teste WHERE codigo = @cod),(SELECT celular FROM proprietario_teste WHERE codigo = @cod),(SELECT tel_comercial FROM proprietario_teste WHERE codigo = @cod),(SELECT endereco_codigo FROM proprietario_teste WHERE codigo = @cod),(SELECT created FROM proprietario_teste WHERE codigo = @cod),(SELECT modified FROM proprietario_teste WHERE codigo = @cod),(SELECT GETDATE()));
+	  SET IDENTITY_INSERT proprietario_teste OFF
+
       DELETE FROM despachante WHERE codigo = @cod;
-	  
-	  SELECT IDENT_CURRENT('despachante') AS 'Código do Despachante';
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -2098,3 +2162,20 @@ sql = "INSERT INTO corretores (cpf, rg, nome, logradouro, numero, bairro, cep, u
 INSERT INTO corretores (cpf, rg, nome, logradouro, numero, bairro, cep, uf, sexo, num_conta_bancaria, imobiliaria_creci)
 VALUES (130899026, 17771868, 'Igor HMHR', 'securitarios', 115, 'alipo de melo', 30840760, 'MG', 'M', 20766, 001);
 */
+-- TRATAMENTO DE ERRO RETORNANDO TODOS OS VALORES DO LOCAL DO ERRO
+	/*
+	BEGIN TRY
+		-- Generate a divide-by-zero error.
+		SELECT 1/0;
+	END TRY
+	BEGIN CATCH
+		SELECT
+        ERROR_NUMBER() AS ErrorNumber
+        ,ERROR_SEVERITY() AS ErrorSeverity
+        ,ERROR_STATE() AS ErrorState
+        ,ERROR_PROCEDURE() AS ErrorProcedure
+        ,ERROR_LINE() AS ErrorLine
+        ,ERROR_MESSAGE() AS ErrorMessage;
+	END CATCH;
+	GO
+	*/
