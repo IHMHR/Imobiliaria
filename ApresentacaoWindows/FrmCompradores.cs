@@ -31,5 +31,65 @@ namespace ApresentacaoWindows
             }
 
         }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                ClsComprador comprador = new ClsComprador();
+                comprador.nome = dataGridView1.Rows[e.RowIndex].Cells["Nome Do Comprador"].Value.ToString();
+                comprador.bairro = dataGridView1.Rows[e.RowIndex].Cells["Bairro do imóvel"].Value.ToString();
+                comprador.cel = dataGridView1.Rows[e.RowIndex].Cells["Celular comprador"].Value.ToString();
+                comprador.cidade = dataGridView1.Rows[e.RowIndex].Cells["Cidade do imóvel"].Value.ToString();
+                comprador.complemento = dataGridView1.Rows[e.RowIndex].Cells["Complemento do imóvel"].Value.ToString();
+                //comprador.cpf = dataGridView1.Rows[e.RowIndex].Cells["XXX"].Value.ToString();
+                //comprador.estado_civil = dataGridView1.Rows[e.RowIndex].Cells["XXX"].Value.ToString();
+                //comprador.fgts = Convert.ToDecimal(dataGridView1.Rows[e.RowIndex].Cells["XXX"].Value.ToString());
+                comprador.lista_intereste = dataGridView1.Rows[e.RowIndex].Cells["Lista de interesses"].Value.ToString();
+                comprador.logradouro = dataGridView1.Rows[e.RowIndex].Cells[@"R.\Av. do imóvel"].Value.ToString();
+                comprador.numero = Convert.ToInt16(dataGridView1.Rows[e.RowIndex].Cells["Número do imóvel"].Value.ToString());
+                //comprador.pais = dataGridView1.Rows[e.RowIndex].Cells["XXX"].Value.ToString();
+                comprador.profissao = dataGridView1.Rows[e.RowIndex].Cells["Profissão do comprador"].Value.ToString();
+                //comprador.renda = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells["XXX"].Value.ToString());
+                //comprador.rg = dataGridView1.Rows[e.RowIndex].Cells["XXX"].Value.ToString();
+                comprador.tel = dataGridView1.Rows[e.RowIndex].Cells["Telefone comprador"].Value.ToString();
+                comprador.tel2 = dataGridView1.Rows[e.RowIndex].Cells["Telefone 2 comprador"].Value.ToString();
+                comprador.telComercial = dataGridView1.Rows[e.RowIndex].Cells["Telefone comercial comprador"].Value.ToString();
+                comprador.uf = dataGridView1.Rows[e.RowIndex].Cells["Estado do imóvel"].Value.ToString();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString());
+            }
+        }
+
+        private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                ClsComprador comprador = new ClsComprador();
+                comprador.codigo = Convert.ToInt16(dataGridView1.Rows[e.RowIndex].Cells["Código do Comprador"].Value.ToString());
+                comprador.nome = dataGridView1.Rows[e.RowIndex].Cells["Nome Do Comprador"].Value.ToString();
+                comprador.bairro = dataGridView1.Rows[e.RowIndex].Cells["Bairro do imóvel"].Value.ToString();
+                comprador.cel = dataGridView1.Rows[e.RowIndex].Cells["Celular comprador"].Value.ToString();
+                comprador.cidade = dataGridView1.Rows[e.RowIndex].Cells["Cidade do imóvel"].Value.ToString();
+                comprador.complemento = dataGridView1.Rows[e.RowIndex].Cells["Complemento do imóvel"].Value.ToString();
+                comprador.lista_intereste = dataGridView1.Rows[e.RowIndex].Cells["Lista de interesses"].Value.ToString();
+                comprador.logradouro = dataGridView1.Rows[e.RowIndex].Cells[@"R.\Av. do imóvel"].Value.ToString();
+                comprador.numero = Convert.ToInt16(dataGridView1.Rows[e.RowIndex].Cells["Número do imóvel"].Value.ToString());
+                comprador.profissao = dataGridView1.Rows[e.RowIndex].Cells["Profissão do comprador"].Value.ToString();
+                comprador.tel = dataGridView1.Rows[e.RowIndex].Cells["Telefone comprador"].Value.ToString();
+                comprador.tel2 = dataGridView1.Rows[e.RowIndex].Cells["Telefone 2 comprador"].Value.ToString();
+                comprador.telComercial = dataGridView1.Rows[e.RowIndex].Cells["Telefone comercial comprador"].Value.ToString();
+                comprador.uf = dataGridView1.Rows[e.RowIndex].Cells["Estado do imóvel"].Value.ToString();
+                comprador.AlterarComprador();
+
+                //MessageBox.Show("CellEndEdit");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString());
+            }
+        }
     }
 }

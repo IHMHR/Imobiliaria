@@ -216,7 +216,7 @@ CONSTRAINT fk_venda FOREIGN KEY (venda_codigo) REFERENCES venda(codigo) ON DELET
 -- quantidade de tabelas criadas
 SELECT COUNT(name) AS 'Tables created' FROM SYSOBJECTS WHERE xtype = 'U'
 -- visualizar procedures criadas
-SELECT * FROM sys.procedures
+SELECT * FROM sys.procedures ORDER BY create_date DESC;
 
 --PROCEDURES PARA INSERT'S--
 CREATE PROCEDURE usp_ImovelInserir
@@ -257,7 +257,7 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_ImovelInserir 052769,'12','10',1,'Rua dos Securitários',115,'Casa','Alípio de Melo','Belo Horizonte','MG','Brasil'
+--EXEC usp_ImovelInserir 092941,'15','11',1,'Avenida Afonso Pena',4444,'Edifício','Cruzeiro','Belo Horizonte','MG','Brasil'
 --SELECT * FROM imovel WHERE codigo = 3;
 CREATE PROCEDURE usp_ProprietarioInserir
   @cpf VARCHAR(11),
@@ -301,7 +301,7 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_ProprietarioInserir '52345678903','RG10110101','Proprietario 01','Casado','3134343434','3133334343','31988888888','3134331511','Rua da Mamae', 864,'Casa','Santa Helena','Belo Horizonte','MG','Brasil';
+--EXEC usp_ProprietarioInserir '92345678903','RG10110101','Proprietario 01','Casado','3134343434','3133334343','31988888888','3134331511','Rua da Mamae', 864,'Casa','Santa Helena','Belo Horizonte','MG','Brasil';
 --SELECT * FROM proprietario WHERE proprietario.codigo = 1;
 CREATE PROCEDURE usp_ProprietarioConjugeInserir
   @cpf VARCHAR(11),
@@ -464,7 +464,7 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_CompradorConjugeInserir '12345678201','RG71114565','Mulher do comprador','Solteira','Advogada',1000,0,'3134747441','3134343434','31985211452','3133215520',2
+--EXEC usp_CompradorConjugeInserir '12345678201','RG71114565','Mulher do comprador','Solteira','Advogada',1000,0,'3134747441','3134343434','31985211452','3133215520',1
 --SELECT * FROM comprador_conjuge WHERE codigo = 7;
 CREATE PROCEDURE usp_VendaInserir
   @valor INT,
@@ -497,7 +497,7 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_VendaInserir 250000,50000,'2015-08-22','3 copias contrato, cpf, rg','Igor Martinelli Ramos',6,'0000000001',2,1,7
+--EXEC usp_VendaInserir 250000,50000,'2015-08-22','3 copias contrato, cpf, rg','Igor Martinelli Ramos',6,'0000000001',3,1,4
 --SELECT * FROM venda WHERE codigo = 5
 CREATE PROCEDURE usp_DespachanteInserir
   @nome VARCHAR(120),
@@ -613,6 +613,19 @@ END
 GO/*OK*/
 --EXEC usp_ImobiliariaInserir '0000000001','Imobiliaria2 Teste Venda e Aluguel', '2010-12-01', 'Imobiliaria Teste','Imobiliaria Teste','3133333333','Igor Martinelli Ramos','Igor Henrique Heredia','Avenida Principal',1921,NULL,'Centro da Cidade','Imovis City','MG','Brasil'
 --SELECT * FROM imobiliaria;
+
+/* ORDEM PARA INSERÇÃO DOS DADOS
+imobiliaria
+corretor
+proprietario
+proprietario conjuge
+imovel
+comprador
+comprador conjuge
+despachante
+venda
+transação bancaria
+*/
 
 --PROCEDURES PARA UPDATES'S--
 CREATE PROCEDURE usp_ImovelAlterar
@@ -1311,19 +1324,98 @@ END
 GO/*OK*/
 --EXEC usp_ImovelPorCod 3
 CREATE PROCEDURE usp_ImovelPorEndereco
-  @rua VARCHAR(100),
+  @rua VARCHAR(100) = NULL,
   @num INT = NULL,
   @compl VARCHAR(30) = NULL,
-  @bairro VARCHAR(100),
-  @cidade VARCHAR(80),
-  @uf CHAR(2),
+  @bairro VARCHAR(100) = NULL,
+  @cidade VARCHAR(80) = NULL,
+  @uf CHAR(2) = NULL,
   @pais VARCHAR(50) = NULL
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	  
-	  SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo WHERE endereco.logradouro LIKE '%'+@rua+'%' OR endereco.numero = @num OR endereco.complemento LIKE '%'+@compl+'%' OR endereco.bairro LIKE '%'+@bairro+'%' OR endereco.cidade LIKE '%'+@cidade+'%' OR endereco.uf = @uf OR endereco.pais LIKE '%'+@pais+'%';
+
+	  /*SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	  FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo 
+	  WHERE endereco.logradouro LIKE '%'+@rua+'%' AND endereco.numero = @num AND endereco.complemento LIKE '%'+@compl+'%' AND endereco.bairro LIKE '%'+@bairro+'%' AND endereco.cidade LIKE '%'+@cidade+'%' AND endereco.uf = @uf AND endereco.pais LIKE '%'+@pais+'%';*/
+	  IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+		SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @rua IS NOT NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+        FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+		WHERE endereco.logradouro LIKE '%'+@rua+'%';
+	  END ELSE IF @rua IS NULL AND @num IS NOT NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+        FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+		WHERE endereco.numero = @num;
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NOT NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+        FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+		WHERE endereco.complemento LIKE '%'+@compl+'%';
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NOT NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+        FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+		WHERE endereco.bairro LIKE '%'+@bairro+'%';
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NOT NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+        FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+		WHERE endereco.cidade LIKE '%'+@cidade+'%';
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NOT NULL AND @pais IS NULL BEGIN
+	    SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+        FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+		WHERE endereco.uf = @uf;
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NOT NULL BEGIN
+	    SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+        FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+		WHERE endereco.pais LIKE '%'+@pais+'%';
+	  END ELSE BEGIN -- + de 1 null
+		/*SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+        FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	    WHERE endereco.logradouro LIKE '%'+@rua+'%' AND endereco.numero = @num AND endereco.complemento LIKE '%'+@compl+'%' AND endereco.bairro LIKE '%'+@bairro+'%' AND endereco.cidade LIKE '%'+@cidade+'%' AND endereco.uf = @uf AND endereco.pais LIKE '%'+@pais+'%';*/
+		SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+        FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	    WHERE ((endereco.logradouro LIKE '%'+@rua+'%') OR (@rua IS NULL)) AND ((endereco.numero = @num) OR (@num IS NULL)) AND ((endereco.complemento LIKE '%'+@compl+'%') OR (@compl IS NULL)) AND ((endereco.bairro LIKE '%'+@bairro+'%') OR (@bairro IS NULL)) AND ((endereco.cidade LIKE '%'+@cidade+'%') OR (@cidade IS NULL)) AND ((endereco.uf = @uf) OR (@uf IS NULL)) AND ((endereco.pais LIKE '%'+@pais+'%') OR (@pais IS NULL));
+	  END
+
+	  /*DECLARE @sql VARCHAR(MAX);
+	  SET @sql = 'SELECT imovel.codigo AS "Código do imóvel",imovel.registro AS "Registro",imovel.frente_lote AS "Frente do lote",imovel.lado_lote AS "Lado do lote",proprietario.nome AS "Proprietário nome",proprietario.telefone AS "Telefone proprietário",proprietario.telefone2 AS "Telefone 2 proprietário",proprietario.celular AS "Celular proprietário",proprietario.tel_comercial AS "Telefone comercial proprietário",proprietario_conjuge.nome AS "Nome do(a) conjuge proprietário",endereco.logradouro AS "R.\Av. do imóvel",endereco.numero AS "Número do imóvel",endereco.complemento AS "Complemento do imóvel",endereco.bairro AS "Bairro do imóvel",endereco.cidade AS "Cidade do imóvel",endereco.uf AS "Estado do imóvel" FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo WHERE 1=1 ';
+	  IF (@rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL) BEGIN
+		SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF (@rua IS NOT NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL) BEGIN
+	    SET @sql += 'AND endereco.logradouro LIKE ' + QUOTENAME(@rua,'''');
+		EXEC(@sql);
+	  END ELSE IF (@rua IS NULL AND @num IS NOT NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL) BEGIN
+	    SET @sql += 'AND endereco.numero =' + QUOTENAME(@num,'''');
+		EXEC(@sql);
+	  END ELSE IF (@rua IS NULL AND @num IS NULL AND @compl IS NOT NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL) BEGIN
+	    SET @sql += 'AND endereco.complemento LIKE ' + QUOTENAME(@compl,'''');
+		EXEC(@sql);
+	  END ELSE IF (@rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NOT NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL) BEGIN
+	    SET @sql += 'AND endereco.bairro LIKE ' + QUOTENAME(@bairro,'''');
+		EXEC(@sql);
+	  END ELSE IF (@rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NOT NULL AND @uf IS NULL AND @pais IS NULL) BEGIN
+	    SET @sql += 'AND endereco.cidade LIKE ' + QUOTENAME(@cidade,'''');
+		EXEC(@sql);
+	  END ELSE IF (@rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NOT NULL AND @pais IS NULL) BEGIN
+	    SET @sql += 'AND endereco.uf =' + QUOTENAME(@compl,'''');
+		EXEC(@sql);
+	  END ELSE IF (@rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NOT NULL) BEGIN
+	    SET @sql += 'AND endereco.pais LIKE ' + QUOTENAME(@pais,'''');
+		EXEC(@sql);
+	  END ELSE BEGIN
+	    SET @sql += 'OR endereco.logradouro LIKE %' + QUOTENAME(@rua,'''') + '% OR endereco.numero = ' + QUOTENAME(@num,'''') + ' OR endereco.complemento LIKE %' + QUOTENAME(@compl,'''') + '% OR endereco.bairro LIKE %' + QUOTENAME(@bairro,'''')  +'% OR endereco.cidade LIKE %' + QUOTENAME(@cidade,'''') + '% OR endereco.uf = ' + QUOTENAME(@uf,'''') + ' OR endereco.pais LIKE %' + QUOTENAME(@pais,'''') + '%';
+		EXEC(@sql);
+	  END*/
+
+	  /*SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+      FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	  WHERE 
+	  ((endereco.logradouro LIKE '%'+@rua+'%') OR (@rua IS NULL)) AND 
+	  ((endereco.numero = @num) OR (@num IS NULL)) AND 
+	  ((endereco.complemento LIKE '%'+@compl+'%') OR (@compl IS NULL)) AND 
+	  ((endereco.bairro LIKE '%'+@bairro+'%') OR (@bairro IS NULL))
+	  --AND endereco.cidade LIKE '%'+@cidade+'%' AND endereco.uf = @uf AND endereco.pais LIKE '%'+@pais+'%';*/
 
 	COMMIT TRAN
   END TRY
@@ -1332,19 +1424,52 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO
-EXEC usp_ImovelPorEndereco '',null,'','','','',''
+GO/*OK*/
+/*--ALTERAR OS VALORES '' PARA NULL
+EXEC usp_ImovelPorEndereco NULL,NULL,NULL,NULL,NULL,NULL,NULL
+EXEC usp_ImovelPorEndereco '','','','','','',''
+EXEC usp_ImovelPorEndereco '%Securitários%',null,NULL,NULL,NULL,NULL,NULL
+EXEC usp_ImovelPorEndereco NULL,115,NULL,NULL,NULL,NULL,NULL
+EXEC usp_ImovelPorEndereco NULL,null,'Casa',NULL,NULL,NULL,NULL
+EXEC usp_ImovelPorEndereco NULL,null,NULL,'Alípio de Melo',NULL,NULL,NULL
+EXEC usp_ImovelPorEndereco NULL,null,NULL,NULL,'Belo Horizonte',NULL,NULL
+EXEC usp_ImovelPorEndereco NULL,null,NULL,NULL,NULL,'MG',NULL
+EXEC usp_ImovelPorEndereco NULL,null,NULL,NULL,NULL,NULL,'Brasil'
+EXEC usp_ImovelPorEndereco NULL,115,NULL,'Alípio de Melo',NULL,NULL,NULL
+EXEC usp_ImovelPorEndereco '',115,'','Alípio de Melo','','',''*/
 CREATE PROCEDURE usp_ImovelPorProprietario
-  @nome VARCHAR(120),
-  @cpf VARCHAR(11),
-  @tel VARCHAR(15),
-  @cel VARCHAR(15)
+  @nome VARCHAR(120) = NULL,
+  @cpf VARCHAR(11) = NULL,
+  @tel VARCHAR(15) = NULL,
+  @cel VARCHAR(15) = NULL
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imovel LEFT JOIN proprietario ON imovel.proprietario_codigo = proprietario.codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo WHERE proprietario.nome LIKE '%'+@nome+'%' OR proprietario.cpf = @cpf OR proprietario.telefone LIKE '%'+@tel+'%' OR proprietario.celular LIKE '%'+@cel+'%';
+	  IF @nome IS NULL AND @cpf IS NULL AND @tel IS NULL AND @cel IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @nome IS NOT NULL AND @cpf IS NULL AND @tel IS NULL AND @cel IS NULL BEGIN
+	    SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+        FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+		WHERE proprietario.nome LIKE '%'+@nome+'%';
+	  END ELSE IF @nome IS NULL AND @cpf IS NOT NULL AND @tel IS NULL AND @cel IS NULL BEGIN
+	    SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+        FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+		WHERE proprietario.cpf = @cpf;
+	  END ELSE IF @nome IS NULL AND @cpf IS NULL AND @tel IS NOT NULL AND @cel IS NULL BEGIN
+	    SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+        FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+		WHERE proprietario.telefone LIKE '%'+@tel+'%';
+	  END ELSE IF @nome IS NULL AND @cpf IS NULL AND @tel IS NOT NULL AND @cel IS NULL BEGIN
+		SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+        FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+		WHERE proprietario.celular LIKE '%'+@cel+'%';
+	  END ELSE BEGIN -- + de 1 null
+	    SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+        FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+		WHERE ((proprietario.nome LIKE '%' + @nome + '%') OR (@nome IS NULL)) AND ((proprietario.cpf = @cpf) OR (@cpf IS NULL)) AND ((proprietario.telefone LIKE '%' + @tel + '%') OR (@tel IS NULL)) AND ((proprietario.celular LIKE '%' + @cel + '%') OR (@cel IS NULL));
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -1353,16 +1478,22 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
-EXEC usp_ImovelPorProprietario 'Igor','13089902605','',''/**/
-SELECT * FROM proprietario
+GO/*OK*/
+/*EXEC usp_ImovelPorProprietario '','','',''
+EXEC usp_ImovelPorProprietario NULL,NULL,NULL,NULL
+EXEC usp_ImovelPorProprietario 'Pro',NULL,NULL,NULL
+EXEC usp_ImovelPorProprietario NULL,'13089902605',NULL,NULL
+EXEC usp_ImovelPorProprietario NULL,NULL,'3134343434',NULL
+EXEC usp_ImovelPorProprietario NULL,NULL,NULL,'3188521996'
+EXEC usp_ImovelPorProprietario 'Pro',NULL,'3134343434',NULL
+SELECT * FROM proprietario*/
 CREATE PROCEDURE usp_ImovelTodos
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario.nome_conjuge AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imovel LEFT JOIN proprietario ON proprietario_codigo = imovel.codigo JOIN endereco ON imovel.endereco_codigo = imovel.codigo ORDER BY imovel.created DESC; --WHERE proprietario.nome LIKE '%'+@nome+'%' OR proprietario.cpf = @cpf OR proprietario.telefone LIKE '%'+@tel+'%' OR proprietario.celular LIKE '%'+@cel+'%';
+	  SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imovel LEFT JOIN proprietario ON proprietario.codigo = imovel.proprietario_codigo LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo ORDER BY imovel.created DESC; --WHERE proprietario.nome LIKE '%'+@nome+'%' OR proprietario.cpf = @cpf OR proprietario.telefone LIKE '%'+@tel+'%' OR proprietario.celular LIKE '%'+@cel+'%';
 
 	COMMIT TRAN
   END TRY
@@ -1371,8 +1502,8 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
-
+GO/*OK*/
+/*EXEC usp_ImovelTodos*/
 CREATE PROCEDURE usp_ProprietarioPorCod
   @cod INT
 AS
@@ -1381,7 +1512,10 @@ BEGIN
     BEGIN TRAN
 	  
 	  --SELECT imovel.codigo AS 'Código do imóvel',imovel.registro AS 'Registro',imovel.frente_lote AS 'Frente do lote',imovel.lado_lote AS 'Lado do lote',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario.nome_conjuge AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imovel LEFT JOIN proprietario ON proprietario_codigo = imovel.codigo JOIN endereco ON imovel.endereco_codigo = imovel.codigo WHERE imovel.codigo = @cod;
-	  SELECT proprietario.codigo AS 'Código do proprietário',nome AS 'Proprietário nome',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo WHERE proprietario.codigo = @cod ORDER BY proprietario.codigo DESC;
+	  /*SELECT proprietario.codigo AS 'Código do proprietário',nome AS 'Proprietário nome',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo WHERE proprietario.codigo = @cod ORDER BY proprietario.codigo DESC;*/
+	  SELECT proprietario.codigo AS 'Código do proprietário',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	  FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	  WHERE proprietario.codigo = @cod;
 
 	COMMIT TRAN
   END TRY
@@ -1399,7 +1533,10 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT proprietario.codigo AS 'Código do proprietário',nome AS 'Proprietário nome',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo WHERE nome LIKE '%'+@nome+'%';
+	  /*SELECT proprietario.codigo AS 'Código do proprietário',nome AS 'Proprietário nome',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo WHERE nome LIKE '%'+@nome+'%';*/
+	  SELECT proprietario.codigo AS 'Código do proprietário',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	  FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	  WHERE proprietario.nome LIKE '%' + @nome + '%';
 
 	COMMIT TRAN
   END TRY
@@ -1409,7 +1546,7 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_ProprietarioPorNome 'casa'
+/*EXEC usp_ProprietarioPorNome 'Proprietario'*/
 CREATE PROCEDURE usp_ProprietarioPorTelefone
   @tel VARCHAR(15) = NULL,
   @tel2 VARCHAR(15) = NULL,
@@ -1420,7 +1557,30 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT proprietario.codigo AS 'Código do proprietário',nome AS 'Proprietário nome',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',nome_conjuge AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM proprietario JOIN endereco ON  proprietario.codigo = endereco_codigo WHERE telefone LIKE '%'+@tel+'%' OR telefone2 LIKE '%'+@tel2+'%' OR celular LIKE '%'+@cel+'%' OR tel_comercial LIKE '%'+@telComercial+'%';
+	  /*SELECT proprietario.codigo AS 'Código do proprietário',nome AS 'Proprietário nome',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',nome_conjuge AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM proprietario JOIN endereco ON  proprietario.codigo = endereco_codigo WHERE telefone LIKE '%'+@tel+'%' OR telefone2 LIKE '%'+@tel2+'%' OR celular LIKE '%'+@cel+'%' OR tel_comercial LIKE '%'+@telComercial+'%';*/
+	  IF @tel IS NULL AND @tel2 IS NULL AND @cel IS NULL AND @telCOmercial IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NULL AND @telCOmercial IS NULL BEGIN
+	    SELECT proprietario.codigo AS 'Código do proprietário',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	    WHERE proprietario.telefone LIKE '%' + @tel + '%';
+	  END ELSE IF @tel IS NULL AND @tel2 IS NOT NULL AND @cel IS NULL AND @telComercial IS NULL BEGIN
+	    SELECT proprietario.codigo AS 'Código do proprietário',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	    WHERE proprietario.telefone2 LIKE '%' + @tel2 + '%';
+	  END ELSE IF @tel IS NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NULL  BEGIN
+	    SELECT proprietario.codigo AS 'Código do proprietário',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	    WHERE proprietario.celular LIKE '%' + @cel + '%';
+	  END ELSE IF @tel IS NULL AND @tel2 IS NULL AND @cel IS NULL AND @telComercial IS NOT NULL BEGIN
+	    SELECT proprietario.codigo AS 'Código do proprietário',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	    WHERE proprietario.tel_comercial LIKE '%' + @telComercial + '%';
+	  END ELSE BEGIN -- + de 1 null
+	    SELECT proprietario.codigo AS 'Código do proprietário',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	    WHERE ((proprietario.telefone LIKE '%' + @tel + '%') OR (@tel IS NULL)) AND ((proprietario.telefone2 LIKE '%' + @tel2 + '%') OR (@tel2 IS NULL)) AND ((proprietario.celular LIKE '%' + @cel + '%') OR (@cel IS NULL)) AND ((proprietario.tel_comercial LIKE '%' + @telComercial + '%') OR (@telComercial IS NULL));
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -1429,21 +1589,62 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*to test and review*/
+/*EXEC usp_ProprietarioPorTelefone NULL,NULL,NULL,NULL
+EXEC usp_ProprietarioPorTelefone '','','',''--mostrnado todos
+EXEC usp_ProprietarioPorTelefone '3434',NULL,NULL,NULL
+EXEC usp_ProprietarioPorTelefone NULL,'3333',NULL,NULL
+EXEC usp_ProprietarioPorTelefone NULL,NULL,'9888',NULL
+EXEC usp_ProprietarioPorTelefone NULL,NULL,NULL,'511'
+EXEC usp_ProprietarioPorTelefone '3',NULL,'9','511'*/
 CREATE PROCEDURE usp_ProprietarioPorEndereco
-  @rua VARCHAR(100),
-  @num INT,
+  @rua VARCHAR(100) = NULL,
+  @num INT = NULL,
   @compl VARCHAR(30) = NULL,
-  @bairro VARCHAR(100),
-  @cidade VARCHAR(80),
-  @uf CHAR(2),
+  @bairro VARCHAR(100) = NULL,
+  @cidade VARCHAR(80) = NULL,
+  @uf CHAR(2) = NULL,
   @pais VARCHAR(50) = NULL
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	  
-	  SELECT proprietario.codigo AS 'Código do proprietário',nome AS 'Proprietário nome',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',nome_conjuge AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM proprietario JOIN endereco ON  proprietario.codigo = endereco_codigo WHERE endereco.logradouro LIKE '%'+@rua+'%' OR endereco.numero = @num OR endereco.complemento LIKE '%'+@compl+'%' OR endereco.bairro LIKE '%'+@bairro+'%' OR endereco.cidade LIKE '%'+@cidade+'%' OR endereco.uf = @uf OR endereco.pais LIKE '%'+@pais+'%';
+
+	  IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @rua IS NOT NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT proprietario.codigo AS 'Código do proprietário',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	    WHERE endereco.logradouro LIKE '%' + @rua + '%';
+	  END ELSE IF @rua IS NULL AND @num IS NOT NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT proprietario.codigo AS 'Código do proprietário',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	    WHERE endereco.numero = @num;
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NOT NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT proprietario.codigo AS 'Código do proprietário',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	    WHERE endereco.complemento LIKE '%' + @compl + '%';
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NOT NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT proprietario.codigo AS 'Código do proprietário',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	    WHERE endereco.bairro LIKE '%' + @bairro + '%';
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NOT NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT proprietario.codigo AS 'Código do proprietário',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	    WHERE endereco.cidade LIKE '%' + @cidade + '%';
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NOT NULL AND @pais IS NULL BEGIN
+	    SELECT proprietario.codigo AS 'Código do proprietário',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	    WHERE endereco.uf LIKE '%' + @uf + '%';
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NOT NULL BEGIN
+	    SELECT proprietario.codigo AS 'Código do proprietário',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+		WHERE endereco.pais LIKE '%' + @pais + '%';
+	  END ELSE BEGIN -- + de 1 null
+	    SELECT proprietario.codigo AS 'Código do proprietário',proprietario.nome AS 'Proprietário nome',proprietario.telefone AS 'Telefone proprietário',proprietario.telefone2 AS 'Telefone 2 proprietário',proprietario.celular AS 'Celular proprietário',proprietario.tel_comercial AS 'Telefone comercial proprietário',proprietario_conjuge.nome AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM proprietario LEFT JOIN endereco ON  endereco.codigo = endereco_codigo LEFT JOIN proprietario_conjuge ON proprietario_conjuge.proprietario_codigo = proprietario.codigo
+	    WHERE ((endereco.logradouro LIKE '%' + @rua + '%') OR (@rua IS NULL)) AND ((endereco.numero = @num) OR (@num IS NULL)) AND ((endereco.complemento LIKE '%' + @compl + '%') OR (@compl IS NULL)) AND ((endereco.bairro LIKE '%' + @bairro + '%') OR (@bairro IS NULL)) AND ((endereco.cidade LIKE '%' + @cidade + '%') OR (@cidade IS NULL)) AND ((endereco.uf LIKE '%' + @uf + '%') OR (@uf IS NULL)) AND ((endereco.pais LIKE '%' + @pais + '%') OR (@pais IS NULL));
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -1452,14 +1653,24 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_ProprietarioPorEndereco '','','','','','',''
+EXEC usp_ProprietarioPorEndereco NULL,NULL,NULL,NULL,NULL,NULL,NULL
+EXEC usp_ProprietarioPorEndereco 'Securitários',NULL,NULL,NULL,NULL,NULL,NULL
+EXEC usp_ProprietarioPorEndereco NULL,115,NULL,NULL,NULL,NULL,NULL
+EXEC usp_ProprietarioPorEndereco NULL,NULL,'Casa',NULL,NULL,NULL,NULL
+EXEC usp_ProprietarioPorEndereco NULL,NULL,NULL,'Melo',NULL,NULL,NULL
+EXEC usp_ProprietarioPorEndereco NULL,NULL,NULL,NULL,'Horizonte',NULL,NULL
+EXEC usp_ProprietarioPorEndereco NULL,NULL,NULL,NULL,NULL,'MG',NULL
+EXEC usp_ProprietarioPorEndereco NULL,NULL,NULL,NULL,NULL,NULL,'Brasil'
+EXEC usp_ProprietarioPorEndereco 'Mamae',864,NULL,NULL,NULL,NULL,NULL*/
 CREATE PROCEDURE usp_ProprietarioTodos
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT proprietario.codigo AS 'Código do proprietário',nome AS 'Proprietário nome',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',nome_conjuge AS 'Nome do(a) conjuge proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM proprietario JOIN endereco ON  proprietario.codigo = endereco_codigo ORDER BY proprietario.created DESC;
+	  SELECT proprietario.codigo AS 'Código do proprietário',nome AS 'Proprietário nome',telefone AS 'Telefone proprietário',telefone2 AS 'Telefone 2 proprietário',celular AS 'Celular proprietário',tel_comercial AS 'Telefone comercial proprietário',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM proprietario INNER JOIN endereco ON proprietario.endereco_codigo = endereco_codigo ORDER BY proprietario.created DESC;
 
 	COMMIT TRAN
   END TRY
@@ -1469,7 +1680,7 @@ BEGIN
   END CATCH
 END
 GO/*TODO*/
-
+/*SELECT * FROM proprietario left JOIN endereco ON endereco.codigo = proprietario.endereco_codigo;*/
 CREATE PROCEDURE usp_CompradorPorCod
   @cod INT
 AS
@@ -1477,7 +1688,9 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo WHERE comprador.codigo = @cod;
+	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	  FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci LEFT JOIN endereco ON comprador.codigo = comprador.endereco_codigo 
+	  WHERE comprador.codigo = @cod;
 
 	COMMIT TRAN
   END TRY
@@ -1486,7 +1699,8 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_CompradorPorCod 9*/
 CREATE PROCEDURE usp_CompradorPorCpfOuRg
   @cpf VARCHAR(11) = NULL,
   @rg VARCHAR(10) = NULL
@@ -1495,7 +1709,21 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo WHERE cpf = @cpf OR rg = @rg;
+	  IF @cpf IS NULL AND @rg IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @cpf IS NOT NULL AND @rg IS NULL BEGIN
+	    SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci LEFT JOIN endereco ON comprador.codigo = comprador.endereco_codigo 
+	    WHERE cpf = @cpf;
+	  END ELSE IF @cpf IS NULL AND @rg IS NOT NULL BEGIN
+	    SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci LEFT JOIN endereco ON comprador.codigo = comprador.endereco_codigo 
+	    WHERE rg = @rg;
+	  END ELSE BEGIN
+	    SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci LEFT JOIN endereco ON comprador.codigo = comprador.endereco_codigo 
+	    WHERE ((cpf = @cpf) OR (@cpf IS NULL)) AND ((rg = @rg) OR (@rg IS NULL));
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -1504,7 +1732,11 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_CompradorPorCpfOuRg NULL,NULL
+EXEC usp_CompradorPorCpfOuRg '',''
+EXEC usp_CompradorPorCpfOuRg '13013013299',NULL
+EXEC usp_CompradorPorCpfOuRg NULL,'MG17771868'*/
 CREATE PROCEDURE usp_CompradorPorNome
   @nome VARCHAR(120),
   @nomeC VARCHAR(120) = NULL
@@ -1513,7 +1745,9 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo WHERE nome LIKE '%'+@nome+'%' OR nome_conjuge LIKE '%'+@nomeC+'%';
+	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	  FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci LEFT JOIN endereco ON comprador.codigo = comprador.endereco_codigo 
+	  WHERE nome LIKE '%' + @nome + '%';
 
 	COMMIT TRAN
   END TRY
@@ -1522,7 +1756,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*DOing*/
 CREATE PROCEDURE usp_CompradorPorTelefone
   @tel VARCHAR(14),
   @tel2 VARCHAR(14),
