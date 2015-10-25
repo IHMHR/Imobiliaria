@@ -766,10 +766,10 @@ SELECT * FROM corretor_teste
 EXEC usp_CorretorAlterar 1,'13089902605','MG17771868','Igor Martinelli Ramos','3134746398','3188343318','3188521996','3132477400','M',NULL,6*/
 CREATE PROCEDURE usp_CompradorAlterar
   @cod INT,
-  @cpf VARCHAR(11),
-  @rg VARCHAR(10),
+  @cpf VARCHAR(11) = NULL,
+  @rg VARCHAR(10) = NULL,
   @nome VARCHAR(120),
-  @estado_Civil VARCHAR(15),
+  @estado_Civil VARCHAR(15) = NULL,
   @profissao varchar(45),
   @renda_bruta INT,
   @fgts DECIMAL(11,2),
@@ -798,6 +798,18 @@ BEGIN
 	   END
 
 	   DECLARE @newEndereco INT = (SELECT IDENT_CURRENT('endereco'));*/
+	   IF @cpf IS NULL BEGIN
+	     SET @cpf = (SELECT cpf FROM comprador WHERE codigo = @cod);
+	   END
+	   IF @rg IS NULL BEGIN
+	     SET @rg = (SELECT rg FROM comprador WHERE codigo = @cod);
+	   END
+	   IF @estado_Civil IS NULL BEGIN
+	     SET @estado_Civil = (SELECT estado_civil FROM comprador WHERE codigo = @cod);
+	   END
+	   IF @cod_endereco IS NULL BEGIN
+	     SET @cod_endereco = (SELECT endereco_codigo FROM comprador WHERE codigo = @cod);
+	   END
 
        IF @creci IS NULL BEGIN
 	     UPDATE comprador SET cpf=@cpf,rg=rg,nome=@nome,estado_civil=@estado_Civil,profissao=@profissao,renda_bruta=@renda_bruta,fgts=@fgts,telefone=@tel,telefone2=@tel2,celular=@cel,tel_comercial=@telComercial,lista_intereste=@lista_intereste,endereco_codigo=@cod_endereco,modified=(SELECT CURRENT_TIMESTAMP) WHERE codigo=@cod;
@@ -814,6 +826,7 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
+EXECUTE usp_CompradorAlterar 1003,NULL,NULL,'IHMHR',NULL,'Estagio TI',600,0.00,'3134746398','3134746666','31988521996','3132475808','001,003,006,010','0000000001',1013;
 /*SELECT * INTO comprador_teste FROM comprador
 SELECT * FROM comprador
 SELECT * FROM comprador_teste
@@ -1738,16 +1751,21 @@ EXEC usp_CompradorPorCpfOuRg '',''
 EXEC usp_CompradorPorCpfOuRg '13013013299',NULL
 EXEC usp_CompradorPorCpfOuRg NULL,'MG17771868'*/
 CREATE PROCEDURE usp_CompradorPorNome
-  @nome VARCHAR(120),
-  @nomeC VARCHAR(120) = NULL
+  @nome VARCHAR(120)
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
-	  FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci LEFT JOIN endereco ON comprador.codigo = comprador.endereco_codigo 
-	  WHERE nome LIKE '%' + @nome + '%';
+	  IF @nome IS NULL BEGIN
+	     SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @nome = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE BEGIN
+	    SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci LEFT JOIN endereco ON comprador.codigo = comprador.endereco_codigo 
+	    WHERE nome LIKE '%' + @nome + '%';
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -1756,18 +1774,49 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*DOing*/
+GO/*Ok*/
+/*EXEC usp_CompradorPorNome NULL
+EXEC usp_CompradorPorNome ''
+EXEC usp_CompradorPorNome 'Martinelli'*/
 CREATE PROCEDURE usp_CompradorPorTelefone
-  @tel VARCHAR(14),
-  @tel2 VARCHAR(14),
-  @cel VARCHAR(14),
-  @telComercial VARCHAR(14)
+  @tel VARCHAR(14) = NULL,
+  @tel2 VARCHAR(14) = NULL,
+  @cel VARCHAR(14) = NULL,
+  @telComercial VARCHAR(14) = NULL
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',nome_conjuge AS 'Nome do(a) conjuge do comprador',entrada AS 'Valor da entrada',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci JOIN endereco ON comprador.codigo = comprador.endereco_codigo WHERE comprador.telefone LIKE '%' + @tel + '%' OR comprador.telefone2 LIKE '%' + @tel2 + '%' OR celular LIKE '%'+@cel+'%' OR comprador.tel_comercial LIKE '%' + @telComercial + '%';
+	  IF @tel IS NULL AND @tel2 IS NULL AND @cel IS NULL AND @telComercial IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @tel = '' AND @tel2 = '' AND @cel = '' AND @telComercial = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NULL AND @telComercial IS NULL BEGIN
+	    SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci LEFT JOIN endereco ON comprador.codigo = comprador.endereco_codigo 
+	    WHERE comprador.telefone LIKE '%' + @tel + '%';
+	  END ELSE IF @tel IS NULL AND @tel2 IS NOT NULL AND @cel IS NULL AND @telComercial IS NULL BEGIN
+	    SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci LEFT JOIN endereco ON comprador.codigo = comprador.endereco_codigo 
+	    WHERE comprador.telefone2 LIKE '%' + @tel2 + '%';
+	  END ELSE IF @tel IS NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NULL BEGIN
+	    SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci LEFT JOIN endereco ON comprador.codigo = comprador.endereco_codigo 
+	    WHERE comprador.celular LIKE '%' + @cel + '%';
+	  END ELSE IF @tel IS NULL AND @tel2 IS NULL AND @cel IS NULL AND @telComercial IS NOT NULL BEGIN
+	    SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci LEFT JOIN endereco ON comprador.codigo = comprador.endereco_codigo 
+	    WHERE comprador.tel_comercial LIKE '%' + @telComercial + '%';
+	  END ELSE BEGIN
+	    SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+        FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci LEFT JOIN endereco ON comprador.codigo = comprador.endereco_codigo 
+	    WHERE ((comprador.telefone = @tel) OR (@tel IS NULL)) AND ((comprador.telefone2 = @tel2) OR (@tel2 IS NULL)) AND ((comprador.celular = @cel) OR (@cel IS NULL)) AND ((comprador.tel_comercial = @telComercial) OR (@telComercial IS NULL));
+	  END
+	  
+	  /*SELECT comprador.codigo AS 'Código do comprador',nome AS 'Nome do comprador',profissao AS 'Profissão do comprador',comprador.telefone AS 'Telefone comprador',telefone2 AS 'Telefone 2 comprador',celular AS 'Celular comprador',tel_comercial AS 'Telefone comercial comprador',lista_intereste AS 'Lista de interesses',imobiliaria.apelido AS 'Imobiliária envolvida',endereco.logradouro AS 'R.\Av. do imóvel',endereco.numero AS 'Número do imóvel',endereco.complemento AS 'Complemento do imóvel',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	  FROM comprador LEFT JOIN imobiliaria ON comprador.codigo = imobiliaria_creci LEFT JOIN endereco ON comprador.codigo = comprador.endereco_codigo 
+	  WHERE comprador.telefone LIKE '%' + @tel + '%' OR comprador.telefone2 LIKE '%' + @tel2 + '%' OR celular LIKE '%'+@cel+'%' OR comprador.tel_comercial LIKE '%' + @telComercial + '%';*/
 
 	COMMIT TRAN
   END TRY
@@ -1776,7 +1825,13 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_CompradorPorTelefone NULL,NULL,NULL,NULL
+EXEC usp_CompradorPorTelefone '','','',''
+EXEC usp_CompradorPorTelefone '31',NULL,NULL,NULL
+EXEC usp_CompradorPorTelefone NULL,'31',NULL,NULL
+EXEC usp_CompradorPorTelefone NULL,NULL,'9',NULL
+EXEC usp_CompradorPorTelefone NULL,NULL,NULL,'8'*/
 CREATE PROCEDURE usp_CompradorPorEndereco
   @rua VARCHAR(100),
   @num INT,
@@ -1799,7 +1854,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*DOing*/
 CREATE PROCEDURE usp_CompradorPorTodos
 AS
 BEGIN

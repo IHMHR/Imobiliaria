@@ -30,10 +30,10 @@ namespace ApresentacaoWindows
                 comprador.cel = txtcel.Text.Equals(string.Empty) ? comprador.cel = "NULL" : txtcel.Text.Replace("(", "").Replace(")", "").Replace("_", "").Replace(" ", "").Replace("-", "");
                 comprador.cidade = txtcidade.Text.Equals(string.Empty) ? comprador.cidade = "NULL" : txtcidade.Text;
                 comprador.complemento = txtcomplemento.Text.Equals(string.Empty) ? comprador.complemento = "NULL" : txtcomplemento.Text;
-                comprador.cpf = txtcpf.Text.Replace(".", "").Replace("-", "").Replace("-", "").Equals(string.Empty) ? comprador.cpf = "NULL" : txtcpf.Text;
+                comprador.cpf = txtcpf.Text.Replace(".", "").Replace("-", "").Replace("-", "").Replace(",","").Equals(string.Empty) ? comprador.cpf = "NULL" : txtcpf.Text;
                 comprador.estado_civil = cmbestadocivil.Text.Equals(string.Empty) ? comprador.estado_civil = "NULL" : cmbestadocivil.Text;
                 //comprador.fgts = Convert.ToDecimal(txtfgts.Text).Equals(string.Empty) ? comprador.fgts = "NULL" : txtfgts.Text;
-                comprador.fgts = Convert.ToDecimal(txtfgts.Text);
+                comprador.fgts = Convert.ToDecimal(txtfgts.Text.Replace(",","."));
                 comprador.lista_intereste = txtlista.Text.Equals(string.Empty) ? comprador.lista_intereste = "NULL" : txtlista.Text;
                 comprador.logradouro = txtlogradouro.Text.Equals(string.Empty) ? comprador.logradouro = "NULL" : txtlogradouro.Text;
                 //comprador.numero = int.Parse(txtnumero.Text).Equals(string.Empty) ? comprador.numero = "NULL" : txtnumero.Text;
@@ -41,8 +41,8 @@ namespace ApresentacaoWindows
                 comprador.pais = txtpais.Text.Equals(string.Empty) ? comprador.profissao = "NULL" : txtpais.Text;
                 comprador.profissao = txtprofissao.Text.Equals(string.Empty) ? comprador.profissao = "NULL" : txtprofissao.Text;
                 //comprador.renda = int.Parse(txtrendabruta.Text).Equals(string.Empty) ? comprador.renda = "NULL" : txtrendabruta.Text;
-                comprador.renda = Convert.ToInt32(txtrendabruta.Text);
-                comprador.rg = txtrg.Text.ToUpper().Equals(string.Empty) ? comprador.rg = "NULL" : txtrg.Text;
+                comprador.renda = Convert.ToInt32(txtrendabruta.Text.Replace(",","."));
+                comprador.rg = txtrg.Text.ToUpper().Replace("-","").Replace("_","").Equals(string.Empty) ? comprador.rg = "NULL" : txtrg.Text;
                 comprador.tel = txttel.Text.Equals(string.Empty) ? comprador.tel = "NULL" : txttel.Text.Replace("(", "").Replace(")", "").Replace("_", "").Replace(" ", "").Replace("-", "");
                 comprador.tel2 = txttel2.Text.Equals(string.Empty) ? comprador.tel2 = "NULL" : txttel2.Text.Replace("(", "").Replace(")", "").Replace("_", "").Replace(" ", "").Replace("-", "");
                 comprador.telComercial = txttelcomercial.Text.Equals(string.Empty) ? comprador.telComercial = "NULL" : txttelcomercial.Text.Replace("(", "").Replace(")", "").Replace("_", "").Replace(" ", "").Replace("-", "");
