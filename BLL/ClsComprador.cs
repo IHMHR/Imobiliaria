@@ -28,6 +28,7 @@ namespace BLL
         #endregion
         ClsAcessoSqlServer sqlserver = new ClsAcessoSqlServer();
         ClsAcessoMySql mysql = new ClsAcessoMySql();
+        ClsAcessoSQLite sqlite = new ClsAcessoSQLite();
 
         public object NovoComprador()
         {
@@ -68,7 +69,7 @@ namespace BLL
                 sqlserver.AdicionarParametro("pais", pais);
                 return sqlserver.ExecutarPersistencia(System.Data.CommandType.StoredProcedure, "usp_CompradorInserir");
             }
-            catch (Exception ex)
+            catch
             {
                 try
                 {
@@ -105,9 +106,22 @@ namespace BLL
                     mysql.AdicionarParametro("pais", pais);
                     return mysql.ExecutarPersistencia(System.Data.CommandType.StoredProcedure, "usp_CompradorInserir");
                 }
-                catch (Exception ex1)
+                catch
                 {
-                    throw new Exception("Erro: " + ex.Message.ToString() + ex1.Message.ToString());
+                    //throw new Exception("Erro: " + ex.Message.ToString() + ex1.Message.ToString());
+                    string comando = "INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES ('" + cpf + "','" + rg + "','" + nome + "','" + estado_civil + "','" + profissao + "'," + renda + "," + fgts + ",'" + tel + "','" + tel2 + "','" + cel + "','" + telComercial + "','" + lista_intereste + "','" + creci + "'," + endereco + ",'" + DateTime.Now.ToString() + "')";
+                    if (sqlite.ExecutarComando(comando))
+                    {
+                        comando = "INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES ('" + logradouro + "'," + numero + ",'" + complemento + "','" + bairro + "','" + cidade + "','" + uf + "','" + pais + "','" + DateTime.Now.ToString() + "')";
+                        if (sqlite.ExecutarComando(comando))
+                            return comando = "Seus dados estão salvos, entretanto é precisar procurar pelo Suporte para auxilio.";
+                        else
+                            return comando = "Procure pelo Suporte para auxilio imediato.";
+                    }
+                    else
+                    {
+                        return comando = "Procure pelo Suporte para auxilio imediato.";
+                    }
                 }
             }
         }/*OK*/
@@ -157,7 +171,7 @@ namespace BLL
             {
                 if (cpf.Equals(string.Empty))
                     sqlserver.AdicionarParametro("cpf", "NULL");
-                else 
+                else
                     sqlserver.AdicionarParametro("cpf", cpf);
                 if (rg.Equals(string.Empty))
                     sqlserver.AdicionarParametro("rg", "NULL");
@@ -183,7 +197,7 @@ namespace BLL
                 }
                 catch (Exception ex1)
                 {
-                throw new Exception("Erro: " + ex.Message.ToString()+ex1.Message.ToString());
+                    throw new Exception("Erro: " + ex.Message.ToString() + ex1.Message.ToString());
                 }
             }
         }/*TESTAR*/
@@ -204,7 +218,7 @@ namespace BLL
                 }
                 catch (Exception ex1)
                 {
-                    throw new Exception("Erro: " + ex.Message.ToString()+ex1.Message.ToString());
+                    throw new Exception("Erro: " + ex.Message.ToString() + ex1.Message.ToString());
                 }
             }
         }/*TESTAR*/
@@ -360,7 +374,7 @@ namespace BLL
                 }
                 catch (Exception ex1)
                 {
-                    throw new Exception("Erro: " + ex.Message.ToString()+ ex1.Message.ToString());
+                    throw new Exception("Erro: " + ex.Message.ToString() + ex1.Message.ToString());
                 }
             }
         }/*OK*/
@@ -377,11 +391,11 @@ namespace BLL
                 try
                 {
                     mysql.AdicionarParametro("cod", codigo);
-                    return mysql.ExecutarPersistencia(System.Data.CommandType.StoredProcedure,"usp_CompradorApagar");
+                    return mysql.ExecutarPersistencia(System.Data.CommandType.StoredProcedure, "usp_CompradorApagar");
                 }
                 catch (Exception ex1)
                 {
-                    throw new Exception("Erro: " + ex.Message.ToString()+ex1.Message.ToString());
+                    throw new Exception("Erro: " + ex.Message.ToString() + ex1.Message.ToString());
                 }
             }
         }/*TESTAR*/
