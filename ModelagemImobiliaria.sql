@@ -1,3 +1,17 @@
+/*
+SELECT name, compatibility_level , version_name = 
+CASE compatibility_level
+    WHEN 65  THEN 'SQL Server 6.5'
+    WHEN 70  THEN 'SQL Server 7.0'
+    WHEN 80  THEN 'SQL Server 2000'
+    WHEN 90  THEN 'SQL Server 2005'
+    WHEN 100 THEN 'SQL Server 2008/R2'
+    WHEN 110 THEN 'SQL Server 2012'
+    WHEN 120 THEN 'SQL Server 2014'
+END
+FROM SYS.DATABASES 
+--WHERE name = 'DBname';
+*/
 USE master;
 
 IF EXISTS(SELECT * FROM sys.databases WHERE name='imobiliaria')
@@ -2079,24 +2093,30 @@ EXEC usp_CorretorPorEndereco NULL,NULL,NULL,NULL,'Braga',NULL,NULL
 EXEC usp_CorretorPorEndereco NULL,NULL,NULL,NULL,NULL,'MG',NULL
 EXEC usp_CorretorPorEndereco NULL,NULL,NULL,NULL,NULL,NULL,'Brazil'*/
 CREATE PROCEDURE usp_CorretorPorTelefone
-  @tel VARCHAR(14),
-  @tel2 VARCHAR(14),
-  @cel VARCHAR(14),
-  @telComercial VARCHAR(14)
+  @cpf VARCHAR(14),
+  @rg VARCHAR(14)
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  IF @tel IS NULL AND @tel2 IS NULL AND @cel IS NULL AND @telComercial IS NULL BEGIN
+	  IF @cpf IS NULL AND @rg IS NULL BEGIN
 	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
-	  END ELSE IF @tel = '' AND @tel2 = '' AND @cel = '' AND @telComercial = '' BEGIN
+	  END ELSE IF @cpf = '' AND @rg = '' BEGIN
 	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
-	  END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NULL AND @telComercial IS NULL BEGIN
-
+	  END ELSE IF @cpf IS NOT NULL AND @rg IS NULL BEGIN
+	    SELECT corretor.codigo AS 'Código do corretor',nome_completo AS 'Nome do corretor',telefone AS 'Telefone corretor',telefone2 AS 'Telefone 2 corretor',celular AS 'Celular corretor',tel_comercial AS 'Telefone comercial corretor',sexo AS 'Sexo',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+		FROM corretor LEFT JOIN endereco ON corretor.endereco_codigo = endereco.codigo
+		WHERE cpf = @cpf;
+	  END ELSE IF @cpf IS NULL AND @rg IS NOT NULL BEGIN
+	    SELECT corretor.codigo AS 'Código do corretor',nome_completo AS 'Nome do corretor',telefone AS 'Telefone corretor',telefone2 AS 'Telefone 2 corretor',celular AS 'Celular corretor',tel_comercial AS 'Telefone comercial corretor',sexo AS 'Sexo',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+		FROM corretor LEFT JOIN endereco ON corretor.endereco_codigo = endereco.codigo
+		WHERE rg = @rg;
+	  END ELSE BEGIN
 	    SELECT corretor.codigo AS 'Código do corretor',nome_completo AS 'Nome do corretor',telefone AS 'Telefone corretor',telefone2 AS 'Telefone 2 corretor',celular AS 'Celular corretor',tel_comercial AS 'Telefone comercial corretor',sexo AS 'Sexo',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
 	    FROM corretor LEFT JOIN endereco ON corretor.endereco_codigo = endereco.codigo
-	    WHERE telefone LIKE '%'+@tel+'%' OR telefone2 LIKE '%'+@tel2+'%' OR celular LIKE '%'+@cel+'%' OR tel_comercial LIKE '%'+@telComercial+'%';
+	    WHERE ((cpf = @cpf) OR (@cpf IS NULL)) AND ((rg = @rg) OR (@rg IS NULL));
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -2105,7 +2125,13 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*DOing*/
+GO/*OK*/
+/*EXEC usp_CorretorPorTelefone NULL,NULL,NULL,NULL
+EXEC usp_CorretorPorTelefone '','','',''
+EXEC usp_CorretorPorTelefone '3134746398',NULL,NULL,NULL
+EXEC usp_CorretorPorTelefone NULL,'5808',NULL,NULL
+EXEC usp_CorretorPorTelefone NULL,NULL,'3188521996',NULL
+EXEC usp_CorretorPorTelefone NULL,NULL,NULL,'3132477400'*/
 CREATE PROCEDURE usp_CorretorPorCpfOuRg
   @cpf VARCHAR(11),
   @rg VARCHAR(10)
@@ -2114,9 +2140,23 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT corretor.codigo AS 'Código do corretor',nome_completo AS 'Nome do corretor',telefone AS 'Telefone corretor',telefone2 AS 'Telefone 2 corretor',celular AS 'Celular corretor',tel_comercial AS 'Telefone comercial corretor',sexo AS 'Sexo',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
-	  FROM corretor LEFT JOIN endereco ON corretor.endereco_codigo = endereco.codigo
-	  WHERE cpf = @cpf OR rg = @rg;
+	  IF @cpf IS NULL AND @rg IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @cpf = '' AND @rg = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @cpf IS NOT NULL AND @rg IS NULL BEGIN
+	    SELECT corretor.codigo AS 'Código do corretor',nome_completo AS 'Nome do corretor',telefone AS 'Telefone corretor',telefone2 AS 'Telefone 2 corretor',celular AS 'Celular corretor',tel_comercial AS 'Telefone comercial corretor',sexo AS 'Sexo',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+		FROM corretor LEFT JOIN endereco ON corretor.endereco_codigo = endereco.codigo
+		WHERE cpf = @cpf;
+	  END ELSE IF @cpf IS NULL AND @rg IS NOT NULL BEGIN
+	    SELECT corretor.codigo AS 'Código do corretor',nome_completo AS 'Nome do corretor',telefone AS 'Telefone corretor',telefone2 AS 'Telefone 2 corretor',celular AS 'Celular corretor',tel_comercial AS 'Telefone comercial corretor',sexo AS 'Sexo',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+		FROM corretor LEFT JOIN endereco ON corretor.endereco_codigo = endereco.codigo
+		WHERE rg = @rg;
+	  END ELSE BEGIN
+	    SELECT corretor.codigo AS 'Código do corretor',nome_completo AS 'Nome do corretor',telefone AS 'Telefone corretor',telefone2 AS 'Telefone 2 corretor',celular AS 'Celular corretor',tel_comercial AS 'Telefone comercial corretor',sexo AS 'Sexo',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM corretor LEFT JOIN endereco ON corretor.endereco_codigo = endereco.codigo
+	    WHERE ((cpf = @cpf) OR (@cpf IS NULL)) AND ((rg = @rg) OR (@rg IS NULL));
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -2125,7 +2165,11 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_CorretorPorCpfOuRg NULL,NULL
+EXEC usp_CorretorPorCpfOuRg '',''
+EXEC usp_CorretorPorCpfOuRg '12332145665',NULL
+EXEC usp_CorretorPorCpfOuRg NULL,'MG17991868'*/
 CREATE PROCEDURE usp_CorretorPorTodos
 AS
 BEGIN
@@ -2152,7 +2196,15 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT despachante.codigo AS 'Código do despachante',nome AS 'Nome do despachante',preco AS 'Preço do despachante',servicos_pendentes AS 'Serviços pendentes', servicos_completos AS 'Serviços completos',telefone AS 'Telefone do Despachante',telefone2 AS 'Telefone 2',celular AS 'Celular do Despachante',tel_comercial AS 'Telefone Comercial',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM despachante JOIN endereco ON despachante.codigo = endereco_codigo WHERE despachante.codigo = @cod;
+	  IF @cod IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @cod = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE BEGIN
+	    SELECT despachante.codigo AS 'Código do despachante',nome AS 'Nome do despachante',preco AS 'Preço do despachante',servicos_pendentes AS 'Serviços pendentes', servicos_completos AS 'Serviços completos',telefone AS 'Telefone do Despachante',telefone2 AS 'Telefone 2',celular AS 'Celular do Despachante',tel_comercial AS 'Telefone Comercial',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM despachante LEFT JOIN endereco ON despachante.endereco_codigo = endereco.codigo
+		WHERE despachante.codigo = @cod;
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -2161,7 +2213,10 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_DespachantePorCod NULL
+EXEC usp_DespachantePorCod ''
+EXEC usp_DespachantePorCod 1*/
 CREATE PROCEDURE usp_DespachantePorNome
   @nome VARCHAR(120)
 AS
@@ -2169,7 +2224,15 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT despachante.codigo AS 'Código do despachante',nome AS 'Nome do despachante',preco AS 'Preço do despachante',servicos_pendentes AS 'Serviços pendentes', servicos_completos AS 'Serviços completos',telefone AS 'Telefone do Despachante',telefone2 AS 'Telefone 2',celular AS 'Celular do Despachante',tel_comercial AS 'Telefone Comercial',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM despachante JOIN endereco ON despachante.codigo = endereco_codigo WHERE nome LIKE '%'+@nome+'%';
+	  IF @nome IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @nome = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE BEGIN
+		SELECT despachante.codigo AS 'Código do despachante',nome AS 'Nome do despachante',preco AS 'Preço do despachante',servicos_pendentes AS 'Serviços pendentes', servicos_completos AS 'Serviços completos',telefone AS 'Telefone do Despachante',telefone2 AS 'Telefone 2',celular AS 'Celular do Despachante',tel_comercial AS 'Telefone Comercial',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+		FROM despachante LEFT JOIN endereco ON despachante.endereco_codigo = endereco.codigo
+		WHERE nome LIKE '%' + @nome + '%';
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -2178,7 +2241,10 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_DespachantePorNome NULL
+EXEC usp_DespachantePorNome ''
+EXEC usp_DespachantePorNome 'Igor'*/
 CREATE PROCEDURE usp_DespachantePorTelefone
   @tel VARCHAR(14),
   @tel2 VARCHAR(14),
@@ -2189,7 +2255,16 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT despachante.codigo AS 'Código do despachante',nome AS 'Nome do despachante',preco AS 'Preço do despachante',servicos_pendentes AS 'Serviços pendentes', servicos_completos AS 'Serviços completos',telefone AS 'Telefone do Despachante',telefone2 AS 'Telefone 2',celular AS 'Celular do Despachante',tel_comercial AS 'Telefone Comercial',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM despachante JOIN endereco ON despachante.codigo = endereco_codigo WHERE telefone LIKE '%'+@tel+'%' OR telefone2 LIKE '%'+@tel2+'%' OR celular LIKE '%'+@cel+'%' OR tel_comercial LIKE '%'+@telComercial+'%';
+	  IF @tel IS NULL AND @tel2 IS NULL AND @cel IS NULL AND @telComercial IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @tel = '' AND @tel2 = '' AND @cel = '' AND @telComercial = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF 
+
+
+	  SELECT despachante.codigo AS 'Código do despachante',nome AS 'Nome do despachante',preco AS 'Preço do despachante',servicos_pendentes AS 'Serviços pendentes', servicos_completos AS 'Serviços completos',telefone AS 'Telefone do Despachante',telefone2 AS 'Telefone 2',celular AS 'Celular do Despachante',tel_comercial AS 'Telefone Comercial',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	  FROM despachante LEFT JOIN endereco ON despachante.endereco_codigo = endereco.codigo
+	  WHERE telefone LIKE '%'+@tel+'%' OR telefone2 LIKE '%'+@tel2+'%' OR celular LIKE '%'+@cel+'%' OR tel_comercial LIKE '%'+@telComercial+'%';
 
 	COMMIT TRAN
   END TRY
@@ -2198,7 +2273,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*DOing*/
 CREATE PROCEDURE usp_DespachantePorServicosPendentes
   @servPendentes SMALLINT
 AS
@@ -2262,7 +2337,9 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT despachante.codigo AS 'Código do despachante',nome AS 'Nome do despachante',preco AS 'Preço do despachante',servicos_pendentes AS 'Serviços pendentes', servicos_completos AS 'Serviços completos',telefone AS 'Telefone do Despachante',telefone2 AS 'Telefone 2',celular AS 'Celular do Despachante',tel_comercial AS 'Telefone Comercial',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM despachante JOIN endereco ON despachante.codigo = endereco_codigo ORDER BY despachante.created DESC;
+	  SELECT despachante.codigo AS 'Código do despachante',nome AS 'Nome do despachante',preco AS 'Preço do despachante',servicos_pendentes AS 'Serviços pendentes', servicos_completos AS 'Serviços completos',telefone AS 'Telefone do Despachante',telefone2 AS 'Telefone 2',celular AS 'Celular do Despachante',tel_comercial AS 'Telefone Comercial',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	  FROM despachante LEFT JOIN endereco ON despachante.endereco_codigo = endereco.codigo
+	  ORDER BY despachante.created DESC;
 
 	COMMIT TRAN
   END TRY
@@ -2271,8 +2348,8 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
-
+GO/*OK*/
+/*EXEC usp_DespachantePorTodos*/
 CREATE PROCEDURE usp_ImobiliariaPorCreci
   @cod INT
 AS
