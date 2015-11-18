@@ -64,6 +64,12 @@
     <Compile Include="FrmCorretores.Designer.cs">
       <DependentUpon>FrmCorretores.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmInserirCompradorConjuge.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmInserirCompradorConjuge.Designer.cs">
+      <DependentUpon>FrmInserirCompradorConjuge.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmInserirCorretor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -86,6 +92,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FrmInserirComprador.resx">
       <DependentUpon>FrmInserirComprador.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmInserirCompradorConjuge.resx">
+      <DependentUpon>FrmInserirCompradorConjuge.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmInserirCorretor.resx">
       <DependentUpon>FrmInserirCorretor.cs</DependentUpon>

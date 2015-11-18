@@ -16,7 +16,7 @@ namespace ApresentacaoWindows
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FrmCompradores());
+            Application.Run(new FrmInserirCompradorConjuge());
         }
     }
 }

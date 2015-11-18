@@ -18,6 +18,7 @@ namespace ApresentacaoWindows
         public FrmCorretores()
         {
             InitializeComponent();
+            dataGridView1.MultiSelect = false;
         }
 
         private void FrmCorretores_Load(object sender, EventArgs e)

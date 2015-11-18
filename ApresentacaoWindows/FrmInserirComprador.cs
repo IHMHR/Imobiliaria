@@ -126,5 +126,18 @@ namespace ApresentacaoWindows
                 MessageBox.Show(ex.Message.ToString());
             }
         }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                FrmInserirCompradorConjuge cc = new FrmInserirCompradorConjuge();
+                cc.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString());
+            }
+        }
     }
 }

@@ -25,6 +25,7 @@ namespace ApresentacaoWindows
             try
             {
                 dataGridView1.DataSource = comprador.BuscarCompradores();
+                dataGridView1.MultiSelect = false;
             }
             catch (Exception ex)
             {
