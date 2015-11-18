@@ -58,6 +58,18 @@
     <Compile Include="FrmCompradores.Designer.cs">
       <DependentUpon>FrmCompradores.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmCorretores.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCorretores.Designer.cs">
+      <DependentUpon>FrmCorretores.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmInserirCorretor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmInserirCorretor.Designer.cs">
+      <DependentUpon>FrmInserirCorretor.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmInserirComprador.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -69,8 +81,14 @@
     <EmbeddedResource Include="FrmCompradores.resx">
       <DependentUpon>FrmCompradores.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FrmCorretores.resx">
+      <DependentUpon>FrmCorretores.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmInserirComprador.resx">
       <DependentUpon>FrmInserirComprador.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmInserirCorretor.resx">
+      <DependentUpon>FrmInserirCorretor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

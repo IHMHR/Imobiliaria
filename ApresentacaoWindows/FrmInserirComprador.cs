@@ -38,7 +38,7 @@ namespace ApresentacaoWindows
                 comprador.logradouro = txtlogradouro.Text.Equals(string.Empty) ? comprador.logradouro = "NULL" : txtlogradouro.Text;
                 //comprador.numero = int.Parse(txtnumero.Text).Equals(string.Empty) ? comprador.numero = "NULL" : txtnumero.Text;
                 comprador.numero = Convert.ToInt16(txtnumero.Text);
-                comprador.pais = txtpais.Text.Equals(string.Empty) ? comprador.profissao = "NULL" : txtpais.Text;
+                comprador.pais = txtpais.Text.Equals(string.Empty) ? comprador.pais = "NULL" : txtpais.Text;
                 comprador.profissao = txtprofissao.Text.Equals(string.Empty) ? comprador.profissao = "NULL" : txtprofissao.Text;
                 //comprador.renda = int.Parse(txtrendabruta.Text).Equals(string.Empty) ? comprador.renda = "NULL" : txtrendabruta.Text;
                 comprador.renda = Convert.ToInt32(txtrendabruta.Text.Replace(",","."));
@@ -49,6 +49,10 @@ namespace ApresentacaoWindows
                 comprador.uf = txtuf.Text.Equals(string.Empty) ? comprador.uf = "NULL" : txtuf.Text.ToUpper();
                 MessageBox.Show("Código do comprador: " + comprador.NovoComprador().ToString() + ".");
             }
+            catch (FormatException)
+            {
+                MessageBox.Show("Você preencheu algum campo de forma incorreta", "Formato incorreto", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message.ToString());
@@ -57,16 +61,34 @@ namespace ApresentacaoWindows
 
         private void button2_Click(object sender, EventArgs e)
         {
-            LimparTxt(this);
+            txtnome.Clear();
+            txtbairro.Clear();
+            txtcel.Clear();
+            txtcidade.Clear();
+            txtcomplemento.Clear();
+            txtcpf.Clear();
+            cmbestadocivil.SelectedIndex = -1;
+            txtfgts.Clear();
+            txtlista.Clear();
+            txtlogradouro.Clear();
+            txtnumero.Clear();
+            txtpais.Clear();
+            txtprofissao.Clear();
+            txtrendabruta.Clear();
+            txtrg.Clear();
+            txttel.Clear();
+            txttel2.Clear();
+            txttelcomercial.Clear();
+            txtuf.Clear();
         }
-        public void LimparTxt(Control controles)
+        /*public void LimparTxt(Control controles)
         {
             foreach (Control ctl in controles.Controls)
             {
                 if (ctl is TextBox) ctl.Text = "";
                 if (ctl is ComboBox) ctl.TabIndex = -1;
             }
-        }
+        }*/
 
         private void txtuf_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -94,13 +116,15 @@ namespace ApresentacaoWindows
 
         private void button4_Click(object sender, EventArgs e)
         {
-            FrmCompradores compres = new FrmCompradores();
-            compres.Show();
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            
+            try
+            { 
+                FrmCompradores compres = new FrmCompradores();
+                compres.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString());
+            }
         }
     }
 }

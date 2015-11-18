@@ -6,19 +6,22 @@ using System.Threading.Tasks;
 
 namespace BLL
 {
-    public class ClsDespachante
+    public class ClsCompradorConjuge
     {
         #region Variaveis
         public int codigo { get; set; }
+        public string cpf { get; set; }
+        public string rg { get; set; }
         public string nome { get; set; }
-        public decimal preco { get; set; }
-        public int servicos_completos { get; set; }
-        public int servicos_pendentes { get; set; }
+        public string estado_civil { get; set; }
+        public string profissao { get; set; }
+        public int renda { get; set; }
+        public decimal fgts { get; set; }
         public string tel { get; set; }
         public string tel2 { get; set; }
         public string cel { get; set; }
         public string telComercial { get; set; }
-        public int endereco { get; set; }
+        public int comprador { get; set; }
         #endregion
     }
 }

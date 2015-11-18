@@ -40,12 +40,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClsComprador.cs" />
+    <Compile Include="ClsCompradorConjuge.cs" />
     <Compile Include="ClsCorretor.cs" />
     <Compile Include="ClsDespachante.cs" />
     <Compile Include="ClsEndereco.cs" />
     <Compile Include="ClsImobiliaria.cs" />
     <Compile Include="ClsImovel.cs" />
     <Compile Include="ClsProprietario.cs" />
+    <Compile Include="ClsProprietarioConjuge.cs" />
     <Compile Include="ClsTransacaoBancaria.cs" />
     <Compile Include="ClsVenda.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -70,7 +70,7 @@ namespace BLL
                     throw new Exception("Erro: " + ex.Message.ToString() + ex1.Message.ToString());
                 }
             }
-        }/*TESTAR*/
+        }/*OK*/
 
         public System.Data.DataTable BuscarCorretores()
         {
@@ -124,7 +124,7 @@ namespace BLL
                 sqlserver.AdicionarParametro("telComercial",telComercial);
                 sqlserver.AdicionarParametro("sexo",sexo);
                 sqlserver.AdicionarParametro("creci",creci);
-                sqlserver.AdicionarParametro("cod_endereco",endereco);
+                sqlserver.AdicionarParametro("cod_endereco", NovoEndereco());
                 return sqlserver.ExecutarPersistencia(System.Data.CommandType.StoredProcedure, "usp_CorretorAlterar");
             }
             catch (Exception ex)

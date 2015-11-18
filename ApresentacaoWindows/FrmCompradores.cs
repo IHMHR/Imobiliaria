@@ -14,6 +14,7 @@ namespace ApresentacaoWindows
     public partial class FrmCompradores : Form
     {
         ClsComprador comprador = new ClsComprador();
+        private static int codEnd;
         public FrmCompradores()
         {
             InitializeComponent();
@@ -68,7 +69,7 @@ namespace ApresentacaoWindows
             {
                 if (MessageBox.Show("Tem certeza da alteração ?", "Tem certeza ?", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
                 {
-                    ClsComprador comprador = new ClsComprador();
+                    //ClsComprador comprador = new ClsComprador();
                     comprador.codigo = Convert.ToInt16(dataGridView1.Rows[e.RowIndex].Cells["Código do Comprador"].Value.ToString());
                     comprador.nome = dataGridView1.Rows[e.RowIndex].Cells["Nome Do Comprador"].Value.ToString();
                     comprador.bairro = dataGridView1.Rows[e.RowIndex].Cells["Bairro do imóvel"].Value.ToString();
@@ -83,10 +84,30 @@ namespace ApresentacaoWindows
                     comprador.tel2 = dataGridView1.Rows[e.RowIndex].Cells["Telefone 2 comprador"].Value.ToString();
                     comprador.telComercial = dataGridView1.Rows[e.RowIndex].Cells["Telefone comercial comprador"].Value.ToString();
                     comprador.uf = dataGridView1.Rows[e.RowIndex].Cells["Estado do imóvel"].Value.ToString();
+                    comprador.endereco = codEnd;
                     comprador.AlterarComprador();
                 }
             }
             catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString());
+            }
+        }
+
+        private void dataGridView1_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            try
+            {
+                //ClsComprador comprador = new ClsComprador();
+                comprador.bairro = dataGridView1.Rows[e.RowIndex].Cells["Bairro do imóvel"].Value.ToString();
+                comprador.cidade = dataGridView1.Rows[e.RowIndex].Cells["Cidade do imóvel"].Value.ToString();
+                comprador.complemento = dataGridView1.Rows[e.RowIndex].Cells["Complemento do imóvel"].Value.ToString();
+                comprador.logradouro = dataGridView1.Rows[e.RowIndex].Cells[@"R.\Av. do imóvel"].Value.ToString();
+                comprador.numero = Convert.ToInt16(dataGridView1.Rows[e.RowIndex].Cells["Número do imóvel"].Value.ToString());
+                comprador.uf = dataGridView1.Rows[e.RowIndex].Cells["Estado do imóvel"].Value.ToString();
+                codEnd = comprador.RecuperarCodigo();
+            }
+            catch(Exception ex)
             {
                 MessageBox.Show(ex.Message.ToString());
             }

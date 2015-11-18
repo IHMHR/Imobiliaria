@@ -1,6 +1,6 @@
 ﻿namespace ApresentacaoWindows
 {
-    partial class FrmCompradores
+    partial class FrmCorretores
     {
         /// <summary>
         /// Required designer variable.
@@ -41,21 +41,20 @@
             this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView1.Location = new System.Drawing.Point(0, 0);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(852, 177);
+            this.dataGridView1.Size = new System.Drawing.Size(881, 223);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dataGridView1_CellBeginEdit);
-            this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellClick);
             this.dataGridView1.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellEndEdit);
             // 
-            // FrmCompradores
+            // FrmCorretores
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(852, 177);
+            this.ClientSize = new System.Drawing.Size(881, 223);
             this.Controls.Add(this.dataGridView1);
-            this.Name = "FrmCompradores";
-            this.Text = "FrmCompradores";
-            this.Load += new System.EventHandler(this.FrmCompradores_Load);
+            this.Name = "FrmCorretores";
+            this.Text = "FrmCorretores";
+            this.Load += new System.EventHandler(this.FrmCorretores_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
 

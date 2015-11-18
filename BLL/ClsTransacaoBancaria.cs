@@ -8,6 +8,7 @@ namespace BLL
 {
     public class ClsTransacaoBancaria
     {
+        #region Variaveis
         public int codigo { get; set; }
         public string agencia { get; set; }
         public string num_conta { get; set; }
@@ -16,5 +17,6 @@ namespace BLL
         public string nome_banco { get; set; }
         public decimal valor { get; set; }
         public int venda { get; set; }
+        #endregion
     }
 }

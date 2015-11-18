@@ -25,6 +25,7 @@ namespace BLL
         public string lista_intereste { get; set; }
         public string creci { get; set; }
         public int endereco { get; set; }
+        
         #endregion
         ClsAcessoSqlServer sqlserver = new ClsAcessoSqlServer();
         ClsAcessoMySql mysql = new ClsAcessoMySql();
@@ -34,6 +35,7 @@ namespace BLL
         {
             try
             {
+                sqlserver.LimparParametros();
                 sqlserver.AdicionarParametro("cpf", cpf);
                 sqlserver.AdicionarParametro("rg", rg);
                 sqlserver.AdicionarParametro("nome", nome);
@@ -73,6 +75,7 @@ namespace BLL
             {
                 try
                 {
+                    mysql.LimparParametros();
                     mysql.AdicionarParametro("cpf", cpf);
                     mysql.AdicionarParametro("rg", rg);
                     mysql.AdicionarParametro("nome", nome);
@@ -109,7 +112,7 @@ namespace BLL
                 catch
                 {
                     //throw new Exception("Erro: " + ex.Message.ToString() + ex1.Message.ToString());
-                    string comando = "INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES ('" + cpf + "','" + rg + "','" + nome + "','" + estado_civil + "','" + profissao + "'," + renda + "," + fgts + ",'" + tel + "','" + tel2 + "','" + cel + "','" + telComercial + "','" + lista_intereste + "','" + creci + "'," + endereco + ",'" + DateTime.Now.ToString() + "')";
+                    string comando = "INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES ('" + cpf + "','" + rg + "','" + nome + "','" + estado_civil + "','" + profissao + "'," + renda + "," + fgts + ",'" + tel + "','" + tel2 + "','" + cel + "','" + telComercial + "','" + lista_intereste + "','" + creci + "'," + NovoEndereco() + ",'" + DateTime.Now.ToString() + "')";
                     if (sqlite.ExecutarComando(comando))
                     {
                         comando = "INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES ('" + logradouro + "'," + numero + ",'" + complemento + "','" + bairro + "','" + cidade + "','" + uf + "','" + pais + "','" + DateTime.Now.ToString() + "')";
@@ -278,7 +281,7 @@ namespace BLL
             }
         }/*TESTAR*/
 
-        /*public System.Data.DataTable BuscarCompradoresEndereço()
+        public System.Data.DataTable BuscarCompradoresEndereço()
         {
             try
             {
@@ -287,24 +290,25 @@ namespace BLL
                 else
                     sqlserver.AdicionarParametro("rua", logradouro);
                 //sqlserver.AdicionarParametro("rua", logradouro);
-                //sqlserver.AdicionarParametro("numero", numero.ToString().Replace("", "NULL"));
-                //sqlserver.AdicionarParametro("compl", complemento);
-                //sqlserver.AdicionarParametro("bairro", bairro);
-                //sqlserver.AdicionarParametro("cidade", cidade);
-                //sqlserver.AdicionarParametro("uf", uf);
-                //sqlserver.AdicionarParametro("pais", pais);
+                sqlserver.AdicionarParametro("numero", numero.ToString().Replace("", "NULL"));
+                sqlserver.AdicionarParametro("compl", complemento);
+                sqlserver.AdicionarParametro("bairro", bairro);
+                sqlserver.AdicionarParametro("cidade", cidade);
+                sqlserver.AdicionarParametro("uf", uf);
+                sqlserver.AdicionarParametro("pais", pais);
                 return sqlserver.ExecutarConsulta(System.Data.CommandType.StoredProcedure, "usp_CompradorPorEndereco");
             }
             catch (Exception ex)
             {
                 throw new Exception("Erro: " + ex.Message.ToString());
             }
-        }*/
+        }/*TESTAR*/
 
         public object AlterarComprador()
         {
             try
             {
+                sqlserver.LimparParametros();
                 sqlserver.AdicionarParametro("cod", codigo);
                 sqlserver.AdicionarParametro("cpf", cpf);
                 sqlserver.AdicionarParametro("rg", rg);
@@ -327,7 +331,8 @@ namespace BLL
                 //sqlserver.AdicionarParametro("fgts", fgts.ToString().Replace("", "NULL"));
                 sqlserver.AdicionarParametro("lista_intereste", lista_intereste);
                 sqlserver.AdicionarParametro("creci", creci);
-                sqlserver.AdicionarParametro("cod_endereco", endereco);
+                //sqlserver.AdicionarParametro("cod_endereco", RecuperarCodigo());
+                sqlserver.AdicionarParametro("cod_endereco", NovoEndereco());
                 /*sqlserver.AdicionarParametro("rua", logradouro);
                 //sqlserver.AdicionarParametro("num", numero.ToString().Replace("", "NULL"));
                 if (numero.Equals(string.Empty))
@@ -349,6 +354,7 @@ namespace BLL
             {
                 try
                 {
+                    mysql.LimparParametros();
                     mysql.AdicionarParametro("cod", codigo);
                     mysql.AdicionarParametro("cpf", cpf);
                     mysql.AdicionarParametro("rg", rg);
@@ -369,7 +375,7 @@ namespace BLL
                     mysql.AdicionarParametro("telComercial", telComercial);
                     mysql.AdicionarParametro("lista_intereste", lista_intereste);
                     mysql.AdicionarParametro("creci", creci);
-                    mysql.AdicionarParametro("cod_endereco", endereco);
+                    mysql.AdicionarParametro("cod_endereco", NovoEndereco());
                     return mysql.ExecutarPersistencia(System.Data.CommandType.StoredProcedure, "usp_CompradorAlterar");
                 }
                 catch (Exception ex1)
@@ -383,6 +389,7 @@ namespace BLL
         {
             try
             {
+                sqlserver.LimparParametros();
                 sqlserver.AdicionarParametro("cod", codigo);
                 return sqlserver.ExecutarPersistencia(System.Data.CommandType.StoredProcedure, "usp_CompradorApagar");
             }
@@ -390,6 +397,7 @@ namespace BLL
             {
                 try
                 {
+                    mysql.LimparParametros();
                     mysql.AdicionarParametro("cod", codigo);
                     return mysql.ExecutarPersistencia(System.Data.CommandType.StoredProcedure, "usp_CompradorApagar");
                 }
