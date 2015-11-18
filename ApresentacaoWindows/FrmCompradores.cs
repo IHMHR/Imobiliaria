@@ -112,5 +112,18 @@ namespace ApresentacaoWindows
                 MessageBox.Show(ex.Message.ToString());
             }
         }
+
+        private void dataGridView1_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
+        {
+            try
+            {
+                comprador.codigo = (int)e.Row.Cells[0].Value;
+                comprador.CompradorApagar();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString());
+            }
+        }
     }
 }
