@@ -2540,11 +2540,10 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*DOing*/
-EXEC usp_ImobiliariaPorApelido
-EXEC usp_ImobiliariaPorApelido
-EXEC usp_ImobiliariaPorApelido 
-EXEC usp_ImobiliariaPorApelido
+GO/*OK*/
+/*EXEC usp_ImobiliariaPorApelido NULL
+EXEC usp_ImobiliariaPorApelido ''
+EXEC usp_ImobiliariaPorApelido 'Teste'*/
 CREATE PROCEDURE usp_ImobiliariaPorDono
   @dono VARCHAR(120),
   @co_dono VARCHAR(120)
@@ -2553,7 +2552,23 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE imobiliaria.dono LIKE '%' + @dono + '%' OR co_dono = '%' + @co_dono + '%';
+	   IF @dono IS NULL AND @co_dono IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @dono = '' AND @co_dono = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @dono IS NOT NULL AND @co_dono IS NULL BEGIN
+	    SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome da Imobiliaria',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM imobiliaria LEFT JOIN endereco ON imobiliaria.endereco_codigo = endereco.codigo
+		WHERE imobiliaria.dono LIKE '%' + @dono + '%';
+	  END ELSE IF @dono IS NULL AND @co_dono IS NOT NULL BEGIN
+	    SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome da Imobiliaria',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM imobiliaria LEFT JOIN endereco ON imobiliaria.endereco_codigo = endereco.codigo
+		WHERE co_dono = '%' + @co_dono + '%';
+	  END ELSE BEGIN
+	    SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome da Imobiliaria',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM imobiliaria LEFT JOIN endereco ON imobiliaria.endereco_codigo = endereco.codigo
+		WHERE ((@dono IS NULL) OR (imobiliaria.dono LIKE '%' + @dono + '%')) AND ((@co_dono IS NULL) OR (co_dono = '%' + @co_dono + '%'));
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -2562,7 +2577,11 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_ImobiliariaPorDono NULL,NULL
+EXEC usp_ImobiliariaPorDono '',''
+EXEC usp_ImobiliariaPorDono NULL,'Igor Henrique Heredia'
+EXEC usp_ImobiliariaPorDono 'Igor Martinelli Ramos',NULL*/
 CREATE PROCEDURE usp_ImobiliariaPorEndereco
   @rua VARCHAR(100),
   @num INT,
@@ -2576,7 +2595,44 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM imobiliaria JOIN endereco ON imobiliaria.creci = endereco_codigo WHERE endereco.logradouro LIKE '%'+@rua+'%' OR endereco.numero = @num OR endereco.complemento LIKE '%'+@compl+'%' OR endereco.bairro LIKE '%'+@bairro+'%' OR endereco.cidade LIKE '%'+@cidade+'%' OR endereco.uf = @uf OR endereco.pais LIKE '%'+@pais+'%';
+	  
+	  IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @rua = '' AND @num = '' AND @compl = '' AND @bairro = '' AND @cidade = '' AND @uf = '' AND @pais = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @rua IS NOT NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM imobiliaria LEFT JOIN endereco ON imobiliaria.endereco_codigo = endereco.codigo
+	    WHERE endereco.logradouro LIKE '%'+@rua+'%';
+	  END ELSE IF @rua IS NULL AND @num IS NOT NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM imobiliaria LEFT JOIN endereco ON imobiliaria.endereco_codigo = endereco.codigo
+	    WHERE endereco.numero = @num;
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NOT NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM imobiliaria LEFT JOIN endereco ON imobiliaria.endereco_codigo = endereco.codigo
+	    WHERE endereco.complemento LIKE '%'+@compl+'%';
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NOT NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM imobiliaria LEFT JOIN endereco ON imobiliaria.endereco_codigo = endereco.codigo
+	    WHERE endereco.bairro LIKE '%'+@bairro+'%';
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NOT NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM imobiliaria LEFT JOIN endereco ON imobiliaria.endereco_codigo = endereco.codigo
+	    WHERE endereco.cidade LIKE '%'+@cidade+'%';
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NOT NULL AND @pais IS NULL BEGIN
+	    SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM imobiliaria LEFT JOIN endereco ON imobiliaria.endereco_codigo = endereco.codigo
+	    WHERE endereco.uf = @uf;
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NOT NULL BEGIN
+	    SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM imobiliaria LEFT JOIN endereco ON imobiliaria.endereco_codigo = endereco.codigo
+		WHERE endereco.pais LIKE '%'+@pais+'%';
+	  END ELSE BEGIN
+	    SELECT imobiliaria.creci AS 'Creci da Imobiliaria',nome_creci AS 'Nome do CEO',dt_emissao AS 'Data da emissão',razao AS 'Razão social', apelido AS 'Nome da loja',telefone AS 'Telefone da loja',dono AS 'Sócio Majoritário',co_dono AS 'Sócio Senior',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM imobiliaria LEFT JOIN endereco ON imobiliaria.endereco_codigo = endereco.codigo
+		WHERE ((endereco.logradouro LIKE '%'+@rua+'%') OR (@rua IS NULL)) AND ((endereco.numero = @num) OR (@num IS NULL)) AND ((endereco.complemento LIKE '%'+@compl+'%') OR (@compl IS NULL)) AND ((endereco.bairro LIKE '%'+@bairro+'%') OR (@bairro IS NULL)) AND ((endereco.cidade LIKE '%'+@cidade+'%') OR (@cidade IS NULL)) AND ((endereco.uf = @uf) OR (@uf IS NULL)) AND ((endereco.pais LIKE '%'+@pais+'%') OR (@pais IS NULL));
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -2585,7 +2641,16 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_ImobiliariaPorEndereco NULL,NULL,NULL,NULL,NULL,NULL,NULL 
+EXEC usp_ImobiliariaPorEndereco '','','','','','','' 
+EXEC usp_ImobiliariaPorEndereco 'Avenida Principal',NULL,NULL,NULL,NULL,NULL,NULL 
+EXEC usp_ImobiliariaPorEndereco NULL,'1921',NULL,NULL,NULL,NULL,NULL 
+EXEC usp_ImobiliariaPorEndereco NULL,NULL,'loja',NULL,NULL,NULL,NULL 
+EXEC usp_ImobiliariaPorEndereco NULL,NULL,NULL,'Centro da Cidade',NULL,NULL,NULL 
+EXEC usp_ImobiliariaPorEndereco NULL,NULL,NULL,NULL,'Imovis City',NULL,NULL 
+EXEC usp_imobiliariaPorEndereco NULL,NULL,NULL,NULL,NULL,'MG',NULL
+EXEC usp_imobiliariaPorEndereco NULL,NULL,NULL,NULL,NULL,NULL,'Brasil'*/
 CREATE PROCEDURE usp_ImobiliariaPorTodos
 AS
 BEGIN
@@ -2612,9 +2677,15 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', capitador AS 'Capitador do imovél',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',imovel_codigo AS 'Código do Imovél',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
-	  FROM venda JOIN endereco ON venda.codigo = endereco_codigo JOIN imobiliaria ON venda.codigo = imobiliaria_creci JOIN imovel ON venda.codigo = imovel_codigo JOIN despachante ON venda.codigo = despachante_codigo 
-	  WHERE venda.codigo = @cod;
+	  IF @cod IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @cod = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE BEGIN
+        SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', imovel.capitador AS 'Capitador do imóvel',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM venda LEFT JOIN endereco ON venda.endereco_codigo = endereco.codigo LEFT JOIN imobiliaria ON venda.codigo = imobiliaria_creci LEFT JOIN imovel ON venda.imovel_codigo = imovel.codigo LEFT JOIN despachante ON venda.despachante_codigo = despachante.codigo
+	    WHERE venda.codigo = @cod;
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -2623,7 +2694,10 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_VendaPorCod NULL
+EXEC usp_VendaPorCod ''
+EXEC usp_VendaPorCod '5'*/
 CREATE PROCEDURE usp_VendaPorValor
   @valor INT
 AS
@@ -2631,7 +2705,15 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', capitador AS 'Capitador do imovél',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',imovel_codigo AS 'Código do Imovél',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM venda JOIN endereco ON venda.codigo = endereco_codigo JOIN imobiliaria ON venda.codigo = imobiliaria_creci JOIN imovel ON venda.codigo = imovel_codigo JOIN despachante ON venda.codigo = despachante_codigo WHERE venda.valor = @valor;
+	  IF @valor IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @valor = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE BEGIN
+        SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', imovel.capitador AS 'Capitador do imóvel',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM venda LEFT JOIN endereco ON venda.endereco_codigo = endereco.codigo LEFT JOIN imobiliaria ON venda.codigo = imobiliaria_creci LEFT JOIN imovel ON venda.imovel_codigo = imovel.codigo LEFT JOIN despachante ON venda.despachante_codigo = despachante.codigo
+	    WHERE venda.valor = @valor;
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -2640,15 +2722,26 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*Ok*/
+/*EXEC usp_VendaPorValor NULL
+EXEC usp_VendaPorValor ''
+EXEC usp_VendaPorValor 250000*/
 CREATE PROCEDURE usp_VendaPorData
-  @data DATE
+  @data VARCHAR(20)
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', capitador AS 'Capitador do imovél',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',imovel_codigo AS 'Código do Imovél',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM venda JOIN endereco ON venda.codigo = endereco_codigo JOIN imobiliaria ON venda.codigo = imobiliaria_creci JOIN imovel ON venda.codigo = imovel_codigo JOIN despachante ON venda.codigo = despachante_codigo WHERE venda.data = @data;
+	  IF @data IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @data = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE BEGIN
+		SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', imovel.capitador AS 'Capitador do imóvel',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM venda LEFT JOIN endereco ON venda.endereco_codigo = endereco.codigo LEFT JOIN imobiliaria ON venda.codigo = imobiliaria_creci LEFT JOIN imovel ON venda.imovel_codigo = imovel.codigo LEFT JOIN despachante ON venda.despachante_codigo = despachante.codigo
+	    WHERE venda.data LIKE '%' + @data + '%';
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -2657,7 +2750,10 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_VendaPorData NULL
+EXEC usp_VendaPorData ''
+EXEC usp_VendaPorData '2015'*/
 CREATE PROCEDURE usp_VendaPorPocentagemImobiliaria
   @porcenta_imobiliaria DECIMAL
 AS
@@ -2665,8 +2761,14 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', capitador AS 'Capitador do imovél',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',imovel_codigo AS 'Código do Imovél',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM venda JOIN endereco ON venda.codigo = endereco_codigo JOIN imobiliaria ON venda.codigo = imobiliaria_creci JOIN imovel ON venda.codigo = imovel_codigo JOIN despachante ON venda.codigo = despachante_codigo WHERE venda.porcenta_imobiliaria = @porcenta_imobiliaria;
-
+	   IF @porcenta_imobiliaria IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE BEGIN
+		SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', imovel.capitador AS 'Capitador do imóvel',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM venda LEFT JOIN endereco ON venda.endereco_codigo = endereco.codigo LEFT JOIN imobiliaria ON venda.codigo = imobiliaria_creci LEFT JOIN imovel ON venda.imovel_codigo = imovel.codigo LEFT JOIN despachante ON venda.despachante_codigo = despachante.codigo
+	    WHERE venda.porcenta_imobiliaria = @porcenta_imobiliaria;
+	  END
+	  
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -2674,7 +2776,9 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_VendaPorPocentagemImobiliaria NULL
+EXEC usp_VendaPorPocentagemImobiliaria 6.0*/
 CREATE PROCEDURE usp_VendaPorEndereco
   @rua VARCHAR(100),
   @num INT,
@@ -2688,7 +2792,45 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', capitador AS 'Capitador do imovél',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',imovel_codigo AS 'Código do Imovél',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM venda JOIN endereco ON venda.codigo = endereco_codigo JOIN imobiliaria ON venda.codigo = imobiliaria_creci JOIN imovel ON venda.codigo = imovel_codigo JOIN despachante ON venda.codigo = despachante_codigo WHERE endereco.logradouro LIKE '%'+@rua+'%' OR endereco.numero = @num OR endereco.complemento LIKE '%'+@compl+'%' OR endereco.bairro LIKE '%'+@bairro+'%' OR endereco.cidade LIKE '%'+@cidade+'%' OR endereco.uf = @uf OR endereco.pais LIKE '%'+@pais+'%';
+	  IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @rua = '' AND @num = '' AND @compl = '' AND @bairro = '' AND @cidade = '' AND @uf = '' AND @pais = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @rua IS NOT NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', imovel.capitador AS 'Capitador do imóvel',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM venda LEFT JOIN endereco ON venda.endereco_codigo = endereco.codigo LEFT JOIN imobiliaria ON venda.codigo = imobiliaria_creci LEFT JOIN imovel ON venda.imovel_codigo = imovel.codigo LEFT JOIN despachante ON venda.despachante_codigo = despachante.codigo
+		WHERE endereco.logradouro LIKE '%'+@rua+'%';
+	  END ELSE IF @rua IS NULL AND @num IS NOT NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+		SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', imovel.capitador AS 'Capitador do imóvel',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM venda LEFT JOIN endereco ON venda.endereco_codigo = endereco.codigo LEFT JOIN imobiliaria ON venda.codigo = imobiliaria_creci LEFT JOIN imovel ON venda.imovel_codigo = imovel.codigo LEFT JOIN despachante ON venda.despachante_codigo = despachante.codigo
+	    WHERE endereco.numero = @num;
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NOT NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', imovel.capitador AS 'Capitador do imóvel',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM venda LEFT JOIN endereco ON venda.endereco_codigo = endereco.codigo LEFT JOIN imobiliaria ON venda.codigo = imobiliaria_creci LEFT JOIN imovel ON venda.imovel_codigo = imovel.codigo LEFT JOIN despachante ON venda.despachante_codigo = despachante.codigo
+	    WHERE endereco.complemento LIKE '%'+@compl+'%';
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NOT NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', imovel.capitador AS 'Capitador do imóvel',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM venda LEFT JOIN endereco ON venda.endereco_codigo = endereco.codigo LEFT JOIN imobiliaria ON venda.codigo = imobiliaria_creci LEFT JOIN imovel ON venda.imovel_codigo = imovel.codigo LEFT JOIN despachante ON venda.despachante_codigo = despachante.codigo
+	    WHERE endereco.bairro LIKE '%'+@bairro+'%';
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NOT NULL AND @uf IS NULL AND @pais IS NULL BEGIN
+	    SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', imovel.capitador AS 'Capitador do imóvel',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM venda LEFT JOIN endereco ON venda.endereco_codigo = endereco.codigo LEFT JOIN imobiliaria ON venda.codigo = imobiliaria_creci LEFT JOIN imovel ON venda.imovel_codigo = imovel.codigo LEFT JOIN despachante ON venda.despachante_codigo = despachante.codigo
+	    WHERE endereco.cidade LIKE '%'+@cidade+'%';
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NOT NULL AND @pais IS NULL BEGIN
+	    SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', imovel.capitador AS 'Capitador do imóvel',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM venda LEFT JOIN endereco ON venda.endereco_codigo = endereco.codigo LEFT JOIN imobiliaria ON venda.codigo = imobiliaria_creci LEFT JOIN imovel ON venda.imovel_codigo = imovel.codigo LEFT JOIN despachante ON venda.despachante_codigo = despachante.codigo
+		WHERE endereco.uf = @uf;
+	  END ELSE IF @rua IS NULL AND @num IS NULL AND @compl IS NULL AND @bairro IS NULL AND @cidade IS NULL AND @uf IS NULL AND @pais IS NOT NULL BEGIN
+	    SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', imovel.capitador AS 'Capitador do imóvel',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM venda LEFT JOIN endereco ON venda.endereco_codigo = endereco.codigo LEFT JOIN imobiliaria ON venda.codigo = imobiliaria_creci LEFT JOIN imovel ON venda.imovel_codigo = imovel.codigo LEFT JOIN despachante ON venda.despachante_codigo = despachante.codigo
+	    WHERE endereco.pais LIKE '%'+@pais+'%';
+	  END ELSE BEGIN
+	    SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', imovel.capitador AS 'Capitador do imóvel',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	    FROM venda LEFT JOIN endereco ON venda.endereco_codigo = endereco.codigo LEFT JOIN imobiliaria ON venda.codigo = imobiliaria_creci LEFT JOIN imovel ON venda.imovel_codigo = imovel.codigo LEFT JOIN despachante ON venda.despachante_codigo = despachante.codigo
+		WHERE ((endereco.logradouro LIKE '%'+@rua+'%') OR (@rua IS NULL)) AND ((endereco.numero = @num) OR (@num IS NULL)) AND ((endereco.complemento LIKE '%'+@compl+'%') OR (@compl IS NULL)) AND ((endereco.bairro LIKE '%'+@bairro+'%') OR (@bairro IS NULL)) AND ((endereco.cidade LIKE '%'+@cidade+'%') OR (@cidade IS NULL)) AND ((endereco.uf = @uf) OR (@uf IS NULL)) AND ((endereco.pais LIKE '%'+@pais+'%') OR (@pais IS NULL));
+	  END
+
+	  --SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', capitador AS 'Capitador do imovél',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',imovel_codigo AS 'Código do Imovél',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' FROM venda JOIN endereco ON venda.codigo = endereco_codigo JOIN imobiliaria ON venda.codigo = imobiliaria_creci JOIN imovel ON venda.codigo = imovel_codigo JOIN despachante ON venda.codigo = despachante_codigo WHERE endereco.logradouro LIKE '%'+@rua+'%' OR endereco.numero = @num OR endereco.complemento LIKE '%'+@compl+'%' OR endereco.bairro LIKE '%'+@bairro+'%' OR endereco.cidade LIKE '%'+@cidade+'%' OR endereco.uf = @uf OR endereco.pais LIKE '%'+@pais+'%';
 
 	COMMIT TRAN
   END TRY
@@ -2697,15 +2839,24 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_VendaPorEndereco NULL,NULL,NULL,NULL,NULL,NULL,NULL
+EXEC usp_VendaPorEndereco '','','','','','',''
+EXEC usp_VendaPorEndereco 'Mamae',NULL,NULL,NULL,NULL,NULL,NULL
+EXEC usp_VendaPorEndereco NULL,864,NULL,NULL,NULL,NULL,NULL
+EXEC usp_VendaPorEndereco NULL,NULL,'casa',NULL,NULL,NULL,NULL
+EXEC usp_VendaPorEndereco NULL,NULL,NULL,'Santa Helena',NULL,NULL,NULL
+EXEC usp_VendaPorEndereco NULL,NULL,NULL,NULL,'Belo Horizonte',NULL,NULL
+EXEC usp_VendaPorEndereco NULL,NULL,NULL,NULL,NULL,'MG',NULL
+EXEC usp_VendaPorEndereco NULL,NULL,NULL,NULL,NULL,NULL,'Brasil'*/
 CREATE PROCEDURE usp_VendaPorTodos
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', capitador AS 'Capitador do imovél',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',imovel_codigo AS 'Código do Imovél',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
-	  FROM venda LEFT JOIN endereco ON venda.endereco_codigo = endereco.codigo LEFT JOIN imobiliaria ON venda.codigo = imobiliaria_creci JOIN imovel ON venda.codigo = imovel_codigo JOIN despachante ON venda.despachante_codigo = venda.codigo
+	  SELECT venda.codigo AS 'Código da Venda',valor AS 'Valor da Venda',data AS 'Data da venda',documentos AS 'Documento disponiveis', imovel.capitador AS 'Capitador do imóvel',porcenta_imobiliaria AS 'Porcentagem da Imobiliaria',imobiliaria_creci AS 'Creci da Imobiliaria', imobiliaria.apelido AS 'Loja da venda',endereco.logradouro AS 'R.\Av. do endereço',endereco.numero AS 'Número do endereço',endereco.complemento AS 'Complemento do endereço',endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+	  FROM venda LEFT JOIN endereco ON venda.endereco_codigo = endereco.codigo LEFT JOIN imobiliaria ON venda.codigo = imobiliaria_creci LEFT JOIN imovel ON venda.imovel_codigo = imovel.codigo LEFT JOIN despachante ON venda.despachante_codigo = despachante.codigo
 	  ORDER BY venda.created DESC;
 
 	COMMIT TRAN
@@ -2715,8 +2866,8 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
-
+GO/*OK*/
+/*EXEC usp_VendaPorTodos*/
 CREATE PROCEDURE usp_TransacaoPorCod
   @cod INT
 AS
@@ -2724,7 +2875,16 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' FROM transacao_bancaria JOIN venda ON transacao_bancaria.codigo = venda_codigo WHERE transacao_bancaria.codigo = @cod;
+	  IF @cod IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @cod = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE BEGIN
+        SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' 
+	    FROM transacao_bancaria LEFT JOIN venda ON transacao_bancaria.venda_codigo = venda.codigo
+	    WHERE transacao_bancaria.codigo = @cod;
+	  END
+	  
 
 	COMMIT TRAN
   END TRY
@@ -2733,15 +2893,26 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_TransacaoPorCod NULL
+EXEC usp_TransacaoPorCod ''
+EXEC usp_TransacaoPorCod 2*/
 CREATE PROCEDURE usp_TransacaoPorAgencia
   @agencia VARCHAR(6)
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	  
-	  SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' FROM transacao_bancaria JOIN venda ON transacao_bancaria.codigo = venda_codigo WHERE transacao_bancaria.agencia = @agencia;
+	 
+	 IF @agencia IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @agencia = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE BEGIN
+        SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' 
+		FROM transacao_bancaria LEFT JOIN venda ON transacao_bancaria.venda_codigo = venda.codigo
+ 	    WHERE transacao_bancaria.agencia = @agencia;
+	  END 
 
 	COMMIT TRAN
   END TRY
@@ -2750,7 +2921,10 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_TransacaoPorAgencia NULL
+EXEC usp_TransacaoPorAgencia ''
+EXEC usp_TransacaoPorAgencia 1203*/
 CREATE PROCEDURE usp_TransacaoPorBanco
   @banco VARCHAR(50)
 AS
@@ -2758,7 +2932,16 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' FROM transacao_bancaria JOIN venda ON transacao_bancaria.codigo = venda_codigo WHERE transacao_bancaria.nome_banco LIKE '%' + @banco + '%';
+	  IF @banco IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @banco = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE BEGIN
+        SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' 
+	    FROM transacao_bancaria LEFT JOIN venda ON transacao_bancaria.venda_codigo = venda.codigo
+		WHERE transacao_bancaria.nome_banco LIKE '%' + @banco + '%';  
+	  END
+	  
 
 	COMMIT TRAN
   END TRY
@@ -2767,16 +2950,25 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_TransacaoPorBanco NULL
+EXEC usp_TransacaoPorBanco ''
+EXEC usp_TransacaoPorBanco 'Bra'*/
 CREATE PROCEDURE usp_TransacaoPorValor
   @valor DECIMAL
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	  
-	  SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' FROM transacao_bancaria JOIN venda ON transacao_bancaria.codigo = venda_codigo WHERE transacao_bancaria.valor = @valor;
 
+	  IF @valor IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE BEGIN
+        SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' 
+	    FROM transacao_bancaria LEFT JOIN venda ON transacao_bancaria.venda_codigo = venda.codigo
+	    WHERE transacao_bancaria.valor = @valor;
+	  END
+	  
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -2784,7 +2976,9 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_TransacaoPorValor NULL
+EXEC usp_TransacaoPorValor 25000*/
 CREATE PROCEDURE usp_TransacaoPorData
   @data DATETIME
 AS
@@ -2792,7 +2986,15 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' FROM transacao_bancaria JOIN venda ON transacao_bancaria.codigo = venda_codigo WHERE transacao_bancaria.created = @data;
+	  IF @data IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @data = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE BEGIN
+        SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' 
+	    FROM transacao_bancaria LEFT JOIN venda ON transacao_bancaria.venda_codigo = venda.codigo
+	    WHERE transacao_bancaria.created = @data;
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -2802,6 +3004,11 @@ BEGIN
   END CATCH
 END
 GO/*TODO*/
+/*EXEC usp_TransacaoPorData NULL
+EXEC usp_TransacaoPorData ''
+EXEC usp_TransacaoPorData '2015-09-11 12:08:46.480'
+select * from transacao_bancaria
+exec sp_columns 'transacao_bancaria'*/
 CREATE PROCEDURE usp_TransacaoPorTipoConta
   @tipo_conta VARCHAR(25)
 AS
@@ -2809,7 +3016,15 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' FROM transacao_bancaria JOIN venda ON transacao_bancaria.codigo = venda_codigo WHERE transacao_bancaria.tipo_conta = @tipo_conta;
+	  IF @tipo_conta IS NULL BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE IF @tipo_conta = '' BEGIN
+	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
+	  END ELSE BEGIN
+        SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' 
+	    FROM transacao_bancaria LEFT JOIN venda ON transacao_bancaria.venda_codigo = venda.codigo
+	    WHERE transacao_bancaria.tipo_conta LIKE '%' + @tipo_conta + '%';  
+	  END
 
 	COMMIT TRAN
   END TRY
@@ -2818,14 +3033,19 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
+GO/*OK*/
+/*EXEC usp_TransacaoPorTipoConta NULL
+EXEC usp_TransacaoPorTipoConta ''
+EXEC usp_TransacaoPorTipoConta 'Corrente'*/
 CREATE PROCEDURE usp_TransacaoPorTodos
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-	  SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' FROM transacao_bancaria JOIN venda ON transacao_bancaria.codigo = venda_codigo ORDER BY transacao_bancaria.created DESC;
+	  SELECT transacao_bancaria.codigo AS 'Código da Transação Bancária',agencia AS 'Agencia',num_conta_bancaria AS 'Número da conta',num_conta_digito AS 'Dígito da conta', tipo_conta AS 'Tipo da Conta',nome_banco AS 'Nome do Banco',venda_codigo AS 'Código da venda', venda.valor AS 'Valor da Venda', transacao_bancaria.valor AS 'Valor da Transação' 
+	  FROM transacao_bancaria LEFT JOIN venda ON transacao_bancaria.venda_codigo = venda.codigo
+	  ORDER BY transacao_bancaria.created DESC;
 
 	COMMIT TRAN
   END TRY
@@ -2834,8 +3054,8 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TODO*/
-
+GO/*OK*/
+/*EXEC usp_TransacaoPorTodos*/
 /*CREATE PROCEDURE usp_EnderecoCodigo
   @rua VARCHAR(100),
   @num INT,
@@ -2988,7 +3208,7 @@ GO
 EXEC usp_EnderecoCodigo NULL,NULL,NULL,NULL,NULL,NULL,NULL
 EXEC usp_EnderecoCodigo '','','','','','',''
 EXEC usp_EnderecoCodigo 'Avenida Afonso Pena',4444,'Edifício','Cruzeiro','Belo Horizonte','MG','NULL'
-SELECT * FROM endereco WHERE codigo = 11
+SELECT * FROM endereco WHERE codigo = 1016
 
 CREATE PROCEDURE usp_EnderecoInserir
   @rua VARCHAR(100),
@@ -3016,6 +3236,24 @@ BEGIN
 END
 GO
 
+CREATE PROCEDURE usp_CompradorConjugePorTodos
+AS
+BEGIN
+  BEGIN TRY
+    BEGIN TRAN
+	
+	  SELECT comprador_conjuge.codigo AS 'Código do Cônjuge',comprador_conjuge.nome AS 'Nome do Cônjuge',comprador_conjuge.estado_civil AS 'Estado Civil do Cônjuge',comprador_conjuge.profissao AS 'Profissão do Cônjuge',comprador_conjuge.renda_bruta AS 'Renda bruta do Cônjuge',comprador_conjuge.fgts AS 'Fundo de Garantia do Cônjuge',comprador_conjuge.telefone,comprador_conjuge.telefone2,comprador_conjuge.celular,comprador_conjuge.tel_comercial AS 'Telefone comercial do Cônjuge',comprador.nome AS 'Nome do Comprador' 
+	  FROM comprador_conjuge LEFT JOIN comprador ON comprador_conjuge.comprador_codigo = comprador.codigo
+	  ORDER BY comprador_conjuge.codigo DESC;
+
+	COMMIT TRAN
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRAN;
+	SELECT ERROR_MESSAGE() AS 'Erro na transação';
+  END CATCH
+END
+GO
 
 --TRIGGER'S PARA EVITAR EXCLUSÃO PERMANENTE--
 /*CREATE TRIGGER [NOME DO TRIGGER]

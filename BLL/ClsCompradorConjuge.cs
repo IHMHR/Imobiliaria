@@ -84,5 +84,17 @@ namespace BLL
                 }
             }
         }
+
+        public System.Data.DataTable BuscarCompradoresConjuges()
+        {
+            try
+            {
+                return sqlserver.ExecutarConsulta(System.Data.CommandType.StoredProcedure, "usp_CompradorConjugePorTodos");
+            }
+            catch (Exception)
+            {
+                throw new Exception("errou");
+            }
+        }
     }
 }
