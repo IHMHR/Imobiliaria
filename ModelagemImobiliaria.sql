@@ -274,18 +274,21 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TESTE*/
---EXEC usp_ImovelInserir 092941,'15','11',1,1,'Avenida Afonso Pena',4444,'Edifício','Cruzeiro','Belo Horizonte','MG','Brasil'
---SELECT * FROM imovel WHERE codigo = 3;
+GO/*OK*/
+/*EXEC usp_ImovelInserir 092941,'15','11',2,1,'Avenida Afonso Pena',4444,'Edifício','Cruzeiro','Belo Horizonte','MG','Brasil'
+SELECT * FROM imovel WHERE codigo = 2;*/
 CREATE PROCEDURE usp_ProprietarioInserir
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
   @nome VARCHAR(120),
   @est_civil VARCHAR(15),
-  @tel VARCHAR(14),
-  @tel2 VARCHAR(14),
-  @cel VARCHAR(14),
-  @telComercial VARCHAR(14),
+  @ddi VARCHAR(5) = NULL,
+  @ddd VARCHAR(5) = NULL,
+  @tel VARCHAR(14) = NULL,
+  @tel2 VARCHAR(14) = NULL,
+  @cel VARCHAR(14) = NULL,
+  @telComercial VARCHAR(14) = NULL,
+  @telExtra VARCHAR(14) = NULL,
   @rua VARCHAR(100),
   @num INT,
   @compl VARCHAR(30) = NULL,
@@ -308,7 +311,25 @@ BEGIN
 	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
 	   END
 
-       INSERT INTO proprietario (cpf,rg,nome,estado_civil,telefone,telefone2,celular,tel_comercial,endereco_codigo,created) VALUES (@cpf,@rg,@nome,@est_civil,@tel,@tel2,@cel,@telComercial,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+	   IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NOT NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,@ddi,@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,celular,tel_comercial,ddi,ddd,created) 
+	     VALUES (@tel,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,celular,ddi,ddd,created) 
+	     VALUES (@tel,@cel,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END
+	   
+       INSERT INTO proprietario (cpf,rg,nome,estado_civil,endereco_codigo,created,telefone_codigo) 
+	   VALUES (@cpf,@rg,@nome,@est_civil,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP),(SELECT IDENT_CURRENT('telefone')));
 
 	   SELECT @@IDENTITY AS 'Código do Proprietário';
 	COMMIT TRAN
@@ -319,24 +340,45 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_ProprietarioInserir '92345678903','RG10110101','Proprietario 01','Casado','3134343434','3133334343','31988888888','3134331511','Rua da Mamae', 864,'Casa','Santa Helena','Belo Horizonte','MG','Brasil';
---SELECT * FROM proprietario WHERE proprietario.codigo = 1;
+/*EXEC usp_ProprietarioInserir '92345678903','RG10110101','Proprietario 01','Casado','+55','31','34343434','33334343','988888888','34331511','5808','Rua da Mamae', 864,'Casa','Santa Helena','Belo Horizonte','MG','Brasil';
+SELECT * FROM proprietario WHERE proprietario.codigo = 1;*/
 CREATE PROCEDURE usp_ProprietarioConjugeInserir
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
   @nome VARCHAR(120),
   @est_civil VARCHAR(15),
-  @tel VARCHAR(14),
-  @tel2 VARCHAR(14),
-  @cel VARCHAR(14),
-  @telComercial VARCHAR(14),
+  @ddi VARCHAR(5) = NULL,
+  @ddd VARCHAR(5) = NULL,
+  @tel VARCHAR(14) = NULL,
+  @tel2 VARCHAR(14) = NULL,
+  @cel VARCHAR(14) = NULL,
+  @telComercial VARCHAR(14) = NULL,
+  @telExtra VARCHAR(14) = NULL,
   @proprietarioCodigo INT
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 
-       INSERT INTO proprietario_conjuge (cpf,rg,nome,estado_civil,telefone,telefone2,celular,tel_comercial,proprietario_codigo,created) VALUES (@cpf,@rg,@nome,@est_civil,@tel,@tel2,@cel,@telComercial,@proprietarioCodigo,(SELECT CURRENT_TIMESTAMP));
+	   IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NOT NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,@ddi,@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,celular,tel_comercial,ddi,ddd,created) 
+	     VALUES (@tel,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,celular,ddi,ddd,created) 
+	     VALUES (@tel,@cel,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END
+
+	   INSERT INTO proprietario_conjuge (cpf,rg,nome,estado_civil,proprietario_codigo,created,telefone_codigo) 
+	   VALUES (@cpf,@rg,@nome,@est_civil,@proprietarioCodigo,(SELECT CURRENT_TIMESTAMP),(SELECT IDENT_CURRENT('telefone')));
 
 	   SELECT @@IDENTITY AS 'Código do(a) Conjuge do(a) Proprietário(a)';
 	COMMIT TRAN
@@ -347,16 +389,19 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_ProprietarioConjugeInserir '98765412300','RG78771888','Mulher do proprietário', 'Casada', '3134343434','3133334343','31985288528','3132433342',1
---SELECT * FROM proprietario_conjuge WHERE codigo = 1;
+/*EXEC usp_ProprietarioConjugeInserir '98765412300','RG78771888','Mulher do proprietário','Casada','+55','031','34343434','33334343','985288528','32433342','1234',1
+SELECT * FROM proprietario_conjuge WHERE codigo = 1;*/
 CREATE PROCEDURE usp_CorretorInserir
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
   @nome VARCHAR(150),
-  @tel VARCHAR(14),
-  @tel2 VARCHAR(14),
-  @cel VARCHAR(14),
-  @telComercial VARCHAR(14),
+  @ddi VARCHAR(5) = NULL,
+  @ddd VARCHAR(5) = NULL,
+  @tel VARCHAR(14) = NULL,
+  @tel2 VARCHAR(14) = NULL,
+  @cel VARCHAR(14) = NULL,
+  @telComercial VARCHAR(14) = NULL,
+  @telExtra VARCHAR(14) = NULL,
   @sexo CHAR(1),
   @creci VARCHAR(10) = NULL,
   @rua VARCHAR(100),
@@ -381,13 +426,32 @@ BEGIN
 	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
 	   END
 
+	   IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NOT NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,@ddi,@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,celular,tel_comercial,ddi,ddd,created) 
+	     VALUES (@tel,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,celular,ddi,ddd,created) 
+	     VALUES (@tel,@cel,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END
+
        IF @creci IS NULL BEGIN
-         INSERT INTO corretor(cpf,rg,nome_completo,telefone,telefone2,celular,tel_comercial,sexo,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@tel,@tel2,@cel,@telComercial,@sexo,(SELECT TOP 1 creci FROM imobiliaria ORDER BY imobiliaria.created DESC),(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO corretor(cpf,rg,nome_completo,sexo,imobiliaria_creci,endereco_codigo,created,telefone_codigo) 
+		 VALUES(@cpf,@rg,@nome,@sexo,(SELECT TOP 1 creci FROM imobiliaria ORDER BY imobiliaria.created DESC),(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP),(SELECT IDENT_CURRENT('telefone')));
        END
        ELSE BEGIN
-         INSERT INTO corretor(cpf,rg,nome_completo,telefone,telefone2,celular,tel_comercial,sexo,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@tel,@tel2,@cel,@telComercial,@sexo,@creci,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO corretor(cpf,rg,nome_completo,sexo,imobiliaria_creci,endereco_codigo,created,telefone_codigo) 
+		 VALUES(@cpf,@rg,@nome,@sexo,@creci,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP),(SELECT IDENT_CURRENT('telefone')));
        END
-
+	   
 	   SELECT @@IDENTITY AS 'Código do Corretor';
 	COMMIT TRAN
   END TRY
@@ -397,8 +461,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_CorretorInserir '12332145665','MG17991868','Igor Ramos','3134746398','5808','3188521996','3132477400','M',NULL,'Rua dos Securitários',115,'Casa','Alipio de Melo','Belo Horizonte','MG','Brasil'
---SELECT * FROM corretor WHERE corretor.codigo = 2;
+/*EXEC usp_CorretorInserir '12332145665','MG17991868','Igor Ramos','+55','31','34746398','5808','88521996','32477400','4444','M',NULL,'Rua dos Securitários',115,'Casa','Alipio de Melo','Belo Horizonte','MG','Brasil'
+SELECT * FROM corretor WHERE corretor.codigo = 2;*/
 CREATE PROCEDURE usp_CompradorInserir
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
@@ -407,10 +471,13 @@ CREATE PROCEDURE usp_CompradorInserir
   @profissao varchar(45),
   @renda_bruta INT,
   @fgts DECIMAL(11,2),
-  @tel VARCHAR(14),
-  @tel2 VARCHAR(14),
-  @cel VARCHAR(14),
-  @telComercial VARCHAR(14),
+  @ddi VARCHAR(5) = NULL,
+  @ddd VARCHAR(5) = NULL,
+  @tel VARCHAR(14) = NULL,
+  @tel2 VARCHAR(14) = NULL,
+  @cel VARCHAR(14) = NULL,
+  @telComercial VARCHAR(14) = NULL,
+  @telExtra VARCHAR(14) = NULL,
   @lista_intereste VARCHAR(50),
   @creci VARCHAR(10) = NULL,
   @rua VARCHAR(100),
@@ -435,11 +502,30 @@ BEGIN
 	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
 	   END
 
+	   IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NOT NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,@ddi,@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,celular,tel_comercial,ddi,ddd,created) 
+	     VALUES (@tel,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,celular,ddi,ddd,created) 
+	     VALUES (@tel,@cel,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END
+
        IF @creci IS NULL BEGIN
-         INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@lista_intereste,(SELECT TOP 1 creci FROM imobiliaria ORDER BY imobiliaria.created DESC),(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,lista_intereste,imobiliaria_creci,endereco_codigo,created,telefone_codigo) 
+		 VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@lista_intereste,(SELECT TOP 1 creci FROM imobiliaria ORDER BY imobiliaria.created DESC),(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP),(SELECT IDENT_CURRENT('telefone')));
        END
        ELSE BEGIN
-         INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,lista_intereste,imobiliaria_creci,endereco_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@lista_intereste,@creci,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO comprador (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,lista_intereste,imobiliaria_creci,endereco_codigo,created,telefone_codigo) 
+		 VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@lista_intereste,@creci,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP),(SELECT IDENT_CURRENT('telefone')));
        END
 
 	   SELECT @@IDENTITY AS 'Código do(a) Comprador(a)';
@@ -451,8 +537,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_CompradorInserir '13013013299','RG17117811','Comprador 01','Solteiro','Analista de Suporte','1400',500,'3134746398','3132477400','31988521996','5808','Imovel 01,05 e 08',NULL,'Rua dos Securitários',115,'Casa','Alipio de Melo','Belo Horizonte','MG','Brasil'
---SELECT * FROM comprador WHERE codigo = 2;
+/*EXEC usp_CompradorInserir '13013013299','RG17117811','Comprador 01','Solteiro','Analista de Suporte',1400,500.00,'+55','31','34746398','32477400','988521996','32477400','5808','Imovel 01,05 e 08',NULL,'Rua dos Securitários',115,'Casa','Alipio de Melo','Belo Horizonte','MG','Brasil'
+SELECT * FROM comprador WHERE codigo = 1;*/
 CREATE PROCEDURE usp_CompradorConjugeInserir
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
@@ -461,17 +547,38 @@ CREATE PROCEDURE usp_CompradorConjugeInserir
   @profissao varchar(45),
   @renda_bruta INT,
   @fgts DECIMAL(11,2),
-  @tel VARCHAR(14),
-  @tel2 VARCHAR(14),
-  @cel VARCHAR(14),
-  @telComercial VARCHAR(14),
+  @ddi VARCHAR(5) = NULL,
+  @ddd VARCHAR(5) = NULL,
+  @tel VARCHAR(14) = NULL,
+  @tel2 VARCHAR(14) = NULL,
+  @cel VARCHAR(14) = NULL,
+  @telComercial VARCHAR(14) = NULL,
+  @telExtra VARCHAR(14) = NULL,
   @compradorCodigo INT
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 	  
-       INSERT INTO comprador_conjuge (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,comprador_codigo,created) VALUES(@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@tel,@tel2,@cel,@telComercial,@compradorCodigo,(SELECT CURRENT_TIMESTAMP));
+	   IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NOT NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,@ddi,@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,celular,tel_comercial,ddi,ddd,created) 
+	     VALUES (@tel,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,celular,ddi,ddd,created) 
+	     VALUES (@tel,@cel,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END
+       
+	   INSERT INTO comprador_conjuge (cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,comprador_codigo,created,telefone_codigo) 
+	   VALUES (@cpf,@rg,@nome,@estado_civil,@profissao,@renda_bruta,@fgts,@compradorCodigo,(SELECT CURRENT_TIMESTAMP),(SELECT IDENT_CURRENT('telefone')));
        
 	   SELECT @@IDENTITY AS 'Código do(a) Conjuge do(a) Comprador(a)';
 	COMMIT TRAN
@@ -482,8 +589,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_CompradorConjugeInserir '12345678201','RG71114565','Mulher do comprador','Solteira','Advogada',1000,0,'3134747441','3134343434','31985211452','3133215520',1
---SELECT * FROM comprador_conjuge WHERE codigo = 7;
+/*EXEC usp_CompradorConjugeInserir '12345678201','RG71114565','Mulher do comprador','Solteira','Advogada',1000,0,'+55','31','34747441','34343434','985211452','33215520','1234',1
+SELECT * FROM comprador_conjuge WHERE codigo = 1;*/
 CREATE PROCEDURE usp_VendaInserir
   @valor INT,
   @entrada INT,
@@ -499,11 +606,14 @@ AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
+
        IF @creci IS NOT NULL BEGIN
-         INSERT INTO venda (valor,entrada,data,documentos,vendedor,porcenta_imobiliaria,imobiliaria_creci,imovel_codigo, despachante_codigo,endereco_codigo,created) VALUES (@valor,@entrada,@data,@documentos,@vendedor,@porcenta_imobiliaria,@creci,@imovel_codigo,@despachante_codigo,@endereco_codigo,(SELECT CURRENT_TIMESTAMP));
+         INSERT INTO venda (valor,entrada,data,documentos,vendedor,porcenta_imobiliaria,imobiliaria_creci,imovel_codigo, despachante_codigo,endereco_codigo,created) 
+		 VALUES (@valor,@entrada,@data,@documentos,@vendedor,@porcenta_imobiliaria,@creci,@imovel_codigo,@despachante_codigo,@endereco_codigo,(SELECT CURRENT_TIMESTAMP));
        END
        ELSE BEGIN
-         INSERT INTO venda (valor,entrada,data,documentos,vendedor,porcenta_imobiliaria,imobiliaria_creci,imovel_codigo,despachante_codigo,endereco_codigo,created) VALUES (@valor,@entrada,@data,@documentos,@vendedor,@porcenta_imobiliaria,@imovel_codigo,@despachante_codigo,(SELECT TOP 1 creci FROM imobiliaria WHERE creci LIKE '%1'),@endereco_codigo,(SELECT CURRENT_TIMESTAMP));
+		 INSERT INTO venda (valor,entrada,data,documentos,vendedor,porcenta_imobiliaria,imobiliaria_creci,imovel_codigo,despachante_codigo,endereco_codigo,created) 
+		 VALUES (@valor,@entrada,@data,@documentos,@vendedor,@porcenta_imobiliaria,(SELECT TOP 1 creci FROM imobiliaria ORDER BY imobiliaria.created DESC),@imovel_codigo,@despachante_codigo,@endereco_codigo,(SELECT CURRENT_TIMESTAMP));
        END
 
 	   SELECT @@IDENTITY AS 'Código da Venda';
@@ -514,18 +624,21 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*TESTE*/
---EXEC usp_VendaInserir 250000,50000,'2015-08-22','3 copias contrato, cpf, rg','Igor Martinelli Ramos',6,'0000000001',3,1,4
---SELECT * FROM venda WHERE codigo = 5
+GO/*OK*/
+/*EXEC usp_VendaInserir 250000,50000,'2015-08-22','3 copias contrato, cpf, rg',2,6,NULL,2,1,4
+SELECT * FROM venda WHERE codigo = 7*/
 CREATE PROCEDURE usp_DespachanteInserir
   @nome VARCHAR(120),
   @preco DECIMAL(10,2),
   @servicos_completos SMALLINT,
   @servicos_pendentes SMALLINT,
-  @tel VARCHAR(14),
-  @tel2 VARCHAR(14),
-  @cel VARCHAR(14),
-  @telComercial VARCHAR(14),
+  @ddi VARCHAR(5) = NULL,
+  @ddd VARCHAR(5) = NULL,
+  @tel VARCHAR(14) = NULL,
+  @tel2 VARCHAR(14) = NULL,
+  @cel VARCHAR(14) = NULL,
+  @telComercial VARCHAR(14) = NULL,
+  @telExtra VARCHAR(14) = NULL,
   @rua VARCHAR(100),
   @num INT,
   @compl VARCHAR(30) = NULL,
@@ -548,7 +661,25 @@ BEGIN
 	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
 	   END
 
-       INSERT INTO despachante (nome,preco,servicos_completos,servicos_pendentes,telefone,telefone2,celular,tel_comercial,endereco_codigo,created) VALUES(@nome,@preco,@servicos_completos,@servicos_pendentes,@tel,@tel2,@cel,@telComercial,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+	   IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NOT NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,@ddi,@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,celular,tel_comercial,ddi,ddd,created) 
+	     VALUES (@tel,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,celular,ddi,ddd,created) 
+	     VALUES (@tel,@cel,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END
+
+       INSERT INTO despachante (nome,preco,servicos_completos,servicos_pendentes,endereco_codigo,created,telefone_codigo) 
+	   VALUES (@nome,@preco,@servicos_completos,@servicos_pendentes,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP),(SELECT IDENT_CURRENT('telefone')));
 	   
 	   SELECT @@IDENTITY AS 'Código do Despachante';
 	COMMIT TRAN
@@ -559,8 +690,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_DespachanteInserir 'Despachante 01', 120,0,0,'3134445351','313474441','31988554466','3134115549','Rua Tranversal',330,'Loja 02','Bairro Central','Belo Horizonte','MG','Brasil'
---SELECT * FROM despachante WHERE codigo = 1;
+/*EXEC usp_DespachanteInserir 'Despachante 01',120,0,0,'+55','031','34445351','3474441','988554466','34115549','6631','Rua Tranversal',330,'Loja 02','Bairro Central','Belo Horizonte','MG','Brasil'
+SELECT * FROM despachante WHERE codigo = 1;*/
 CREATE PROCEDURE usp_TransacaoInserir
   @agencia VARCHAR(6),
   @num_conta VARCHAR(8),
@@ -574,7 +705,8 @@ BEGIN
   BEGIN TRY
     BEGIN TRAN
 
-       INSERT INTO transacao_bancaria (agencia,num_conta_bancaria,num_conta_digito,tipo_conta,nome_banco,valor,venda_codigo,created) VALUES (@agencia,@num_conta,@digito,@tipo_conta,@nome_banco,@valor,(SELECT codigo FROM venda WHERE codigo = @venda),(SELECT CURRENT_TIMESTAMP));
+       INSERT INTO transacao_bancaria (agencia,num_conta_bancaria,num_conta_digito,tipo_conta,nome_banco,valor,venda_codigo,created) 
+	   VALUES (@agencia,@num_conta,@digito,@tipo_conta,@nome_banco,@valor,(SELECT codigo FROM venda WHERE codigo = @venda),(SELECT CURRENT_TIMESTAMP));
 
 	   SELECT @@IDENTITY AS 'Código da Transação Bancária';
 	COMMIT TRAN
@@ -585,15 +717,21 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_TransacaoInserir '1203','0020766',7,'Conta Corrente','Bradesco',25000,5
---SELECT * FROM transacao_bancaria WHERE codigo = 2;
+/*EXEC usp_TransacaoInserir '1203','0020766','7','Conta Corrente','Bradesco',25000,7
+SELECT * FROM transacao_bancaria WHERE codigo = 1;*/
 CREATE PROCEDURE usp_ImobiliariaInserir
   @creci VARCHAR(10),
   @nome VARCHAR(120),
   @data_emissao DATE,
   @razao VARCHAR(120),
   @apelido VARCHAR(80),
-  @tel VARCHAR(14),
+  @ddi VARCHAR(5) = NULL,
+  @ddd VARCHAR(5) = NULL,
+  @tel VARCHAR(14) = NULL,
+  @tel2 VARCHAR(14) = NULL,
+  @cel VARCHAR(14) = NULL,
+  @telComercial VARCHAR(14) = NULL,
+  @telExtra VARCHAR(14) = NULL,
   @dono VARCHAR(120),
   @co_dono VARCHAR(120),
   @rua VARCHAR(100),
@@ -618,7 +756,25 @@ BEGIN
 	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
 	   END
 
-       INSERT INTO imobiliaria (creci,nome_creci,dt_emissao,razao,apelido,telefone,dono,co_dono,endereco_codigo,created) VALUES (@creci,@nome,@data_emissao,@razao,@apelido,@tel,@dono,@co_dono,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP));
+	   IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NOT NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,@ddi,@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,ddi,ddd,created) 
+	     VALUES (@tel,@tel2,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,celular,tel_comercial,ddi,ddd,created) 
+	     VALUES (@tel,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
+	     INSERT INTO telefone (telefone,celular,ddi,ddd,created) 
+	     VALUES (@tel,@cel,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
+	   END
+
+       INSERT INTO imobiliaria (creci,nome_creci,dt_emissao,razao,apelido,dono,co_dono,endereco_codigo,created,telefone_codigo) 
+	   VALUES (@creci,@nome,@data_emissao,@razao,@apelido,@dono,@co_dono,(SELECT IDENT_CURRENT('endereco')),(SELECT CURRENT_TIMESTAMP),(SELECT IDENT_CURRENT('telefone')));
 
 	   SELECT TOP 1 creci AS 'Código da Imobiliária' FROM imobiliaria ORDER BY created DESC;
 	COMMIT TRAN
@@ -629,8 +785,8 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
---EXEC usp_ImobiliariaInserir '0000000001','Imobiliaria2 Teste Venda e Aluguel', '2010-12-01', 'Imobiliaria Teste','Imobiliaria Teste','3133333333','Igor Martinelli Ramos','Igor Henrique Heredia','Avenida Principal',1921,NULL,'Centro da Cidade','Imovis City','MG','Brasil'
---SELECT * FROM imobiliaria;
+/*EXEC usp_ImobiliariaInserir '0000000001','Imobiliaria2 Teste Venda e Aluguel', '2010-12-01', 'Imobiliaria Teste','Imobiliaria Teste','+55','031','33333333','33334444','98989898','12345678','5555','Igor Martinelli Ramos','Igor Henrique Heredia','Avenida Principal',1921,NULL,'Centro da Cidade','Imovis City','MG','Brasil'
+SELECT * FROM imobiliaria;*/
 
 /* ORDEM PARA INSERÇÃO DOS DADOS
 imobiliaria
@@ -3204,11 +3360,11 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO
-EXEC usp_EnderecoCodigo NULL,NULL,NULL,NULL,NULL,NULL,NULL
+GO/*OK*/
+/*EXEC usp_EnderecoCodigo NULL,NULL,NULL,NULL,NULL,NULL,NULL
 EXEC usp_EnderecoCodigo '','','','','','',''
 EXEC usp_EnderecoCodigo 'Avenida Afonso Pena',4444,'Edifício','Cruzeiro','Belo Horizonte','MG','NULL'
-SELECT * FROM endereco WHERE codigo = 1016
+SELECT * FROM endereco WHERE codigo = 1016*/
 
 CREATE PROCEDURE usp_EnderecoInserir
   @rua VARCHAR(100),
@@ -3270,7 +3426,7 @@ BEGIN
   ROLLBACK
 END
 GO/*OK*/
-CREATE TRIGGER PrevineAlterDropTable 
+/*CREATE TRIGGER PrevineAlterDropTable 
 ON DATABASE 
 FOR DROP_TABLE, ALTER_TABLE 
 AS
@@ -3278,9 +3434,17 @@ BEGIN
   PRINT 'Você não tem permissão!.'
   ROLLBACK
 END
+GO*/
+CREATE TRIGGER ProibirDropTable
+ON DATABASE
+FOR DROP_TABLE
+AS
+BEGIN
+  PRINT 'Esta bloqueado a opção para excluir tabelas da Base de Dados.'
+  ROLLBACK
+END
 GO/*OK*/
-
-CREATE TRIGGER MoveComprador
+/*CREATE TRIGGER MoveComprador
 ON comprador
 INSTEAD OF DELETE
 AS
@@ -3294,7 +3458,7 @@ SET IDENTITY_INSERT [imobiliaria].[dbo].[bk_comprador] ON;
 SELECT * FROM comprador;
 SELECT * FROM bk_comprador;
 --Cannot insert explicit value for identity column in table 'bk_comprador' when IDENTITY_INSERT is set to OFF.
-
+*/
 /*
 usp_ImovelApagar
 usp_ProprietarioApagar
@@ -3339,3 +3503,65 @@ VALUES (130899026, 17771868, 'Igor HMHR', 'securitarios', 115, 'alipo de melo', 
 	END CATCH;
 	GO
 	*/
+
+-- COMEÇANDO A TRABALHAR COM NOVAS FUNCIONALIDADES --
+CREATE TABLE telefone (
+codigo INT NOT NULL IDENTITY(1,1),
+telefone VARCHAR(14) NULL,
+telefone2 VARCHAR(14) NULL,
+celular VARCHAR(14) NULL,
+tel_comercial VARCHAR(14) NULL,
+telefone_extra VARCHAR(14) NULL,
+ddi VARCHAR(5), --código do pais
+ddd VARCHAR(5), --código da cidade/estado
+created DATETIME,
+modified DATETIME
+
+CONSTRAINT pk_telefone PRIMARY KEY (codigo)
+);/*OK*/
+/* OBJETOS TABELAS QUE SOFRERAM ALTERAÇÕES */
+ALTER TABLE imobiliaria DROP COLUMN telefone
+ALTER TABLE imobiliaria ADD telefone_codigo INT
+ALTER TABLE imobiliaria ADD CONSTRAINT tel_imobiliaria FOREIGN KEY (telefone_codigo) REFERENCES telefone(codigo) ON DELETE NO ACTION
+
+ALTER TABLE corretor DROP COLUMN telefone
+ALTER TABLE corretor DROP COLUMN telefone2
+ALTER TABLE corretor DROP COLUMN celular
+ALTER TABLE corretor DROP COLUMN tel_comercial
+ALTER TABLE corretor ADD telefone_codigo INT
+ALTER TABLE corretor ADD CONSTRAINT tel_corretor FOREIGN KEY (telefone_codigo) REFERENCES telefone(codigo) ON DELETE NO ACTION
+
+ALTER TABLE comprador DROP COLUMN telefone
+ALTER TABLE comprador DROP COLUMN telefone2
+ALTER TABLE comprador DROP COLUMN celular
+ALTER TABLE comprador DROP COLUMN tel_comercial
+ALTER TABLE comprador ADD telefone_codigo INT
+ALTER TABLE comprador ADD CONSTRAINT tel_comprador FOREIGN KEY (telefone_codigo) REFERENCES telefone(codigo) ON DELETE NO ACTION
+
+ALTER TABLE comprador_conjuge DROP COLUMN telefone
+ALTER TABLE comprador_conjuge DROP COLUMN telefone2
+ALTER TABLE comprador_conjuge DROP COLUMN celular
+ALTER TABLE comprador_conjuge DROP COLUMN tel_comercial
+ALTER TABLE comprador_conjuge ADD telefone_codigo INT
+ALTER TABLE comprador_conjuge ADD CONSTRAINT tel_comprador_conjuge FOREIGN KEY (telefone_codigo) REFERENCES telefone(codigo) ON DELETE NO ACTION
+
+ALTER TABLE proprietario DROP COLUMN telefone
+ALTER TABLE proprietario DROP COLUMN telefone2
+ALTER TABLE proprietario DROP COLUMN celular
+ALTER TABLE proprietario DROP COLUMN tel_comercial
+ALTER TABLE proprietario ADD telefone_codigo INT
+ALTER TABLE proprietario ADD CONSTRAINT tel_proprietario FOREIGN KEY (telefone_codigo) REFERENCES telefone(codigo) ON DELETE NO ACTION
+
+ALTER TABLE proprietario_conjuge DROP COLUMN telefone
+ALTER TABLE proprietario_conjuge DROP COLUMN telefone2
+ALTER TABLE proprietario_conjuge DROP COLUMN celular
+ALTER TABLE proprietario_conjuge DROP COLUMN tel_comercial
+ALTER TABLE proprietario_conjuge ADD telefone_codigo INT
+ALTER TABLE proprietario_conjuge ADD CONSTRAINT tel_proprietario_conjuge FOREIGN KEY (telefone_codigo) REFERENCES telefone(codigo) ON DELETE NO ACTION
+
+ALTER TABLE despachante DROP COLUMN telefone
+ALTER TABLE despachante DROP COLUMN telefone2
+ALTER TABLE despachante DROP COLUMN celular
+ALTER TABLE despachante DROP COLUMN tel_comercial
+ALTER TABLE despachante ADD telefone_codigo INT
+ALTER TABLE despachante ADD CONSTRAINT tel_despachante FOREIGN KEY (telefone_codigo) REFERENCES telefone(codigo) ON DELETE NO ACTION
