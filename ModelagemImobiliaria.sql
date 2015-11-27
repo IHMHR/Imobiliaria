@@ -1387,10 +1387,19 @@ BEGIN
 	  
 	  --TRANSFERINDO OS DADOS PARA OUTRA TABELA
 	  SET IDENTITY_INSERT imovel_teste ON
-	  INSERT INTO imovel_teste (codigo,registro,frente_lote,lado_lote,proprietario_codigo,endereco_codigo,created,modified,dt_exclusao) VALUES (@cod,(SELECT registro FROM imovel WHERE codigo = @cod),(SELECT frente_lote FROM imovel WHERE codigo = @cod),(SELECT lado_lote FROM imovel WHERE codigo = @cod),(SELECT proprietario_codigo FROM imovel WHERE codigo = @cod),(SELECT endereco_codigo FROM imovel WHERE codigo = @cod),(SELECT created FROM imovel WHERE codigo = @cod),(SELECT modified FROM imovel WHERE codigo = @cod),(SELECT GETDATE()));
+	  INSERT INTO imovel_teste (codigo,registro,frente_lote,lado_lote,capitador,proprietario_codigo,endereco_codigo,created,modified,dt_exclusao) 
+	  VALUES (@cod,(SELECT registro FROM imovel WHERE codigo = @cod),(SELECT frente_lote FROM imovel WHERE codigo = @cod),(SELECT lado_lote FROM imovel WHERE codigo = @cod),(SELECT capitador FROM imovel WHERE codigo = @cod),(SELECT proprietario_codigo FROM imovel WHERE codigo = @cod),(SELECT endereco_codigo FROM imovel WHERE codigo = @cod),(SELECT created FROM imovel WHERE codigo = @cod),(SELECT modified FROM imovel WHERE codigo = @cod),(SELECT GETDATE()));
 	  SET IDENTITY_INSERT imovel_teste OFF
-
+	  
+	  ALTER TABLE venda NOCHECK CONSTRAINT fk_imovel
+	  ALTER TABLE transacao_bancaria NOCHECK CONSTRAINT fk_venda
+	  
 	  DELETE FROM imovel WHERE codigo = @cod;
+
+	  ALTER TABLE venda CHECK CONSTRAINT fk_imovel
+	  ALTER TABLE transacao_bancaria CHECK CONSTRAINT fk_venda
+
+
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -1399,7 +1408,7 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-/*EXEC usp_ImovelApagar 5*/
+/*EXEC usp_ImovelApagar 2*/
 CREATE PROCEDURE usp_ProprietarioApagar
   @cod INT
 AS
@@ -1411,7 +1420,8 @@ BEGIN
 
 	  --TRANSFERINDO OS DADOS PARA OUTRA TABELA
       SET IDENTITY_INSERT proprietario_teste ON	
-      INSERT INTO proprietario_teste (codigo,cpf,rg,nome,estado_civil,telefone,telefone2,celular,tel_comercial,endereco_codigo,created,modified,dt_exclusao) VALUES (@cod,(SELECT cpf FROM proprietario WHERE codigo = @cod),(SELECT rg FROM proprietario WHERE codigo = @cod),(SELECT nome FROM proprietario WHERE codigo = @cod),(SELECT estado_civil FROM proprietario WHERE codigo = @cod),(SELECT telefone FROM proprietario WHERE codigo = @cod),(SELECT telefone2 FROM proprietario WHERE codigo = @cod),(SELECT celular FROM proprietario WHERE codigo = @cod),(SELECT tel_comercial FROM proprietario WHERE codigo = @cod),(SELECT endereco_codigo FROM proprietario WHERE codigo = @cod),(SELECT created FROM proprietario WHERE codigo = @cod),(SELECT modified FROM proprietario WHERE codigo = @cod),(SELECT GETDATE()));
+      INSERT INTO proprietario_teste (codigo,cpf,rg,nome,estado_civil,endereco_codigo,created,modified,telefone_codigo,dt_exclusao) 
+	  VALUES (@cod,(SELECT cpf FROM proprietario WHERE codigo = @cod),(SELECT rg FROM proprietario WHERE codigo = @cod),(SELECT nome FROM proprietario WHERE codigo = @cod),(SELECT estado_civil FROM proprietario WHERE codigo = @cod),(SELECT endereco_codigo FROM proprietario WHERE codigo = @cod),(SELECT created FROM proprietario WHERE codigo = @cod),(SELECT modified FROM proprietario WHERE codigo = @cod),(SELECT telefone_codigo FROM proprietario WHERE codigo = @cod),(SELECT GETDATE()));
 	  SET IDENTITY_INSERT proprietario_teste OFF
 	  
 	  ALTER TABLE imovel NOCHECK CONSTRAINT fk_proprietario;
@@ -1441,10 +1451,16 @@ BEGIN
 	  
 	  --TRANSFERINDO OS DADOS PARA OUTRA TABELA
       SET IDENTITY_INSERT corretor_teste ON	
-      INSERT INTO corretor_teste (codigo,cpf,rg,nome_completo,telefone,telefone2,celular,tel_comercial,sexo,imobiliaria_creci,endereco_codigo,created,modified,dt_exclusao) VALUES (@cod,(SELECT cpf FROM corretor WHERE codigo = @cod),(SELECT rg FROM corretor WHERE codigo = @cod),(SELECT nome_completo FROM corretor WHERE codigo = @cod),(SELECT telefone FROM corretor WHERE codigo = @cod),(SELECT telefone2 FROM corretor WHERE codigo = @cod),(SELECT celular FROM corretor WHERE codigo = @cod),(SELECT tel_comercial FROM corretor WHERE codigo = @cod),(SELECT sexo FROM corretor WHERE codigo = @cod),(SELECT imobiliaria_creci FROM corretor WHERE codigo = @cod),(SELECT endereco_codigo FROM corretor WHERE codigo = @cod),(SELECT created FROM corretor WHERE codigo = @cod),(SELECT modified FROM corretor WHERE codigo = @cod),(SELECT GETDATE()));
+      INSERT INTO corretor_teste (codigo,cpf,rg,nome_completo,sexo,imobiliaria_creci,endereco_codigo,created,modified,dt_exclusao,telefone_codigo) 
+	  VALUES (@cod,(SELECT cpf FROM corretor WHERE codigo = @cod),(SELECT rg FROM corretor WHERE codigo = @cod),(SELECT nome_completo FROM corretor WHERE codigo = @cod),(SELECT sexo FROM corretor WHERE codigo = @cod),(SELECT imobiliaria_creci FROM corretor WHERE codigo = @cod),(SELECT endereco_codigo FROM corretor WHERE codigo = @cod),(SELECT created FROM corretor WHERE codigo = @cod),(SELECT modified FROM corretor WHERE codigo = @cod),(SELECT GETDATE()),(SELECT telefone_codigo FROM corretor WHERE codigo = @cod));
 	  SET IDENTITY_INSERT corretor_teste OFF
 
+	  ALTER TABLE venda NOCHECK CONSTRAINT fk_vendedor
+
 	  DELETE FROM corretor WHERE codigo = @cod
+
+	  ALTER TABLE venda NOCHECK CONSTRAINT fk_vendedor
+
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -1465,7 +1481,8 @@ BEGIN
 
 	  --TRANSFERINDO OS DADOS PARA OUTRA TABELA
 	  SET IDENTITY_INSERT comprador_teste ON	
-	  INSERT INTO comprador_teste (codigo,cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,lista_intereste,imobiliaria_creci,endereco_codigo,created,modified,dt_exclusao) VALUES (@cod,(SELECT cpf FROM comprador WHERE codigo = @cod),(SELECT rg FROM comprador WHERE codigo = @cod),(SELECT nome FROM comprador WHERE codigo = @cod),(SELECT estado_civil FROM comprador WHERE codigo = @cod),(SELECT profissao FROM comprador WHERE codigo = @cod),(SELECT renda_bruta FROM comprador WHERE codigo = @cod),(SELECT fgts FROM comprador WHERE codigo = @cod),(SELECT telefone FROM comprador WHERE codigo = @cod),(SELECT telefone2 FROM comprador WHERE codigo = @cod),(SELECT celular FROM comprador WHERE codigo = @cod),(SELECT tel_comercial FROM comprador WHERE codigo = @cod),(SELECT lista_intereste FROM comprador WHERE codigo = @cod),(SELECT imobiliaria_creci FROM comprador WHERE codigo = @cod),(SELECT endereco_codigo FROM comprador WHERE codigo = @cod),(SELECT created FROM comprador WHERE codigo = @cod),(SELECT modified FROM comprador WHERE codigo = @cod),(SELECT GETDATE()));
+	  INSERT INTO comprador_teste (codigo,cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,lista_intereste,imobiliaria_creci,endereco_codigo,created,modified,dt_exclusao,telefone_codigo) 
+	  VALUES (@cod,(SELECT cpf FROM comprador WHERE codigo = @cod),(SELECT rg FROM comprador WHERE codigo = @cod),(SELECT nome FROM comprador WHERE codigo = @cod),(SELECT estado_civil FROM comprador WHERE codigo = @cod),(SELECT profissao FROM comprador WHERE codigo = @cod),(SELECT renda_bruta FROM comprador WHERE codigo = @cod),(SELECT fgts FROM comprador WHERE codigo = @cod),(SELECT lista_intereste FROM comprador WHERE codigo = @cod),(SELECT imobiliaria_creci FROM comprador WHERE codigo = @cod),(SELECT endereco_codigo FROM comprador WHERE codigo = @cod),(SELECT created FROM comprador WHERE codigo = @cod),(SELECT modified FROM comprador WHERE codigo = @cod),(SELECT GETDATE()),(SELECT telefone_codigo FROM comprador WHERE codigo = @cod));
 	  SET IDENTITY_INSERT comprador_teste OFF
 
 	  ALTER TABLE comprador_conjuge NOCHECK CONSTRAINT fk_comprador;
@@ -1493,10 +1510,12 @@ BEGIN
 
 	  --TRANSFERINDO OS DADOS PARA OUTRA TABELA
       SET IDENTITY_INSERT venda_teste ON	
-      INSERT INTO venda_teste (codigo,valor,entrada,data,documentos,vendedor,porcenta_imobiliaria,imobiliaria_creci,endereco_codigo,imovel_codigo,despachante_codigo,created,modified,dt_exclusao) VALUES (@cod,(SELECT valor FROM venda WHERE codigo = @cod),(SELECT entrada FROM venda WHERE codigo = @cod),(SELECT data FROM venda WHERE codigo = @cod),(SELECT documentos FROM venda WHERE codigo = @cod),(SELECT vendedor FROM venda WHERE codigo = @cod),(SELECT porcenta_imobiliaria FROM venda WHERE codigo = @cod),(SELECT imobiliaria_creci FROM venda WHERE codigo = @cod),(SELECT endereco_codigo FROM venda WHERE codigo = @cod),(SELECT imovel_codigo FROM venda WHERE codigo = @cod),(SELECT despachante_codigo FROM venda WHERE codigo = @cod),(SELECT created FROM venda WHERE codigo = @cod),(SELECT modified FROM venda WHERE codigo = @cod),(SELECT GETDATE()));
+      INSERT INTO venda_teste (codigo,valor,entrada,data,documentos,vendedor,porcenta_imobiliaria,imobiliaria_creci,endereco_codigo,imovel_codigo,despachante_codigo,created,modified,dt_exclusao) 
+	  VALUES (@cod,(SELECT valor FROM venda WHERE codigo = @cod),(SELECT entrada FROM venda WHERE codigo = @cod),(SELECT data FROM venda WHERE codigo = @cod),(SELECT documentos FROM venda WHERE codigo = @cod),(SELECT vendedor FROM venda WHERE codigo = @cod),(SELECT porcenta_imobiliaria FROM venda WHERE codigo = @cod),(SELECT imobiliaria_creci FROM venda WHERE codigo = @cod),(SELECT endereco_codigo FROM venda WHERE codigo = @cod),(SELECT imovel_codigo FROM venda WHERE codigo = @cod),(SELECT despachante_codigo FROM venda WHERE codigo = @cod),(SELECT created FROM venda WHERE codigo = @cod),(SELECT modified FROM venda WHERE codigo = @cod),(SELECT GETDATE()));
 	  SET IDENTITY_INSERT venda_teste OFF
 	  
 	  DELETE FROM venda WHERE codigo = @cod;
+
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -1505,7 +1524,7 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-/*EXEC usp_VendaApagar 8*/
+/*EXEC usp_VendaApagar 6*/
 CREATE PROCEDURE usp_DespachanteApagar
   @cod INT
 AS
@@ -1517,7 +1536,8 @@ BEGIN
 
 	  --TRANSFERINDO OS DADOS PARA OUTRA TABELA
       SET IDENTITY_INSERT despachante_teste ON	
-      INSERT INTO despachante_teste (codigo,nome,preco,servicos_completos,servicos_pendentes,telefone,telefone2,celular,tel_comercial,endereco_codigo,created,modified,dt_exclusao) VALUES (@cod,(SELECT nome FROM despachante WHERE codigo = @cod),(SELECT preco FROM despachante WHERE codigo = @cod),(SELECT servicos_completos FROM despachante WHERE codigo = @cod),(SELECT servicos_pendentes FROM despachante WHERE codigo = @cod),(SELECT telefone FROM despachante WHERE codigo = @cod),(SELECT telefone2 FROM despachante WHERE codigo = @cod),(SELECT celular FROM despachante WHERE codigo = @cod),(SELECT tel_comercial FROM despachante WHERE codigo = @cod),(SELECT endereco_codigo FROM despachante WHERE codigo = @cod),(SELECT created FROM despachante WHERE codigo = @cod),(SELECT modified FROM despachante WHERE codigo = @cod),(SELECT GETDATE()));
+      INSERT INTO despachante_teste (codigo,nome,preco,servicos_completos,servicos_pendentes,endereco_codigo,created,modified,dt_exclusao,telefone_codigo) 
+	  VALUES (@cod,(SELECT nome FROM despachante WHERE codigo = @cod),(SELECT preco FROM despachante WHERE codigo = @cod),(SELECT servicos_completos FROM despachante WHERE codigo = @cod),(SELECT servicos_pendentes FROM despachante WHERE codigo = @cod),(SELECT endereco_codigo FROM despachante WHERE codigo = @cod),(SELECT created FROM despachante WHERE codigo = @cod),(SELECT modified FROM despachante WHERE codigo = @cod),(SELECT GETDATE()),(SELECT telefone_codigo FROM despachante WHERE codigo = @cod));
 	  SET IDENTITY_INSERT despachante_teste OFF
 	  
 	  ALTER TABLE venda NOCHECK CONSTRAINT fk_despachante;
@@ -1525,6 +1545,7 @@ BEGIN
       DELETE FROM despachante WHERE codigo = @cod;
 
 	  ALTER TABLE venda CHECK CONSTRAINT fk_despachante;
+
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -1545,10 +1566,12 @@ BEGIN
 
 	   --TRANSFERINDO OS DADOS PARA OUTRA TABELA
        SET IDENTITY_INSERT transacao_bancaria_teste ON	
-       INSERT INTO transacao_bancaria_teste (codigo,agencia,num_conta_bancaria,num_conta_digito,tipo_conta,nome_banco,valor,venda_codigo,created,modified,dt_exclusao) VALUES (@cod,(SELECT agencia FROM transacao_bancaria WHERE codigo = @cod),(SELECT num_conta_bancaria FROM transacao_bancaria WHERE codigo = @cod),(SELECT num_conta_digito FROM transacao_bancaria WHERE codigo = @cod),(SELECT tipo_conta FROM transacao_bancaria WHERE codigo = @cod),(SELECT nome_banco FROM transacao_bancaria WHERE codigo = @cod),(SELECT valor FROM transacao_bancaria WHERE codigo = @cod),(SELECT venda_codigo FROM transacao_bancaria WHERE codigo = @cod),(SELECT created FROM transacao_bancaria WHERE codigo = @cod),(SELECT modified FROM transacao_bancaria WHERE codigo = @cod),(SELECT GETDATE()));
+       INSERT INTO transacao_bancaria_teste (codigo,agencia,num_conta_bancaria,num_conta_digito,tipo_conta,nome_banco,valor,venda_codigo,created,modified,dt_exclusao) 
+	   VALUES (@cod,(SELECT agencia FROM transacao_bancaria WHERE codigo = @cod),(SELECT num_conta_bancaria FROM transacao_bancaria WHERE codigo = @cod),(SELECT num_conta_digito FROM transacao_bancaria WHERE codigo = @cod),(SELECT tipo_conta FROM transacao_bancaria WHERE codigo = @cod),(SELECT nome_banco FROM transacao_bancaria WHERE codigo = @cod),(SELECT valor FROM transacao_bancaria WHERE codigo = @cod),(SELECT venda_codigo FROM transacao_bancaria WHERE codigo = @cod),(SELECT created FROM transacao_bancaria WHERE codigo = @cod),(SELECT modified FROM transacao_bancaria WHERE codigo = @cod),(SELECT GETDATE()));
 	   SET IDENTITY_INSERT transacao_bancaria OFF
 
 	   DELETE FROM transacao_bancaria WHERE codigo = @cod;
+
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -1569,7 +1592,8 @@ BEGIN
 
 	   --TRANSFERINDO OS DADOS PARA OUTRA TABELA
        --SET IDENTITY_INSERT imobiliaria_teste ON	
-       INSERT INTO imobiliaria_teste (creci,nome_creci,dt_emissao,razao,apelido,telefone,dono,co_dono,endereco_codigo,created,modified,dt_exclusao) VALUES ((SELECT creci FROM imobiliaria WHERE creci = @creci),(SELECT nome_creci FROM imobiliaria WHERE creci = @creci),(SELECT dt_emissao FROM imobiliaria WHERE creci = @creci),(SELECT razao FROM imobiliaria WHERE creci = @creci),(SELECT apelido FROM imobiliaria WHERE creci = @creci),(SELECT telefone FROM imobiliaria WHERE creci = @creci),(SELECT dono FROM imobiliaria WHERE creci = @creci),(SELECT co_dono FROM imobiliaria WHERE creci = @creci),(SELECT endereco_codigo FROM imobiliaria WHERE creci = @creci),(SELECT created FROM imobiliaria WHERE creci = @creci),(SELECT modified FROM imobiliaria WHERE creci = @creci),(SELECT GETDATE()));
+       INSERT INTO imobiliaria_teste (creci,nome_creci,dt_emissao,razao,apelido,dono,co_dono,endereco_codigo,created,modified,dt_exclusao,telefone_codigo) 
+	   VALUES ((SELECT creci FROM imobiliaria WHERE creci = @creci),(SELECT nome_creci FROM imobiliaria WHERE creci = @creci),(SELECT dt_emissao FROM imobiliaria WHERE creci = @creci),(SELECT razao FROM imobiliaria WHERE creci = @creci),(SELECT apelido FROM imobiliaria WHERE creci = @creci),(SELECT dono FROM imobiliaria WHERE creci = @creci),(SELECT co_dono FROM imobiliaria WHERE creci = @creci),(SELECT endereco_codigo FROM imobiliaria WHERE creci = @creci),(SELECT created FROM imobiliaria WHERE creci = @creci),(SELECT modified FROM imobiliaria WHERE creci = @creci),(SELECT GETDATE()),(SELECT telefone_codigo FROM imobiliaria WHERE creci = @creci));
 	   --SET IDENTITY_INSERT imobiliaria_teste OFF
 
 	   ALTER TABLE corretor NOCHECK CONSTRAINT fk_creci;
@@ -1581,6 +1605,7 @@ BEGIN
 	   ALTER TABLE corretor CHECK CONSTRAINT fk_creci;
 	   ALTER TABLE comprador CHECK CONSTRAINT fk_creci_comprador;
 	   ALTER TABLE venda NOCHECK CONSTRAINT fk_creci_venda;
+
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -1601,11 +1626,13 @@ BEGIN
 
 	   --TRANSFERINDO OS DADOS PARA OUTRA TABELA
        SET IDENTITY_INSERT proprietario_conjuge_teste ON	
-       INSERT INTO proprietario_conjuge_teste (codigo,cpf,rg,nome,estado_civil,telefone,telefone2,celular,tel_comercial,proprietario_codigo,created,modified,dt_exclusao) VALUES (@cod,(SELECT cpf FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT rg FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT nome FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT estado_civil FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT telefone FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT telefone2 FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT celular FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT tel_comercial FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT proprietario_codigo FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT created FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT modified FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT GETDATE()));
+       INSERT INTO proprietario_conjuge_teste (codigo,cpf,rg,nome,estado_civil,proprietario_codigo,created,modified,dt_exclusao,telefone_codigo) 
+	   VALUES (@cod,(SELECT cpf FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT rg FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT nome FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT estado_civil FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT proprietario_codigo FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT created FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT modified FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT GETDATE()),(SELECT telefone_codigo FROM proprietario_conjuge WHERE codigo = @cod));
 	   SET IDENTITY_INSERT proprietario_conjuge_teste OFF
 
 
 	   DELETE FROM proprietario_conjuge WHERE codigo = @cod;
+
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -1626,7 +1653,8 @@ BEGIN
 
 	   --TRANSFERINDO OS DADOS PARA OUTRA TABELA
        SET IDENTITY_INSERT comprador_conjuge_teste ON	
-       INSERT INTO comprador_conjuge_teste (codigo,cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,telefone,telefone2,celular,tel_comercial,comprador_codigo,created,modified,dt_exclusao) VALUES (@cod,(SELECT cpf FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT rg FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT nome FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT estado_civil FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT profissao FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT renda_bruta FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT fgts FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT telefone FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT telefone2 FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT celular FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT tel_comercial FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT comprador_codigo FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT created FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT modified FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT GETDATE()));
+       INSERT INTO comprador_conjuge_teste (codigo,cpf,rg,nome,estado_civil,profissao,renda_bruta,fgts,comprador_codigo,created,modified,dt_exclusao,telefone_codigo) 
+	   VALUES (@cod,(SELECT cpf FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT rg FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT nome FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT estado_civil FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT profissao FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT renda_bruta FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT fgts FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT comprador_codigo FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT created FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT modified FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod),(SELECT GETDATE()),(SELECT telefone_codigo FROM comprador_conjuge WHERE comprador_conjuge.codigo = @cod));
 	   SET IDENTITY_INSERT comprador_conjuge_teste OFF
 
 
@@ -1639,7 +1667,7 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
-/*EXEC usp_CompradorConjugeApagar 2*/
+/*EXEC usp_CompradorConjugeApagar 1*/
 
 --PROCEDURES PARA PESQUISA--
 CREATE PROCEDURE usp_ImovelPorCod
