@@ -3719,6 +3719,7 @@ VALUES (130899026, 17771868, 'Igor HMHR', 'securitarios', 115, 'alipo de melo', 
 	*/
 
 -- COMEÇANDO A TRABALHAR COM NOVAS FUNCIONALIDADES --
+/*Nova tabela Telefone*/
 CREATE TABLE telefone (
 codigo INT NOT NULL IDENTITY(1,1),
 telefone VARCHAR(14) NULL,
@@ -3780,5 +3781,17 @@ ALTER TABLE despachante DROP COLUMN tel_comercial
 ALTER TABLE despachante ADD telefone_codigo INT
 ALTER TABLE despachante ADD CONSTRAINT tel_despachante FOREIGN KEY (telefone_codigo) REFERENCES telefone(codigo) ON DELETE NO ACTION
 
---Criar uma função função que recebe o nome e o sobrenome, juntar os 2 e colocar no campo nomeCompleto (tbl corretor)
---criar 1 campo Data na tabela transacao_bancaria
+/*Criando Indexes para as tabelas*/
+SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'imovel'
+CREATE UNIQUE INDEX ImovelIndex ON  imovel (codigo,registro);
+
+/*Procedure para visualizar Index criados*/
+CREATE PROCEDURE usp_indexesAll
+AS
+BEGIN
+  SELECT * FROM sys.indexes WHERE name LIKE '%Index' 
+  AND object_id <> 1993058136  AND object_id <> 1993058136  AND object_id <> 2025058250
+  AND object_id <> 2025058250  AND object_id <> 2057058364 AND object_id <> 2057058364
+END
+GO/*OK*/
+/*EXEC usp_indexesAll*/
