@@ -3782,16 +3782,58 @@ ALTER TABLE despachante ADD telefone_codigo INT
 ALTER TABLE despachante ADD CONSTRAINT tel_despachante FOREIGN KEY (telefone_codigo) REFERENCES telefone(codigo) ON DELETE NO ACTION
 
 /*Criando Indexes para as tabelas*/
-SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'imovel'
-CREATE UNIQUE INDEX ImovelIndex ON  imovel (codigo,registro);
+SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'imovel'  --vendos todos os fields
+CREATE UNIQUE INDEX ImovelIndex ON imovel (codigo,registro);
+
+SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'corretor'
+CREATE UNIQUE INDEX CorretorIndex ON corretor (codigo,nome_completo,cpf);
+
+SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'comprador'
+CREATE UNIQUE INDEX CompradorIndex ON comprador (codigo,nome,cpf,fgts,profissao);
+
+SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'comprador_conjuge'
+CREATE UNIQUE INDEX CompradorConjugeIndex ON comprador_conjuge (codigo,nome,cpf,fgts,profissao);
+
+SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'despachante'
+CREATE UNIQUE INDEX DespachanteIndex ON despachante (codigo,preco,servicos_completos,servicos_pendentes);
+
+SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'endereco'
+CREATE UNIQUE INDEX EnderecoIndex ON endereco (codigo,bairro,logradouro);
+
+SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'imobiliaria'
+CREATE UNIQUE INDEX ImobiliariaIndex ON imobiliaria (razao,dono);
+
+SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'proprietario'
+CREATE UNIQUE INDEX ProprietarioIndex ON proprietario (codigo,cpf,nome);
+
+SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'proprietario_conjuge'
+CREATE UNIQUE INDEX ProprietarioConjugeIndex ON proprietario_conjuge (codigo,cpf,nome);
+
+SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'telefone'
+CREATE UNIQUE INDEX TelefoneIndex ON telefone (codigo,ddd);
+
+SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'transacao_bancaria'
+CREATE UNIQUE INDEX TransacaoBancariaIndex ON transacao_bancaria (codigo,valor,nome_banco);
+
+SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'venda'
+CREATE UNIQUE INDEX VendaIndex ON venda (codigo,valor,entrada,data);
+
 
 /*Procedure para visualizar Index criados*/
 CREATE PROCEDURE usp_indexesAll
 AS
 BEGIN
+
   SELECT * FROM sys.indexes WHERE name LIKE '%Index' 
   AND object_id <> 1993058136  AND object_id <> 1993058136  AND object_id <> 2025058250
   AND object_id <> 2025058250  AND object_id <> 2057058364 AND object_id <> 2057058364
+  ORDER BY name ASC
+
 END
 GO/*OK*/
 /*EXEC usp_indexesAll*/
+
+
+
+
+--colocar o campo cep na tabela endereco
