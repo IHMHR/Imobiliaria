@@ -7,7 +7,7 @@ using DAL;
 
 namespace BLL
 {
-    public class ClsEndereco
+    public class ClsEndereco : ClsTelefone
     {
         #region Variaveis
         public int CodigoEndereco { get; set; }
@@ -102,6 +102,13 @@ namespace BLL
             {
                 throw new Exception("errado");
             }
+        }
+
+        public System.Data.DataTable recuperaCEP(string cep)
+        {
+            sqlserver.LimparParametros();
+            sqlserver.AdicionarParametro("Nr_CEP", cep);
+            return sqlserver.ExecutarConsulta(System.Data.CommandType.StoredProcedure, "stpConsulta_CEP");
         }
     }
 }

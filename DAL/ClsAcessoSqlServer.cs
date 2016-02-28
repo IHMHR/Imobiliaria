@@ -120,5 +120,10 @@ namespace DAL
                 throw new Exception(ex.Message.ToString());
             }
         }
+
+        public object ExecutarConsulta()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

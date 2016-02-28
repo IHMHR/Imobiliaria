@@ -139,5 +139,22 @@ namespace ApresentacaoWindows
                 MessageBox.Show(ex.Message.ToString());
             }
         }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            if (textBox1.Text.Length > 7)
+            {
+                string cep = textBox1.Text.Replace(".", "").Replace("-", "");
+                ClsEndereco en = new ClsEndereco();
+                DataTable result = en.recuperaCEP(cep);
+                txtlogradouro.Text = result.Rows[0]["Logradouro"].ToString();
+                txtbairro.Text = result.Rows[0]["Bairro"].ToString();
+                txtcidade.Text = result.Rows[0]["Cidade"].ToString();
+                txtuf.Text = result.Rows[0]["UF"].ToString();
+                txtpais.Text = "Brasil";
+                if (!txtlogradouro.Text.Equals(string.Empty))
+                    txtnumero.Focus();
+            }
+        }
     }
 }

@@ -48,6 +48,7 @@
     <Compile Include="ClsImovel.cs" />
     <Compile Include="ClsProprietario.cs" />
     <Compile Include="ClsProprietarioConjuge.cs" />
+    <Compile Include="ClsTelefone.cs" />
     <Compile Include="ClsTransacaoBancaria.cs" />
     <Compile Include="ClsVenda.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

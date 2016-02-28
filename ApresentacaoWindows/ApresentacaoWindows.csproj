@@ -88,6 +88,12 @@
     <Compile Include="FrmInserirComprador.Designer.cs">
       <DependentUpon>FrmInserirComprador.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmInserirProprietario.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmInserirProprietario.Designer.cs">
+      <DependentUpon>FrmInserirProprietario.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="FrmCompradorConjuges.resx">
@@ -107,6 +113,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FrmInserirCorretor.resx">
       <DependentUpon>FrmInserirCorretor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmInserirProprietario.resx">
+      <DependentUpon>FrmInserirProprietario.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
