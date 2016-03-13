@@ -134,6 +134,7 @@ codigo INT NOT NULL IDENTITY(1,1),
 cpf VARCHAR(11) NOT NULL UNIQUE,
 rg VARCHAR(10) NOT NULL,
 nome VARCHAR(120) NOT NULL,
+sexo CHAR(1) NOT NULL,
 estado_civil VARCHAR(15) NOT NULL, 
 profissao VARCHAR(45) NOT NULL,
 renda_bruta INT NOT NULL ,
@@ -147,7 +148,8 @@ created DATETIME NOT NULL,
 modified DATETIME NULL,
 
 CONSTRAINT pk_comprador_conjuge PRIMARY KEY (codigo),
-CONSTRAINT fk_comprador FOREIGN KEY (comprador_codigo) REFERENCES comprador(codigo) ON DELETE NO ACTION
+CONSTRAINT fk_comprador FOREIGN KEY (comprador_codigo) REFERENCES comprador(codigo) ON DELETE NO ACTION,
+CONSTRAINT chk_SexoCompradorConjuge CHECK (sexo IN ('M','F'))
 );/*OK*/
 
 CREATE TABLE proprietario (
@@ -826,7 +828,17 @@ BEGIN
 	  --Criar variavel local para guardar o id do endereço criado
 	  DECLARE @newEndereco INT = (SELECT IDENT_CURRENT('endereco'));*/
 	  
-      UPDATE imovel SET registro = @registro, frente_lote = @frente_lote, lado_lote = @lado_lote, capitador = @capitador, proprietario_codigo = @cod_proprietario, endereco_codigo = @cod_endereco, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod;
+      UPDATE 
+		imovel 
+	  SET 
+		registro = @registro, 
+		frente_lote = @frente_lote, 
+		lado_lote = @lado_lote, 
+		capitador = @capitador, 
+		proprietario_codigo = @cod_proprietario, 
+		endereco_codigo = @cod_endereco, 
+		modified = (SELECT CURRENT_TIMESTAMP) 
+	  WHERE codigo = @cod;
 
 	  SELECT imovel.codigo AS 'Código do Imovel Alterado' FROM imovel WHERE imovel.codigo = @cod;
 	COMMIT TRAN
@@ -859,39 +871,19 @@ AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	  /*--alteração do endereço
-	  --UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;
-	  --inserir novo endereço e inutilizar o antigo
-       IF @compl IS NULL BEGIN
-         INSERT INTO endereco (logradouro,numero,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
-       END
-       IF @pais IS  NULL BEGIN
-         INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
-       END
-	   IF @pais IS NOT NULL AND @compl IS NOT NULL BEGIN
-	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
-	   END
-	   
-	   DECLARE @newEndereco INT = (SELECT IDENT_CURRENT('endereco'));*/
 
-	   IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NOT NULL BEGIN
-	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
-	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,@ddi,@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
-	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,ddi,ddd,created) 
-	     VALUES (@tel,@tel2,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,celular,tel_comercial,ddi,ddd,created) 
-	     VALUES (@tel,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,celular,ddi,ddd,created) 
-	     VALUES (@tel,@cel,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END
 	   
-       UPDATE proprietario SET cpf=@cpf,rg=@rg,nome=@nome,estado_civil=@est_civil,endereco_codigo=@cod_endereco,modified=(SELECT CURRENT_TIMESTAMP),telefone_codigo=(SELECT IDENT_CURRENT('telefone')) WHERE codigo=@cod;
+       UPDATE 
+	     proprietario 
+	   SET
+	     cpf = @cpf,
+		 rg = @rg,
+		 nome = @nome,
+		 estado_civil = @est_civil,
+		 endereco_codigo = @cod_endereco,
+		 modified = (SELECT CURRENT_TIMESTAMP),
+		 telefone_codigo = (SELECT IDENT_CURRENT('telefone'))
+	   WHERE codigo = @cod;
 
 	   SELECT proprietario.codigo AS 'Código do Proprietário Alterado' FROM proprietario WHERE proprietario.codigo = @cod;
 
