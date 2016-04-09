@@ -858,15 +858,7 @@ CREATE PROCEDURE usp_ProprietarioAlterar
   @cpf VARCHAR(11),
   @rg VARCHAR(10),
   @nome VARCHAR(120),
-  @est_civil VARCHAR(15),
-  @ddi VARCHAR(5) = NULL,
-  @ddd VARCHAR(5),
-  @tel VARCHAR(14) = NULL,
-  @tel2 VARCHAR(14) = NULL,
-  @cel VARCHAR(14),
-  @telComercial VARCHAR(14) = NULL,
-  @telExtra VARCHAR(14) = NULL,
-  @cod_endereco INT
+  @est_civil VARCHAR(15)
 AS
 BEGIN
   BEGIN TRY
@@ -904,34 +896,13 @@ CREATE PROCEDURE usp_CorretorAlterar
   @cpf VARCHAR(11) = NULL,
   @rg VARCHAR(10) = NULL,
   @nome VARCHAR(150),
-  @ddi VARCHAR(5) = NULL,
-  @ddd VARCHAR(5),
-  @tel VARCHAR(14) = NULL,
-  @tel2 VARCHAR(14) = NULL,
-  @cel VARCHAR(14),
-  @telComercial VARCHAR(14) = NULL,
-  @telExtra VARCHAR(14) = NULL,
   @sexo CHAR(1),
-  @creci VARCHAR(10) = NULL,
-  @cod_endereco INT
+  @creci VARCHAR(10) = NULL
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	   /*--alteração do endereço
-	   --UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;
-	   --inserir novo endereço e inutilizar o antigo
-       IF @compl IS NULL BEGIN
-         INSERT INTO endereco (logradouro,numero,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
-       END
-       IF @pais IS  NULL BEGIN
-         INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
-       END
-	   IF @pais IS NOT NULL AND @compl IS NOT NULL BEGIN
-	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
-	   END
 
-	   DECLARE @newEndereco INT = (SELECT IDENT_CURRENT('endereco'));*/
 
 	   IF @cpf IS NULL BEGIN
 	     SET @cpf = (SELECT cpf FROM corretor WHERE codigo = @cod);
