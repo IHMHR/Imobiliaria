@@ -1570,6 +1570,106 @@ END
 GO/*OK*/
 /*EXEC usp_CompradorConjugeApagar 1*/
 
+-- Criação de Views --
+CREATE VIEW vwCorretor
+AS
+  SELECT 
+    cpf AS 'CPF do(a) Corretor(a)',
+	rg AS 'RG do(a) Corretor(a)',
+	nome_completo AS 'Nome Completo',
+	CASE sexo
+	  WHEN 'M' THEN 'Masculino'
+	  WHEN 'F' THEN 'Feminino'
+	END AS 'Sexo',
+	(SELECT apelido FROM imobiliaria WHERE creci = imobiliaria_creci) AS 'Imobiliaria Vinculado',
+	(ddd + ' ' + telefone) AS 'Telefone da loja',
+	(ddd + ' ' + telefone2) AS 'Telefone 2',
+	(ddd + ' ' + celular) AS 'Celular',
+	(ddd + ' ' + tel_comercial) AS 'Telefone comercial',
+	(ddd + ' ' + telefone_extra) AS 'Telefone extra',
+	logradouro AS 'R.\Av. do endereço',
+	numero AS 'Número do endereço',
+	complemento AS 'Complemento do endereço',
+	bairro AS 'Bairro do imóvel',
+	cidade AS 'Cidade do imóvel',
+	uf AS 'Estado do imóvel' 
+  FROM 
+    corretor LEFT JOIN endereco ON corretor.endereco_codigo = endereco.codigo 
+	LEFT JOIN telefone ON corretor.telefone_codigo = telefone.codigo
+GO
+
+SELECT * FROM vwCorretor
+
+CREATE VIEW vwImobiliaria
+AS
+  SELECT 
+    creci AS 'Creci da Imobiliaria',
+	nome_creci AS 'Nome do CEO',
+	dt_emissao AS 'Data da emissão CRECI',
+	razao AS 'Razão social',
+	apelido AS 'Nome da loja',
+	(ddd + ' ' + telefone) AS 'Telefone da loja',
+	(ddd + ' ' + telefone2) AS 'Telefone 2 loja',
+	(ddd + ' ' + celular) AS 'Celular loja',
+	(ddd + ' ' + tel_comercial) AS 'Telefone comercial loja',
+	(ddd + ' ' + telefone_extra) AS 'Telefone extra loja',
+	dono AS 'Sócio Majoritário',
+	co_dono AS 'Sócio Senior',
+	logradouro AS 'R.\Av. do endereço',
+	numero AS 'Número do endereço',
+	complemento AS 'Complemento do endereço',
+	bairro AS 'Bairro do imóvel',
+	cidade AS 'Cidade do imóvel',
+	uf AS 'Estado do imóvel' 
+  FROM 
+    imobiliaria LEFT JOIN endereco ON imobiliaria.endereco_codigo = endereco.codigo 
+	LEFT JOIN telefone ON imobiliaria.telefone_codigo = telefone.codigo
+GO
+
+SELECT * FROM vwImobiliaria
+
+CREATE VIEW vwDespachante
+AS
+  SELECT 
+    nome AS 'Nome do Despachante',
+	preco AS 'Preço do Despachante',
+	servicos_completos AS 'Serviços já realizados',
+	servicos_pendentes AS 'Serviços Pendentes',
+	(ddd + ' ' + telefone) AS 'Telefone do Despachante',
+	(ddd + ' ' + telefone2) AS 'Telefone 2 do Despachante',
+	(ddd + ' ' + celular) AS 'Celular do Despachante',
+	(ddd + ' ' + tel_comercial) AS 'Telefone comercial do Despachante',
+	(ddd + ' ' + telefone_extra) AS 'Telefone extra do Despachante',
+	logradouro AS 'R.\Av. do endereço',
+	numero AS 'Número do endereço',
+	complemento AS 'Complemento do endereço',
+	bairro AS 'Bairro do imóvel',
+	cidade AS 'Cidade do imóvel',
+	uf AS 'Estado do imóvel' 
+  FROM 
+    Despachante LEFT JOIN endereco ON Despachante.endereco_codigo = endereco.codigo 
+	LEFT JOIN telefone ON Despachante.telefone_codigo = telefone.codigo
+GO
+
+SELECT * FROM vwDespachante
+
+CREATE VIEW vwImovel
+AS 
+  SELECT 
+    registro AS 'Registro do Imóvel',
+	frente_lote + 'm²' AS 'Frente do Imóvel',
+	lado_lote + 'm²' AS 'Lado do Imóvel',
+	capitador AS 'Capitador do Imóvel',
+	(SELECT nome FROM proprietario WHERE proprietario.codigo = proprietario_codigo) AS 'Proprietário do Imóvel',
+	logradouro AS 'R.\Av. do endereço',
+	numero AS 'Número do endereço',
+	complemento AS 'Complemento do endereço',
+	bairro AS 'Bairro do imóvel',
+	cidade AS 'Cidade do imóvel',
+	uf AS 'Estado do imóvel' 
+  FROM
+    imovel LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo 
+GO
 
 --PROCEDURES PARA PESQUISA--
 CREATE PROCEDURE usp_ImovelPorCod
@@ -3776,58 +3876,3 @@ GO/*OK*/
 EXECUTE usp_RetornarCEP '00000000'
 EXECUTE usp_RetornarCEP NULL
 EXEC usp_RetornarCEP '30840760'
-
-CREATE VIEW vwImobiliaria
-AS
-  SELECT 
-    creci AS 'Creci da Imobiliaria',
-	nome_creci AS 'Nome do CEO',
-	dt_emissao AS 'Data da emissão CRECI',
-	razao AS 'Razão social',
-	apelido AS 'Nome da loja',
-	(ddd + ' ' + telefone) AS 'Telefone da loja',
-	(ddd + ' ' + telefone2) AS 'Telefone 2 loja',
-	(ddd + ' ' + celular) AS 'Celular loja',
-	(ddd + ' ' + tel_comercial) AS 'Telefone comercial loja',
-	(ddd + ' ' + telefone_extra) AS 'Telefone extra loja',
-	dono AS 'Sócio Majoritário',
-	co_dono AS 'Sócio Senior',
-	logradouro AS 'R.\Av. do endereço',
-	numero AS 'Número do endereço',
-	complemento AS 'Complemento do endereço',
-	bairro AS 'Bairro do imóvel',
-	cidade AS 'Cidade do imóvel',
-	uf AS 'Estado do imóvel' 
-  FROM 
-    imobiliaria LEFT JOIN endereco ON imobiliaria.endereco_codigo = endereco.codigo 
-	LEFT JOIN telefone ON imobiliaria.telefone_codigo = telefone.codigo
-GO
-
-SELECT * FROM vwImobiliaria
-
-CREATE PROCEDURE usp_ImobiliariaPorCreciTeste
-  @cod INT
-AS
-BEGIN
-  BEGIN TRY
-    BEGIN TRAN
-	  
-	  IF @cod IS NULL BEGIN
-	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
-	  END ELSE IF @cod = '' BEGIN
-	    SELECT 'Todos os paramêtros não podem ser nulos' AS 'Informações Incorretas';
-	  END ELSE BEGIN
-	    SELECT * FROM vwImobiliaria WHERE [Creci da Imobiliaria] = @cod;
-	  END
-	  
-	COMMIT TRAN
-  END TRY
-  BEGIN CATCH
-    ROLLBACK TRAN;
-	SELECT ERROR_MESSAGE() AS 'Erro na transação';
-  END CATCH
-END
-GO/*OK*/
-/*EXEC usp_ImobiliariaPorCreci NULL
-EXEC usp_ImobiliariaPorCreci ''
-EXEC usp_ImobiliariaPorCreci 1*/
