@@ -803,12 +803,12 @@ transação bancaria
 --PROCEDURES PARA UPDATES'S--
 CREATE PROCEDURE usp_ImovelAlterar
   @cod INT,
-  @registro INT,
-  @frente_lote VARCHAR(10),
-  @lado_lote VARCHAR(10),
-  @capitador INT,
-  @cod_proprietario INT,
-  @cod_endereco INT
+  @registro INT = NULL,
+  @frente_lote VARCHAR(10) = NULL,
+  @lado_lote VARCHAR(10) = NULL,
+  @capitador INT = NULL,
+  @cod_proprietario INT = NULL,
+  @cod_endereco INT = NULL
 AS
 BEGIN
   BEGIN TRY
@@ -831,16 +831,16 @@ BEGIN
       UPDATE 
 		imovel 
 	  SET 
-		registro = @registro, 
-		frente_lote = @frente_lote, 
-		lado_lote = @lado_lote, 
-		capitador = @capitador, 
-		proprietario_codigo = @cod_proprietario, 
-		endereco_codigo = @cod_endereco, 
-		modified = (SELECT CURRENT_TIMESTAMP) 
+		registro = ISNULL(@registro, (SELECT registro FROM imovel WHERE codigo = @cod)),
+		frente_lote = ISNULL(@frente_lote, (SELECT frente_lote FROM imovel WHERE codigo = @cod)),
+		lado_lote = ISNULL(@lado_lote, (SELECT lado_lote FROM imovel WHERE codigo = @cod)),
+		capitador = ISNULL(@capitador, (SELECT capitador FROM imovel WHERE codigo = @cod)),
+		proprietario_codigo = ISNULL(@cod_proprietario, (SELECT proprietario_codigo FROM imovel WHERE codigo = @cod)),
+		endereco_codigo = ISNULL(@cod_endereco, (SELECT endereco_codigo FROM imovel WHERE codigo = @cod)),
+		modified = (SELECT CURRENT_TIMESTAMP)
 	  WHERE codigo = @cod;
 
-	  SELECT imovel.codigo AS 'Código do Imovel Alterado' FROM imovel WHERE imovel.codigo = @cod;
+	  SELECT @cod AS 'Código do Imovel Alterado';
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -855,29 +855,32 @@ EXEC usp_ImovelAlterar 2,92941,'35','22',2,1,8
 SELECT * FROM imovel*/
 CREATE PROCEDURE usp_ProprietarioAlterar
   @cod INT,
-  @cpf VARCHAR(11),
-  @rg VARCHAR(10),
-  @nome VARCHAR(120),
-  @est_civil VARCHAR(15)
+  @cpf VARCHAR(11) = NULL,
+  @rg VARCHAR(10) = NULL,
+  @nome VARCHAR(120) = NULL,
+  @sexo CHAR(1) = NULL,
+  @est_civil VARCHAR(15) = NULL,
+  @end_codigo INT = NULL,
+  @tel_codigo INT = NULL
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
 
-	   
        UPDATE 
 	     proprietario 
 	   SET
-	     cpf = @cpf,
-		 rg = @rg,
-		 nome = @nome,
-		 estado_civil = @est_civil,
-		 endereco_codigo = @cod_endereco,
+	     cpf = ISNULL(@cpf, (SELECT cpf FROM proprietario WHERE codigo = @cod)),
+		 rg = ISNULL(@rg, (SELECT rg FROM proprietario WHERE codigo = @cod)),
+		 nome = ISNULL(@nome, (SELECT nome FROM proprietario WHERE codigo = @cod)),
+		 estado_civil = ISNULL(@est_civil, (SELECT estado_civil FROM proprietario WHERE codigo = @cod)),
+		 sexo = ISNULL(@sexo, (SELECT sexo FROM proprietario WHERE codigo = @cod)),
+		 endereco_codigo = ISNULL(@cod_endereco, (SELECT endereco_codigo FROM proprietario WHERE codigo = @cod)),
 		 modified = (SELECT CURRENT_TIMESTAMP),
-		 telefone_codigo = (SELECT IDENT_CURRENT('telefone'))
+		 telefone_codigo = ISNULL(@tel_codigo, (SELECT telefone_codigo FROM proprietario WHERE codigo = @cod))
 	   WHERE codigo = @cod;
 
-	   SELECT proprietario.codigo AS 'Código do Proprietário Alterado' FROM proprietario WHERE proprietario.codigo = @cod;
+	   SELECT @cod AS 'Código do Proprietário Alterado';
 
 	COMMIT TRAN
   END TRY
@@ -897,44 +900,30 @@ CREATE PROCEDURE usp_CorretorAlterar
   @rg VARCHAR(10) = NULL,
   @nome VARCHAR(150),
   @sexo CHAR(1),
-  @creci VARCHAR(10) = NULL
+  @creci VARCHAR(10) = NULL,
+  @end_codigo INT = NULL,
+  @tel_codigo INT = NULL
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-
-
-	   IF @cpf IS NULL BEGIN
-	     SET @cpf = (SELECT cpf FROM corretor WHERE codigo = @cod);
-	   END
-	   IF @rg IS NULL BEGIN
-	     SET @rg = (SELECT rg FROM corretor WHERE codigo = @cod);
-	   END
-
-	   IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NOT NULL BEGIN
-	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
-	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,@ddi,@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
-	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,ddi,ddd,created) 
-	     VALUES (@tel,@tel2,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,celular,tel_comercial,ddi,ddd,created) 
-	     VALUES (@tel,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,celular,ddi,ddd,created) 
-	     VALUES (@tel,@cel,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END
-
-	   IF @creci IS NULL BEGIN
-         UPDATE corretor SET cpf=@cpf,rg=@rg,nome_completo=@nome,endereco_codigo=@cod_endereco,sexo=@sexo,modified=(SELECT CURRENT_TIMESTAMP),telefone_codigo=(SELECT IDENT_CURRENT('telefone')) WHERE codigo=@cod;
-	   END ELSE BEGIN
-	     UPDATE corretor SET cpf=@cpf,rg=@rg,nome_completo=@nome,endereco_codigo=@cod_endereco,sexo=@sexo,imobiliaria_creci=@creci,modified=(SELECT CURRENT_TIMESTAMP),telefone_codigo=(SELECT IDENT_CURRENT('telefone')) WHERE codigo=@cod;
-	   END
-
-	   SELECT corretor.codigo AS 'Código do Corretor Alterado' FROM corretor WHERE corretor.codigo = @cod;
+	   
+	   UPDATE 
+	     corretor 
+	   SET 
+	     cpf = ISNULL(@cpf, (SELECT cpf FROM corretor WHERE codigo = @cod)),
+		 rg = ISNULL(@rg, (SELECT rg FROM corretor WHERE codigo = @cod)),
+		 nome_completo = ISNULL(@nome, (SELECT nome_completo FROM corretor WHERE codigo = @cod)),
+		 endereco_codigo = ISNULL(@cod_endereco, (SELECT endereco_codigo FROM corretor WHERE codigo = @cod)),
+		 sexo = ISNULL(@sexo, (SELECT sexo FROM corretor WHERE codigo = @cod)),
+		 imobiliaria_creci = ISNULL(@creci, (SELECT imobiliaria_creci FROM corretor WHERE codigo = @cod)),
+		 modified = (SELECT CURRENT_TIMESTAMP),
+		 telefone_codigo = ISNULL(@cod_telefone, (SELECT telefone_codigo FROM corretor WHERE codigo = @cod)),
+		 endereco_codigo = ISNULL(@end_codigo, (SELECT endereco_codigo FROM corretor WHERE codigo = @cod))
+	   WHERE 
+	     codigo = @cod;
+	   
+	   SELECT @cod AS 'Código do Corretor Alterado';
 
 	COMMIT TRAN
   END TRY
@@ -952,73 +941,40 @@ CREATE PROCEDURE usp_CompradorAlterar
   @cod INT,
   @cpf VARCHAR(11) = NULL,
   @rg VARCHAR(10) = NULL,
-  @nome VARCHAR(120),
+  @nome VARCHAR(120) = NULL,
   @estado_Civil VARCHAR(15) = NULL,
-  @profissao varchar(45),
-  @renda_bruta INT,
-  @fgts DECIMAL(11,2),
-  @ddi VARCHAR(5) = NULL,
-  @ddd VARCHAR(5),
-  @tel VARCHAR(14) = NULL,
-  @tel2 VARCHAR(14) = NULL,
-  @cel VARCHAR(14),
-  @telComercial VARCHAR(14) = NULL,
-  @telExtra VARCHAR(14) = NULL,
+  @profissao varchar(45) = NULL,
+  @renda_bruta INT = NULL,
+  @fgts DECIMAL(11,2) = NULL,
   @lista_intereste VARCHAR(50),
   @creci VARCHAR(10) = NULL,
-  @cod_endereco INT
+  @cod_endereco INT = NULL,
+  @tel_codigo INT = NULL
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	   /*--alteração do endereço
-	   --UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;
-	   --inserir novo endereço e inutilizar o antigo
-       IF @compl IS NULL BEGIN
-         INSERT INTO endereco (logradouro,numero,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
-       END
-       IF @pais IS  NULL BEGIN
-         INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,(SELECT CURRENT_TIMESTAMP));
-       END
-	   IF @pais IS NOT NULL AND @compl IS NOT NULL BEGIN
-	     INSERT INTO endereco (logradouro,numero,complemento,bairro,cidade,uf,pais,created) VALUES (@rua,@num,@compl,@bairro,@cidade,@uf,@pais,(SELECT CURRENT_TIMESTAMP));
-	   END
+	   
+	   UPDATE 
+	     comprador
+	   SET 
+	     cpf = ISNULL(@cpf, (SELECT cpf FROM comprador WHERE codigo = @cod)),
+		 rg = ISNULL(rg, (SELECT rg FROM comprador WHERE codigo = @cod)),
+		 nome = ISNULL(@nome, (SELECT nome FROM comprador WHERE codigo = @cod)),
+		 estado_civil = ISNULL(@estado_Civil, (SELECT estado_civil FROM comprador WHERE codigo = @cod)),
+		 profissao = ISNULL(@profissao, (SELECT profissao FROM comprador WHERE codigo = @cod)),
+		 renda_bruta = ISNULL(@renda_bruta, (SELECT renda_bruta FROM comprador WHERE codigo = @cod)),
+		 fgts = ISNULL(@fgts, (SELECT fgts FROM comprador WHERE codigo = @cod)),
+		 lista_intereste = ISNULL(@lista_intereste, (SELECT lista_intereste FROM comprador WHERE codigo = @cod)),
+		 endereco_codigo = ISNULL(@cod_endereco, (SELECT endereco_codigo FROM comprador WHERE codigo = @cod)),
+		 imobiliaria_creci = ISNULL(@creci, (SELECT imobiliaria_creci FROM comprador WHERE codigo = @cod)),
+		 modified = (SELECT CURRENT_TIMESTAMP),
+		 telefone_codigo = ISNULL(@tel_codigo, (SELECT telefone_codigo FROM comprador WHERE codigo = @cod))
+	  WHERE 
+	    codigo = @cod;
+	   
 
-	   DECLARE @newEndereco INT = (SELECT IDENT_CURRENT('endereco'));*/
-	   IF @cpf IS NULL BEGIN
-	     SET @cpf = (SELECT cpf FROM comprador WHERE codigo = @cod);
-	   END
-	   IF @rg IS NULL BEGIN
-	     SET @rg = (SELECT rg FROM comprador WHERE codigo = @cod);
-	   END
-	   IF @estado_Civil IS NULL BEGIN
-	     SET @estado_Civil = (SELECT estado_civil FROM comprador WHERE codigo = @cod);
-	   END
-
-	   IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NOT NULL BEGIN
-	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
-	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,@ddi,@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
-	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,ddi,ddd,created) 
-	     VALUES (@tel,@tel2,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,celular,tel_comercial,ddi,ddd,created) 
-	     VALUES (@tel,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,celular,ddi,ddd,created) 
-	     VALUES (@tel,@cel,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END
-
-       IF @creci IS NULL BEGIN
-	     UPDATE comprador SET cpf=@cpf,rg=rg,nome=@nome,estado_civil=@estado_Civil,profissao=@profissao,renda_bruta=@renda_bruta,fgts=@fgts,lista_intereste=@lista_intereste,endereco_codigo=@cod_endereco,modified=(SELECT CURRENT_TIMESTAMP),telefone_codigo=(SELECT IDENT_CURRENT('telefone')) WHERE codigo=@cod;
-	   END ELSE BEGIN
-	     UPDATE comprador SET cpf=@cpf,rg=rg,nome=@nome,estado_civil=@estado_Civil,profissao=@profissao,renda_bruta=@renda_bruta,fgts=@fgts,lista_intereste=@lista_intereste,endereco_codigo=@cod_endereco,imobiliaria_creci=@creci,modified=(SELECT CURRENT_TIMESTAMP),telefone_codigo=(SELECT IDENT_CURRENT('telefone')) WHERE codigo=@cod;
-	   END
-
-	   SELECT comprador.codigo AS 'Código do Comprador Alterado' FROM comprador WHERE comprador.codigo = @cod;
+	   SELECT @cod AS 'Código do Comprador Alterado';
 
 	COMMIT TRAN
   END TRY
@@ -1034,30 +990,42 @@ EXEC usp_CompradorAlterar 1,'13013013299','RG17117811','Ederson Ramos', 'Casado'
 SELECT * FROM comprador*/
 CREATE PROCEDURE usp_VendaAlterar
   @cod INT,
-  @valor INT,
-  @entrada INT,
-  @data DATE,
-  @documentos VARCHAR(80),
-  @vendedor INT,
-  @porcenta_imobiliaria DECIMAL(11,2),
-  @imovel_codigo INT,
-  @despachante_codigo INT,
+  @valor INT = NULL,
+  @entrada INT = NULL,
+  @data DATE = NULL,
+  @documentos VARCHAR(80) = NULL,
+  @vendedor INT = NULL,
+  @porcenta_imobiliaria DECIMAL(11,2) = NULL,
+  @imovel_codigo INT = NULL,
+  @despachante_codigo INT = NULL,
   @creci VARCHAR(10) = NULL,
-  @cod_endereco INT
+  @cod_endereco INT = NULL,
+  @comprador_codigo INT = NULL,
+  @transacao_banco INT = NULL
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	   /*--alteração do endereço
-	   UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;*/
+	   
+	   UPDATE 
+	     venda
+	   SET 
+	     @entrada = ISNULL(entrada, (SELECT entrada FROM venda WHERE codigo = @cod)),
+		 @vendedor = ISNULL(vendedor, (SELECT vendedor FROM venda WHERE codigo = @cod)),
+		 valor = ISNULL(@valor, (SELECT valor FROM venda WHERE codigo = @cod)),
+		 data = ISNULL(@data, (SELECT data FROM venda WHERE codigo = @cod)),
+		 documentos = ISNULL(@documentos, (SELECT documentos FROM venda WHERE codigo = @cod)),
+		 porcenta_imobiliaria = ISNULL(@porcenta_imobiliaria, (SELECT porcenta_imobiliaria FROM venda WHERE codigo = @cod)),
+		 imobiliaria_creci = ISNULL(@creci, (SELECT imobiliaria_creci FROM venda WHERE codigo = @cod)),
+		 despachante_codigo = ISNULL(@despachante_codigo, (SELECT despachante_codigo FROM venda WHERE codigo = @cod)),
+		 modified = (SELECT CURRENT_TIMESTAMP),
+		 transacao_bancaria_codigo = ISNULL(@transacao_banco, (SELECT transacao_bancaria_codigo FROM venda WHERE codigo = @cod)),
+		 comprador_codigo = ISNULL(@comprador_codigo, (SELECT comprador_codigo FROM venda WHERE codigo = @cod))
+	   WHERE 
+		 codigo = @cod;
+	   
 
-       IF @creci IS NULL BEGIN
-	     UPDATE venda SET @entrada=entrada,@vendedor=vendedor,valor=@valor,data=@data,documentos=@documentos,porcenta_imobiliaria=@porcenta_imobiliaria,despachante_codigo=@despachante_codigo,modified=(SELECT CURRENT_TIMESTAMP) WHERE  codigo = @cod;
-	   END ELSE BEGIN
-	     UPDATE venda SET @entrada=entrada,@vendedor=vendedor,valor=@valor,data=@data,documentos=@documentos,porcenta_imobiliaria=@porcenta_imobiliaria,imobiliaria_creci=@creci,despachante_codigo=@despachante_codigo,modified=(SELECT CURRENT_TIMESTAMP) WHERE  codigo = @cod;
-	   END
-
-	   SELECT venda.codigo AS 'Código da Venda Alterada' FROM venda WHERE venda.codigo = @cod;
+	   SELECT @cod AS 'Código da Venda Alterada';
 	COMMIT TRAN
   END TRY
   BEGIN CATCH
@@ -1072,45 +1040,19 @@ EXEC usp_VendaAlterar 6,300000,50000,'2015-02-05','documentos conferidos e entre
 SELECT * FROM venda*/
 CREATE PROCEDURE usp_DespachanteAlterar
   @cod INT,
-  @nome VARCHAR(120),
-  @preco DECIMAL(10,2),
-  @servicos_completos SMALLINT,
-  @servicos_pendentes SMALLINT,
-  @ddi VARCHAR(5) = NULL,
-  @ddd VARCHAR(5),
-  @tel VARCHAR(14) = NULL,
-  @tel2 VARCHAR(14) = NULL,
-  @cel VARCHAR(14),
-  @telComercial VARCHAR(14) = NULL,
-  @telExtra VARCHAR(14) = NULL,
-  @cod_endereco INT
+  @nome VARCHAR(120) = NULL,
+  @preco DECIMAL(10,2) = NULL,
+  @servicos_completos SMALLINT = NULL,
+  @servicos_pendentes SMALLINT = NULL,
+  @cod_endereco INT = NULL
 AS
 BEGIN
   BEGIN TRY
     BEGIN TRAN
-	   /*--alteração do endereço
-	   UPDATE endereco SET logradouro = @rua, numero = @num, complemento = @compl, bairro = @bairro, cidade = @cidade, uf = @uf, pais = @pais, modified = (SELECT CURRENT_TIMESTAMP) WHERE codigo = @cod_endereco;*/
-
-	   IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NOT NULL BEGIN
-	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
-	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,@ddi,@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NOT NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,telefone_extra,ddi,ddd,created) 
-	     VALUES (@tel,@tel2,@cel,@telComercial,@telExtra,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NOT NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,telefone2,celular,tel_comercial,ddi,ddd,created) 
-	     VALUES (@tel,@tel2,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NOT NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,celular,tel_comercial,ddi,ddd,created) 
-	     VALUES (@tel,@cel,@telComercial,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END ELSE IF @tel IS NOT NULL AND @tel2 IS NULL AND @cel IS NOT NULL AND @telComercial IS NULL AND @telExtra IS NULL AND @ddd IS NOT NULL AND @ddi IS NULL BEGIN
-	     INSERT INTO telefone (telefone,celular,ddi,ddd,created) 
-	     VALUES (@tel,@cel,'+55',@ddd,(SELECT CURRENT_TIMESTAMP))
-	   END
-
+	   
 	   UPDATE despachante SET nome=@nome,preco=@preco,servicos_completos=@servicos_completos,servicos_pendentes=@servicos_pendentes,endereco_codigo=@cod_endereco,modified=(SELECT CURRENT_TIMESTAMP),telefone_codigo=(SELECT IDENT_CURRENT('telefone')) WHERE codigo = @cod;
 	   
-	   SELECT despachante.codigo AS 'Código do Despachante Alterado' FROM despachante WHERE despachante.codigo = @cod;
+	   SELECT @cod AS 'Código do Despachante Alterado';
 
 	COMMIT TRAN
   END TRY
