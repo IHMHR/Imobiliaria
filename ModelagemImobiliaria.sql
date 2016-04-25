@@ -1465,8 +1465,8 @@ BEGIN
 
 	   --TRANSFERINDO OS DADOS PARA OUTRA TABELA
        SET IDENTITY_INSERT transacao_bancaria_teste ON	
-       INSERT INTO transacao_bancaria_teste (codigo,agencia,num_conta_bancaria,num_conta_digito,tipo_conta,nome_banco,valor,venda_codigo,created,modified,dt_exclusao) 
-	   VALUES (@cod,(SELECT agencia FROM transacao_bancaria WHERE codigo = @cod),(SELECT num_conta_bancaria FROM transacao_bancaria WHERE codigo = @cod),(SELECT num_conta_digito FROM transacao_bancaria WHERE codigo = @cod),(SELECT tipo_conta FROM transacao_bancaria WHERE codigo = @cod),(SELECT nome_banco FROM transacao_bancaria WHERE codigo = @cod),(SELECT valor FROM transacao_bancaria WHERE codigo = @cod),(SELECT venda_codigo FROM transacao_bancaria WHERE codigo = @cod),(SELECT created FROM transacao_bancaria WHERE codigo = @cod),(SELECT modified FROM transacao_bancaria WHERE codigo = @cod),(SELECT GETDATE()));
+       INSERT INTO transacao_bancaria_teste (codigo,agencia,num_conta_bancaria,num_conta_digito,tipo_conta,nome_banco,valor,created,modified,dt_exclusao) 
+	   VALUES (@cod,(SELECT agencia FROM transacao_bancaria WHERE codigo = @cod),(SELECT num_conta_bancaria FROM transacao_bancaria WHERE codigo = @cod),(SELECT num_conta_digito FROM transacao_bancaria WHERE codigo = @cod),(SELECT tipo_conta FROM transacao_bancaria WHERE codigo = @cod),(SELECT nome_banco FROM transacao_bancaria WHERE codigo = @cod),(SELECT valor FROM transacao_bancaria WHERE codigo = @cod),(SELECT created FROM transacao_bancaria WHERE codigo = @cod),(SELECT modified FROM transacao_bancaria WHERE codigo = @cod),(SELECT GETDATE()));
 	   SET IDENTITY_INSERT transacao_bancaria OFF
 
 	   DELETE FROM transacao_bancaria WHERE codigo = @cod;
@@ -1525,8 +1525,8 @@ BEGIN
 	 
 	   --TRANSFERINDO OS DADOS PARA OUTRA TABELA
        SET IDENTITY_INSERT proprietario_conjuge_teste ON	
-       INSERT INTO proprietario_conjuge_teste (codigo,cpf,rg,nome,estado_civil,proprietario_codigo,created,modified,dt_exclusao,telefone_codigo) 
-	   VALUES (@cod,(SELECT cpf FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT rg FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT nome FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT estado_civil FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT proprietario_codigo FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT created FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT modified FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT GETDATE()),(SELECT telefone_codigo FROM proprietario_conjuge WHERE codigo = @cod));
+       INSERT INTO proprietario_conjuge_teste (codigo,cpf,rg,nome,estado_civil,created,modified,dt_exclusao,telefone_codigo) 
+	   VALUES (@cod,(SELECT cpf FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT rg FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT nome FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT estado_civil FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT created FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT modified FROM proprietario_conjuge WHERE proprietario_conjuge.codigo = @cod),(SELECT GETDATE()),(SELECT telefone_codigo FROM proprietario_conjuge WHERE codigo = @cod));
 	   SET IDENTITY_INSERT proprietario_conjuge_teste OFF
 
 
@@ -1571,105 +1571,133 @@ GO/*OK*/
 /*EXEC usp_CompradorConjugeApagar 1*/
 
 -- Criação de Views --
-CREATE VIEW vwCorretor
+CREATE VIEW vwCorretor WITH SCHEMABINDING
 AS
   SELECT 
-    cpf AS 'CPF do(a) Corretor(a)',
-	rg AS 'RG do(a) Corretor(a)',
-	nome_completo AS 'Nome Completo',
-	CASE sexo
+    c.cpf AS 'CPF do(a) Corretor(a)',
+	c.rg AS 'RG do(a) Corretor(a)',
+	c.nome_completo AS 'Nome Completo',
+	CASE c.sexo
 	  WHEN 'M' THEN 'Masculino'
 	  WHEN 'F' THEN 'Feminino'
 	END AS 'Sexo',
-	(SELECT apelido FROM imobiliaria WHERE creci = imobiliaria_creci) AS 'Imobiliaria Vinculado',
-	(ddd + ' ' + telefone) AS 'Telefone da loja',
-	(ddd + ' ' + telefone2) AS 'Telefone 2',
-	(ddd + ' ' + celular) AS 'Celular',
-	(ddd + ' ' + tel_comercial) AS 'Telefone comercial',
-	(ddd + ' ' + telefone_extra) AS 'Telefone extra',
-	logradouro AS 'R.\Av. do endereço',
-	numero AS 'Número do endereço',
-	complemento AS 'Complemento do endereço',
-	bairro AS 'Bairro do imóvel',
-	cidade AS 'Cidade do imóvel',
-	uf AS 'Estado do imóvel' 
+	(SELECT imobiliaria.apelido FROM dbo.imobiliaria WHERE imobiliaria.creci = c.imobiliaria_creci) AS 'Imobiliaria Vinculado',
+	(t.ddd + ' ' + t.telefone) AS 'Telefone da loja',
+	(t.ddd + ' ' + t.telefone2) AS 'Telefone 2',
+	(t.ddd + ' ' + t.celular) AS 'Celular',
+	(t.ddd + ' ' + t.tel_comercial) AS 'Telefone comercial',
+	(t.ddd + ' ' + t.telefone_extra) AS 'Telefone extra',
+	e.logradouro AS 'R.\Av. do endereço',
+	e.numero AS 'Número do endereço',
+	e.complemento AS 'Complemento do endereço',
+	e.bairro AS 'Bairro do imóvel',
+	e.cidade AS 'Cidade do imóvel',
+	e.uf AS 'Estado do imóvel' 
   FROM 
-    corretor LEFT JOIN endereco ON corretor.endereco_codigo = endereco.codigo 
-	LEFT JOIN telefone ON corretor.telefone_codigo = telefone.codigo
+    dbo.corretor c LEFT JOIN dbo.endereco e ON c.endereco_codigo = e.codigo 
+	LEFT JOIN dbo.telefone t ON c.telefone_codigo = t.codigo
 GO
 
 SELECT * FROM vwCorretor
 
-CREATE VIEW vwImobiliaria
+CREATE VIEW vwImobiliaria WITH SCHEMABINDING
 AS
   SELECT 
-    creci AS 'Creci da Imobiliaria',
-	nome_creci AS 'Nome do CEO',
-	dt_emissao AS 'Data da emissão CRECI',
-	razao AS 'Razão social',
-	apelido AS 'Nome da loja',
-	(ddd + ' ' + telefone) AS 'Telefone da loja',
-	(ddd + ' ' + telefone2) AS 'Telefone 2 loja',
-	(ddd + ' ' + celular) AS 'Celular loja',
-	(ddd + ' ' + tel_comercial) AS 'Telefone comercial loja',
-	(ddd + ' ' + telefone_extra) AS 'Telefone extra loja',
-	dono AS 'Sócio Majoritário',
-	co_dono AS 'Sócio Senior',
-	logradouro AS 'R.\Av. do endereço',
-	numero AS 'Número do endereço',
-	complemento AS 'Complemento do endereço',
-	bairro AS 'Bairro do imóvel',
-	cidade AS 'Cidade do imóvel',
-	uf AS 'Estado do imóvel' 
+    i.creci AS 'Creci da Imobiliaria',
+	i.nome_creci AS 'Nome do CEO',
+	i.dt_emissao AS 'Data da emissão CRECI',
+	i.razao AS 'Razão social',
+	i.apelido AS 'Nome da loja',
+	(t.ddd + ' ' + t.telefone) AS 'Telefone da loja',
+	(t.ddd + ' ' + t.telefone2) AS 'Telefone 2',
+	(t.ddd + ' ' + t.celular) AS 'Celular',
+	(t.ddd + ' ' + t.tel_comercial) AS 'Telefone comercial',
+	(t.ddd + ' ' + t.telefone_extra) AS 'Telefone extra',
+	i.dono AS 'Sócio Majoritário',
+	i.co_dono AS 'Sócio Senior',
+	e.logradouro AS 'R.\Av. do endereço',
+	e.numero AS 'Número do endereço',
+	e.complemento AS 'Complemento do endereço',
+	e.bairro AS 'Bairro do imóvel',
+	e.cidade AS 'Cidade do imóvel',
+	e.uf AS 'Estado do imóvel' 
   FROM 
-    imobiliaria LEFT JOIN endereco ON imobiliaria.endereco_codigo = endereco.codigo 
-	LEFT JOIN telefone ON imobiliaria.telefone_codigo = telefone.codigo
+    dbo.imobiliaria i LEFT JOIN dbo.endereco e ON i.endereco_codigo = e.codigo 
+	LEFT JOIN dbo.telefone t ON i.telefone_codigo = t.codigo
 GO
 
 SELECT * FROM vwImobiliaria
 
-CREATE VIEW vwDespachante
+CREATE VIEW vwDespachante WITH SCHEMABINDING
 AS
   SELECT 
-    nome AS 'Nome do Despachante',
-	preco AS 'Preço do Despachante',
-	servicos_completos AS 'Serviços já realizados',
-	servicos_pendentes AS 'Serviços Pendentes',
-	(ddd + ' ' + telefone) AS 'Telefone do Despachante',
-	(ddd + ' ' + telefone2) AS 'Telefone 2 do Despachante',
-	(ddd + ' ' + celular) AS 'Celular do Despachante',
-	(ddd + ' ' + tel_comercial) AS 'Telefone comercial do Despachante',
-	(ddd + ' ' + telefone_extra) AS 'Telefone extra do Despachante',
-	logradouro AS 'R.\Av. do endereço',
-	numero AS 'Número do endereço',
-	complemento AS 'Complemento do endereço',
-	bairro AS 'Bairro do imóvel',
-	cidade AS 'Cidade do imóvel',
-	uf AS 'Estado do imóvel' 
+    d.nome AS 'Nome do Despachante',
+	d.preco AS 'Preço do Despachante',
+	d.servicos_completos AS 'Serviços já realizados',
+	d.servicos_pendentes AS 'Serviços Pendentes',
+	(t.ddd + ' ' + t.telefone) AS 'Telefone do Despachante',
+	(t.ddd + ' ' + t.telefone2) AS 'Telefone 2 do Despachante',
+	(t.ddd + ' ' + t.celular) AS 'Celular do Despachante',
+	(t.ddd + ' ' + t.tel_comercial) AS 'Telefone comercial do Despachante',
+	(t.ddd + ' ' + t.telefone_extra) AS 'Telefone extra do Despachante',
+	e.logradouro AS 'R.\Av. do endereço',
+	e.numero AS 'Número do endereço',
+	e.complemento AS 'Complemento do endereço',
+	e.bairro AS 'Bairro do imóvel',
+	e.cidade AS 'Cidade do imóvel',
+	e.uf AS 'Estado do imóvel' 
   FROM 
-    Despachante LEFT JOIN endereco ON Despachante.endereco_codigo = endereco.codigo 
-	LEFT JOIN telefone ON Despachante.telefone_codigo = telefone.codigo
+    dbo.Despachante d LEFT JOIN dbo.endereco e ON d.endereco_codigo = e.codigo 
+	LEFT JOIN dbo.telefone t ON d.telefone_codigo = t.codigo
 GO
 
 SELECT * FROM vwDespachante
 
-CREATE VIEW vwImovel
+CREATE VIEW vwImovel WITH SCHEMABINDING
 AS 
   SELECT 
-    registro AS 'Registro do Imóvel',
-	frente_lote + 'm²' AS 'Frente do Imóvel',
-	lado_lote + 'm²' AS 'Lado do Imóvel',
-	capitador AS 'Capitador do Imóvel',
-	(SELECT nome FROM proprietario WHERE proprietario.codigo = proprietario_codigo) AS 'Proprietário do Imóvel',
-	logradouro AS 'R.\Av. do endereço',
-	numero AS 'Número do endereço',
-	complemento AS 'Complemento do endereço',
-	bairro AS 'Bairro do imóvel',
-	cidade AS 'Cidade do imóvel',
-	uf AS 'Estado do imóvel' 
+    i.registro AS 'Registro do Imóvel',
+	i.frente_lote + 'm²' AS 'Frente do Imóvel',
+	i.lado_lote + 'm²' AS 'Lado do Imóvel',
+	i.capitador AS 'Capitador do Imóvel',
+	p.nome AS 'Proprietário do Imóvel',
+	e.logradouro AS 'R.\Av. do endereço',
+	e.numero AS 'Número do endereço',
+	e.complemento AS 'Complemento do endereço',
+	e.bairro AS 'Bairro do imóvel',
+	e.cidade AS 'Cidade do imóvel',
+	e.uf AS 'Estado do imóvel' 
   FROM
-    imovel LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo 
+    dbo.imovel i LEFT JOIN dbo.endereco e ON i.endereco_codigo = e.codigo 
+	LEFT JOIN dbo.proprietario p ON i.proprietario_codigo = p.codigo 
 GO
+
+SELECT * FROM vwImovel
+
+-- OCULTANDO CAMPOS NULOS --
+DECLARE @sql VARCHAR(MAX) = (SELECT CONCAT('SELECT ',
+  CASE (count(registro)) WHEN 0 THEN '' ELSE ',registro' END,
+  CASE (count(frente_lote)) WHEN 0 THEN '' ELSE ',frente_lote' END,
+  CASE (count(lado_lote)) WHEN 0 THEN '' ELSE ',lado_lote' END,
+  CASE (count(capitador)) WHEN 0 THEN '' ELSE ',capitador' END,
+  CASE (count(nome)) WHEN 0 THEN '' ELSE ',nome' END,
+  CASE (count(logradouro)) WHEN 0 THEN '' ELSE ',logradouro' END,
+  CASE (count(numero)) WHEN 0 THEN '' ELSE ',numero' END,
+  CASE (count(complemento)) WHEN 0 THEN '' ELSE ',complemento' END,
+  CASE (count(bairro)) WHEN 0 THEN '' ELSE ',capitabairrodor' END,
+  CASE (count(cidade)) WHEN 0 THEN '' ELSE ',cidade' END,
+  CASE (count(uf)) WHEN 0 THEN '' ELSE ',uf' END,
+  CASE (count(pais)) WHEN 0 THEN '' ELSE ',pais' END,
+  ' FROM imovel LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo
+    LEFT JOIN proprietario ON imovel.proprietario_codigo = proprietario.codigo ')
+FROM 
+   imovel LEFT JOIN endereco ON imovel.endereco_codigo = endereco.codigo
+   LEFT JOIN proprietario ON imovel.proprietario_codigo = proprietario.codigo  );
+--SELECT @sql
+SELECT ISNULL((SELECT @sql WHERE @sql NOT LIKE 'SELECT  FROM imovel LEFT %'), 'Nada para exibir') AS 'Visualização de Dados'
+
+
+
 
 --PROCEDURES PARA PESQUISA--
 CREATE PROCEDURE usp_ImovelPorCod
