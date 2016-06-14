@@ -3,7 +3,7 @@ using DAL;
 
 namespace BLL
 {
-    public class ClsCorretor : ClsEndereco
+    sealed public class ClsCorretor : ClsEndereco
     {
         #region Variaveis
         public int codigo { get; set; }

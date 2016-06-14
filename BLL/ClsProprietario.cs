@@ -7,7 +7,7 @@ using DAL;
 
 namespace BLL
 {
-    public class ClsProprietario : ClsEndereco
+    sealed public class ClsProprietario : ClsEndereco
     {
         #region Variaveis
         public int codigo { get; set; }

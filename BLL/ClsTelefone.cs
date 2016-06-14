@@ -8,6 +8,7 @@ namespace BLL
 {
     public class ClsTelefone
     {
+        #region Variaveis
         public int codigo { get; set; }
         public string telefone { get; set; }
         public string telefone2 { get; set; }
@@ -16,5 +17,6 @@ namespace BLL
         public string telExtra { get; set; }
         public int ddi { get; set; }
         public int ddd { get; set; }
+    #endregion
     }
 }

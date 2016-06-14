@@ -903,8 +903,8 @@ CREATE PROCEDURE usp_CorretorAlterar
   @cod INT,
   @cpf VARCHAR(11) = NULL,
   @rg VARCHAR(10) = NULL,
-  @nome VARCHAR(150),
-  @sexo CHAR(1),
+  @nome VARCHAR(150) = NULL,
+  @sexo CHAR(1) = NULL,
   @estado_civil VARCHAR(15) = NULL,
   @creci VARCHAR(10) = NULL,
   @end_codigo INT = NULL,
@@ -1250,17 +1250,17 @@ SELECT * INTO comprador_conjuge_teste FROM comprador_conjuge
 SELECT * INTO proprietario_conjuge_teste FROM proprietario_conjuge
 SELECT * INTO venda_teste FROM venda
 
---APAGANDO OS DADOS DAS TABELAS *_teste--
-DELETE FROM imovel_teste;
-DELETE FROM proprietario_teste;
-DELETE FROM corretor_teste;
-DELETE FROM comprador_teste;
-DELETE FROM despachante_teste;
-DELETE FROM transacao_bancaria_teste;
-DELETE FROM imobiliaria_teste;
-DELETE FROM comprador_conjuge_teste;
-DELETE FROM proprietario_conjuge_teste;
-DELETE FROM venda_teste;
+--APAGANDO OS DADOS DAS TABELAS *_teste
+TRUNCATE TABLE imovel_teste;
+TRUNCATE TABLE proprietario_teste;
+TRUNCATE TABLE corretor_teste;
+TRUNCATE TABLE comprador_teste;
+TRUNCATE TABLE despachante_teste;
+TRUNCATE TABLE transacao_bancaria_teste;
+TRUNCATE TABLE imobiliaria_teste;
+TRUNCATE TABLE comprador_conjuge_teste;
+TRUNCATE TABLE proprietario_conjuge_teste;
+TRUNCATE TABLE venda_teste;
 
 --ALTERANDO AS TABELAS *_teste--
 --Exemplo: ALTER TABLE dbo.doc_exa ADD column_b VARCHAR(20) NULL, column_c INT NULL;--
@@ -1697,10 +1697,9 @@ FROM
 SELECT ISNULL((SELECT @sql WHERE @sql NOT LIKE 'SELECT  FROM imovel LEFT %'), 'Nada para exibir') AS 'Visualização de Dados'
 
 
-
-
+-- Replace then with ((( View )))
 --PROCEDURES PARA PESQUISA--
-CREATE PROCEDURE usp_ImovelPorCod
+/*CREATE PROCEDURE usp_ImovelPorCod
   @cod INT
 AS
 BEGIN
@@ -3653,7 +3652,7 @@ BEGIN
 	SELECT ERROR_MESSAGE() AS 'Erro na transação';
   END CATCH
 END
-GO/*OK*/
+GO/*OK*/*/
 
 --TRIGGER'S PARA EVITAR EXCLUSÃO PERMANENTE--
 /*CREATE TRIGGER [NOME DO TRIGGER]
@@ -3871,7 +3870,7 @@ COMMIT WORK
 /*OK*/
 
 --criar a tabela cep
-CREATE TABLE cep (
+/*CREATE TABLE cep (
 cep CHAR(8),
 Logradouro VARCHAR(100),
 Bairro VARCHAR(100),
@@ -3879,7 +3878,7 @@ Cidade VARCHAR(80),
 Estado CHAR(2)
 
 CONSTRAINT pk_cep PRIMARY KEY (CEP)
-);/*OK*/
+);/*OK*/*/
 
 --kinda read-only
 DENY INSERT, UPDATE, DELETE ON cep TO Public
@@ -3901,6 +3900,59 @@ BEGIN
   END CATCH
 END
 GO/*OK*/
+EXECUTE usp_RetornarCEP '34000000' -- CEP geral de Nova Lima
 EXECUTE usp_RetornarCEP '00000000'
 EXECUTE usp_RetornarCEP NULL
 EXEC usp_RetornarCEP '30840760'
+
+-- SP to return CEP
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[stpConsulta_CEP]
+  @Nr_CEP VARCHAR(20)
+AS BEGIN
+    DECLARE 
+        @obj INT,
+        @Url VARCHAR(255),
+        @resposta VARCHAR(8000),
+        @xml XML
+
+    -- Recupera apenas os números do CEP
+    DECLARE @startingIndex INT = 0
+ 
+    WHILE (1=1)
+    BEGIN
+ 
+        SET @startingIndex = PATINDEX('%[^0-9]%', @Nr_CEP)  
+ 
+        IF (@startingIndex <> 0)
+            SET @Nr_CEP = REPLACE(@Nr_CEP, SUBSTRING(@Nr_CEP, @startingIndex, 1), '')  
+        ELSE    
+            BREAK
+ 
+    END 
+ 
+    SET @Url = 'http://viacep.com.br/ws/' + @Nr_CEP + '/xml'
+ 
+    EXEC sys.sp_OACreate 'MSXML2.ServerXMLHTTP', @obj OUT
+    EXEC sys.sp_OAMethod @obj, 'open', NULL, 'GET', @Url, FALSE
+    EXEC sys.sp_OAMethod @obj, 'send'
+    EXEC sys.sp_OAGetProperty @obj, 'responseText', @resposta OUT
+    EXEC sys.sp_OADestroy @obj
+ 
+    SET @xml = @resposta COLLATE SQL_Latin1_General_CP1251_CS_AS
+ 
+    SELECT
+        @xml.value('(/xmlcep/cep)[1]', 'varchar(9)') AS CEP,
+        @xml.value('(/xmlcep/logradouro)[1]', 'varchar(200)') AS Logradouro,
+        @xml.value('(/xmlcep/complemento)[1]', 'varchar(200)') AS Complemento,
+        @xml.value('(/xmlcep/bairro)[1]', 'varchar(200)') AS Bairro,
+        @xml.value('(/xmlcep/localidade)[1]', 'varchar(200)') AS Cidade,
+        @xml.value('(/xmlcep/uf)[1]', 'varchar(200)') AS UF,
+        @xml.value('(/xmlcep/ibge)[1]', 'varchar(200)') AS IBGE
+ 
+END
+GO

@@ -7,7 +7,7 @@ using DAL;
 
 namespace BLL
 {
-    public class ClsImobiliaria : ClsEndereco
+    sealed public class ClsImobiliaria : ClsEndereco
     {
         #region Variaveis
         public string creci { get; set; }
@@ -120,6 +120,19 @@ namespace BLL
                 {
                     throw new Exception("Erro: " + ex.Message.ToString() + ex1.Message.ToString());
                 }
+            }
+        }
+
+        public void InserirImobiliaria()
+        {
+            try
+            {
+                imobiliariaEntities imobiliaria = new imobiliariaEntities();
+                imobiliaria.usp_ImobiliariaInserir(creci, nome_creci, emissao, razao, apelido, ddi.ToString(), ddd.ToString(), telefone, telefone2, celular, telComercial, telExtra, dono, co_dono, logradouro, numero, complemento, bairro, cidade, uf, pais);
+            }
+            catch (Exception erro)
+            {
+                throw new Exception(erro.Message.ToString());
             }
         }
 

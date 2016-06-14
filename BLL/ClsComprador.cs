@@ -7,7 +7,7 @@ using DAL;
 
 namespace BLL
 {
-    public class ClsComprador : ClsEndereco
+    sealed public class ClsComprador : ClsEndereco
     {
         #region Variaveis
         public int codigo { get; set; }
@@ -407,5 +407,18 @@ namespace BLL
                 }
             }
         }/*TESTAR*/
+
+        public void InserirComprador()
+        {
+            try
+            {
+                imobiliariaEntities im = new imobiliariaEntities();
+                im.usp_CompradorInserir(cpf, rg, nome, "M", estado_civil, profissao, renda, fgts, ddi.ToString(), ddd.ToString(), telefone, telefone2, celular, telComercial, telExtra, lista_intereste, creci, logradouro, numero, complemento, bairro, cidade, uf, pais);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro: " + ex.Message.ToString());
+            }
+        }
     }
 }

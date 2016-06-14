@@ -7,7 +7,7 @@ using DAL;
 
 namespace BLL
 {
-    public class ClsCompradorConjuge
+    sealed public class ClsCompradorConjuge
     {
         #region Variaveis
         public int codigo { get; set; }

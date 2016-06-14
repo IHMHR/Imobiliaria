@@ -1,0 +1,994 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="imobiliariaModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'imobiliaria.dbo.vwCorretor' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="vwCorretor">
+          <Key>
+            <PropertyRef Name="CPF do(a) Corretor(a)" />
+            <PropertyRef Name="RG do(a) Corretor(a)" />
+            <PropertyRef Name="Nome Completo" />
+          </Key>
+          <Property Name="CPF do(a) Corretor(a)" Type="varchar" MaxLength="11" Nullable="false" />
+          <Property Name="RG do(a) Corretor(a)" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Nome Completo" Type="varchar" MaxLength="150" Nullable="false" />
+          <Property Name="Sexo" Type="varchar" MaxLength="9" />
+          <Property Name="Imobiliaria Vinculado" Type="varchar" MaxLength="80" />
+          <Property Name="Telefone da loja" Type="varchar" MaxLength="20" />
+          <Property Name="Telefone 2" Type="varchar" MaxLength="20" />
+          <Property Name="Celular" Type="varchar" MaxLength="20" />
+          <Property Name="Telefone comercial" Type="varchar" MaxLength="20" />
+          <Property Name="Telefone extra" Type="varchar" MaxLength="20" />
+          <Property Name="R.\Av. do endereço" Type="varchar" MaxLength="100" />
+          <Property Name="Número do endereço" Type="int" />
+          <Property Name="Complemento do endereço" Type="varchar" MaxLength="30" />
+          <Property Name="Bairro do imóvel" Type="varchar" MaxLength="100" />
+          <Property Name="Cidade do imóvel" Type="varchar" MaxLength="80" />
+          <Property Name="Estado do imóvel" Type="char" MaxLength="2" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'imobiliaria.dbo.vwDespachante' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="vwDespachante">
+          <Key>
+            <PropertyRef Name="Nome do Despachante" />
+          </Key>
+          <Property Name="Nome do Despachante" Type="varchar" MaxLength="120" Nullable="false" />
+          <Property Name="Preço do Despachante" Type="decimal" Precision="10" Scale="2" />
+          <Property Name="Serviços já realizados" Type="smallint" />
+          <Property Name="Serviços Pendentes" Type="smallint" />
+          <Property Name="Telefone do Despachante" Type="varchar" MaxLength="20" />
+          <Property Name="Telefone 2 do Despachante" Type="varchar" MaxLength="20" />
+          <Property Name="Celular do Despachante" Type="varchar" MaxLength="20" />
+          <Property Name="Telefone comercial do Despachante" Type="varchar" MaxLength="20" />
+          <Property Name="Telefone extra do Despachante" Type="varchar" MaxLength="20" />
+          <Property Name="R.\Av. do endereço" Type="varchar" MaxLength="100" />
+          <Property Name="Número do endereço" Type="int" />
+          <Property Name="Complemento do endereço" Type="varchar" MaxLength="30" />
+          <Property Name="Bairro do imóvel" Type="varchar" MaxLength="100" />
+          <Property Name="Cidade do imóvel" Type="varchar" MaxLength="80" />
+          <Property Name="Estado do imóvel" Type="char" MaxLength="2" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'imobiliaria.dbo.vwImobiliaria' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="vwImobiliaria">
+          <Key>
+            <PropertyRef Name="Creci da Imobiliaria" />
+            <PropertyRef Name="Nome do CEO" />
+            <PropertyRef Name="Data da emissão CRECI" />
+            <PropertyRef Name="Razão social" />
+            <PropertyRef Name="Sócio Majoritário" />
+            <PropertyRef Name="Sócio Senior" />
+          </Key>
+          <Property Name="Creci da Imobiliaria" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Nome do CEO" Type="varchar" MaxLength="120" Nullable="false" />
+          <Property Name="Data da emissão CRECI" Type="date" Nullable="false" />
+          <Property Name="Razão social" Type="varchar" MaxLength="120" Nullable="false" />
+          <Property Name="Nome da loja" Type="varchar" MaxLength="80" />
+          <Property Name="Telefone da loja" Type="varchar" MaxLength="20" />
+          <Property Name="Telefone 2" Type="varchar" MaxLength="20" />
+          <Property Name="Celular" Type="varchar" MaxLength="20" />
+          <Property Name="Telefone comercial" Type="varchar" MaxLength="20" />
+          <Property Name="Telefone extra" Type="varchar" MaxLength="20" />
+          <Property Name="Sócio Majoritário" Type="varchar" MaxLength="120" Nullable="false" />
+          <Property Name="Sócio Senior" Type="varchar" MaxLength="120" Nullable="false" />
+          <Property Name="R.\Av. do endereço" Type="varchar" MaxLength="100" />
+          <Property Name="Número do endereço" Type="int" />
+          <Property Name="Complemento do endereço" Type="varchar" MaxLength="30" />
+          <Property Name="Bairro do imóvel" Type="varchar" MaxLength="100" />
+          <Property Name="Cidade do imóvel" Type="varchar" MaxLength="80" />
+          <Property Name="Estado do imóvel" Type="char" MaxLength="2" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'imobiliaria.dbo.vwImovel' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="vwImovel">
+          <Key>
+            <PropertyRef Name="Registro do Imóvel" />
+            <PropertyRef Name="Frente do Imóvel" />
+            <PropertyRef Name="Lado do Imóvel" />
+            <PropertyRef Name="Capitador do Imóvel" />
+          </Key>
+          <Property Name="Registro do Imóvel" Type="int" Nullable="false" />
+          <Property Name="Frente do Imóvel" Type="varchar" MaxLength="12" Nullable="false" />
+          <Property Name="Lado do Imóvel" Type="varchar" MaxLength="12" Nullable="false" />
+          <Property Name="Capitador do Imóvel" Type="int" Nullable="false" />
+          <Property Name="Proprietário do Imóvel" Type="varchar" MaxLength="120" />
+          <Property Name="R.\Av. do endereço" Type="varchar" MaxLength="100" />
+          <Property Name="Número do endereço" Type="int" />
+          <Property Name="Complemento do endereço" Type="varchar" MaxLength="30" />
+          <Property Name="Bairro do imóvel" Type="varchar" MaxLength="100" />
+          <Property Name="Cidade do imóvel" Type="varchar" MaxLength="80" />
+          <Property Name="Estado do imóvel" Type="char" MaxLength="2" />
+        </EntityType>
+        <Function Name="stpConsulta_CEP" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="Nr_CEP" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="usp_CompradorApagar" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="cod" Type="int" Mode="In" />
+        </Function>
+        <Function Name="usp_CompradorConjugeApagar" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="cod" Type="int" Mode="In" />
+        </Function>
+        <Function Name="usp_CompradoreConjugeInserir" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="cpf" Type="varchar" Mode="In" />
+          <Parameter Name="rg" Type="varchar" Mode="In" />
+          <Parameter Name="nome" Type="varchar" Mode="In" />
+          <Parameter Name="sexo" Type="char" Mode="In" />
+          <Parameter Name="estado_Civil" Type="varchar" Mode="In" />
+          <Parameter Name="profissao" Type="varchar" Mode="In" />
+          <Parameter Name="renda_bruta" Type="int" Mode="In" />
+          <Parameter Name="fgts" Type="decimal" Mode="In" />
+          <Parameter Name="ddi" Type="varchar" Mode="In" />
+          <Parameter Name="ddd" Type="varchar" Mode="In" />
+          <Parameter Name="tel" Type="varchar" Mode="In" />
+          <Parameter Name="tel2" Type="varchar" Mode="In" />
+          <Parameter Name="cel" Type="varchar" Mode="In" />
+          <Parameter Name="telComercial" Type="varchar" Mode="In" />
+          <Parameter Name="telExtra" Type="varchar" Mode="In" />
+          <Parameter Name="lista_intereste" Type="varchar" Mode="In" />
+          <Parameter Name="creci" Type="varchar" Mode="In" />
+          <Parameter Name="rua" Type="varchar" Mode="In" />
+          <Parameter Name="num" Type="int" Mode="In" />
+          <Parameter Name="compl" Type="varchar" Mode="In" />
+          <Parameter Name="bairro" Type="varchar" Mode="In" />
+          <Parameter Name="cidade" Type="varchar" Mode="In" />
+          <Parameter Name="uf" Type="char" Mode="In" />
+          <Parameter Name="pais" Type="varchar" Mode="In" />
+          <Parameter Name="cpfC" Type="varchar" Mode="In" />
+          <Parameter Name="rgC" Type="varchar" Mode="In" />
+          <Parameter Name="nomeC" Type="varchar" Mode="In" />
+          <Parameter Name="sexoC" Type="char" Mode="In" />
+          <Parameter Name="estado_CivilC" Type="varchar" Mode="In" />
+          <Parameter Name="profissaoC" Type="varchar" Mode="In" />
+          <Parameter Name="renda_brutaC" Type="int" Mode="In" />
+          <Parameter Name="fgtsC" Type="decimal" Mode="In" />
+          <Parameter Name="ddiC" Type="varchar" Mode="In" />
+          <Parameter Name="dddC" Type="varchar" Mode="In" />
+          <Parameter Name="telC" Type="varchar" Mode="In" />
+          <Parameter Name="tel2C" Type="varchar" Mode="In" />
+          <Parameter Name="celC" Type="varchar" Mode="In" />
+          <Parameter Name="telComercialC" Type="varchar" Mode="In" />
+          <Parameter Name="telExtraC" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="usp_CompradorInserir" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="cpf" Type="varchar" Mode="In" />
+          <Parameter Name="rg" Type="varchar" Mode="In" />
+          <Parameter Name="nome" Type="varchar" Mode="In" />
+          <Parameter Name="sexo" Type="char" Mode="In" />
+          <Parameter Name="estado_Civil" Type="varchar" Mode="In" />
+          <Parameter Name="profissao" Type="varchar" Mode="In" />
+          <Parameter Name="renda_bruta" Type="int" Mode="In" />
+          <Parameter Name="fgts" Type="decimal" Mode="In" />
+          <Parameter Name="ddi" Type="varchar" Mode="In" />
+          <Parameter Name="ddd" Type="varchar" Mode="In" />
+          <Parameter Name="tel" Type="varchar" Mode="In" />
+          <Parameter Name="tel2" Type="varchar" Mode="In" />
+          <Parameter Name="cel" Type="varchar" Mode="In" />
+          <Parameter Name="telComercial" Type="varchar" Mode="In" />
+          <Parameter Name="telExtra" Type="varchar" Mode="In" />
+          <Parameter Name="lista_intereste" Type="varchar" Mode="In" />
+          <Parameter Name="creci" Type="varchar" Mode="In" />
+          <Parameter Name="rua" Type="varchar" Mode="In" />
+          <Parameter Name="num" Type="int" Mode="In" />
+          <Parameter Name="compl" Type="varchar" Mode="In" />
+          <Parameter Name="bairro" Type="varchar" Mode="In" />
+          <Parameter Name="cidade" Type="varchar" Mode="In" />
+          <Parameter Name="uf" Type="char" Mode="In" />
+          <Parameter Name="pais" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="usp_CorretorApagar" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="cod" Type="int" Mode="In" />
+        </Function>
+        <Function Name="usp_CorretorInserir" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="cpf" Type="varchar" Mode="In" />
+          <Parameter Name="rg" Type="varchar" Mode="In" />
+          <Parameter Name="nome" Type="varchar" Mode="In" />
+          <Parameter Name="ddi" Type="varchar" Mode="In" />
+          <Parameter Name="ddd" Type="varchar" Mode="In" />
+          <Parameter Name="tel" Type="varchar" Mode="In" />
+          <Parameter Name="tel2" Type="varchar" Mode="In" />
+          <Parameter Name="cel" Type="varchar" Mode="In" />
+          <Parameter Name="telComercial" Type="varchar" Mode="In" />
+          <Parameter Name="telExtra" Type="varchar" Mode="In" />
+          <Parameter Name="sexo" Type="char" Mode="In" />
+          <Parameter Name="creci" Type="varchar" Mode="In" />
+          <Parameter Name="rua" Type="varchar" Mode="In" />
+          <Parameter Name="num" Type="int" Mode="In" />
+          <Parameter Name="compl" Type="varchar" Mode="In" />
+          <Parameter Name="bairro" Type="varchar" Mode="In" />
+          <Parameter Name="cidade" Type="varchar" Mode="In" />
+          <Parameter Name="uf" Type="char" Mode="In" />
+          <Parameter Name="pais" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="usp_DespachanteApagar" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="cod" Type="int" Mode="In" />
+        </Function>
+        <Function Name="usp_DespachanteInserir" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="nome" Type="varchar" Mode="In" />
+          <Parameter Name="preco" Type="decimal" Mode="In" />
+          <Parameter Name="servicos_completos" Type="smallint" Mode="In" />
+          <Parameter Name="servicos_pendentes" Type="smallint" Mode="In" />
+          <Parameter Name="ddi" Type="varchar" Mode="In" />
+          <Parameter Name="ddd" Type="varchar" Mode="In" />
+          <Parameter Name="tel" Type="varchar" Mode="In" />
+          <Parameter Name="tel2" Type="varchar" Mode="In" />
+          <Parameter Name="cel" Type="varchar" Mode="In" />
+          <Parameter Name="telComercial" Type="varchar" Mode="In" />
+          <Parameter Name="telExtra" Type="varchar" Mode="In" />
+          <Parameter Name="rua" Type="varchar" Mode="In" />
+          <Parameter Name="num" Type="int" Mode="In" />
+          <Parameter Name="compl" Type="varchar" Mode="In" />
+          <Parameter Name="bairro" Type="varchar" Mode="In" />
+          <Parameter Name="cidade" Type="varchar" Mode="In" />
+          <Parameter Name="uf" Type="char" Mode="In" />
+          <Parameter Name="pais" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="usp_ImobiliariaApagar" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="creci" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="usp_ImobiliariaInserir" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="creci" Type="varchar" Mode="In" />
+          <Parameter Name="nome" Type="varchar" Mode="In" />
+          <Parameter Name="data_emissao" Type="date" Mode="In" />
+          <Parameter Name="razao" Type="varchar" Mode="In" />
+          <Parameter Name="apelido" Type="varchar" Mode="In" />
+          <Parameter Name="ddi" Type="varchar" Mode="In" />
+          <Parameter Name="ddd" Type="varchar" Mode="In" />
+          <Parameter Name="tel" Type="varchar" Mode="In" />
+          <Parameter Name="tel2" Type="varchar" Mode="In" />
+          <Parameter Name="cel" Type="varchar" Mode="In" />
+          <Parameter Name="telComercial" Type="varchar" Mode="In" />
+          <Parameter Name="telExtra" Type="varchar" Mode="In" />
+          <Parameter Name="dono" Type="varchar" Mode="In" />
+          <Parameter Name="co_dono" Type="varchar" Mode="In" />
+          <Parameter Name="rua" Type="varchar" Mode="In" />
+          <Parameter Name="num" Type="int" Mode="In" />
+          <Parameter Name="compl" Type="varchar" Mode="In" />
+          <Parameter Name="bairro" Type="varchar" Mode="In" />
+          <Parameter Name="cidade" Type="varchar" Mode="In" />
+          <Parameter Name="uf" Type="char" Mode="In" />
+          <Parameter Name="pais" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="usp_ImovelApagar" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="cod" Type="int" Mode="In" />
+        </Function>
+        <Function Name="usp_ImovelInserir" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="registro" Type="int" Mode="In" />
+          <Parameter Name="frente_lote" Type="varchar" Mode="In" />
+          <Parameter Name="lado_lote" Type="varchar" Mode="In" />
+          <Parameter Name="capitador" Type="int" Mode="In" />
+          <Parameter Name="cod_proprietario" Type="int" Mode="In" />
+          <Parameter Name="rua" Type="varchar" Mode="In" />
+          <Parameter Name="num" Type="int" Mode="In" />
+          <Parameter Name="compl" Type="varchar" Mode="In" />
+          <Parameter Name="bairro" Type="varchar" Mode="In" />
+          <Parameter Name="cidade" Type="varchar" Mode="In" />
+          <Parameter Name="uf" Type="char" Mode="In" />
+          <Parameter Name="pais" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="usp_indexesAll" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <Function Name="usp_ProprietarioApagar" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="cod" Type="int" Mode="In" />
+        </Function>
+        <Function Name="usp_ProprietarioConjugeApagar" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="cod" Type="int" Mode="In" />
+        </Function>
+        <Function Name="usp_ProprietarioeConjugeInserir" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="cpf" Type="varchar" Mode="In" />
+          <Parameter Name="rg" Type="varchar" Mode="In" />
+          <Parameter Name="nome" Type="varchar" Mode="In" />
+          <Parameter Name="sexo" Type="char" Mode="In" />
+          <Parameter Name="est_civil" Type="varchar" Mode="In" />
+          <Parameter Name="ddi" Type="varchar" Mode="In" />
+          <Parameter Name="ddd" Type="varchar" Mode="In" />
+          <Parameter Name="tel" Type="varchar" Mode="In" />
+          <Parameter Name="tel2" Type="varchar" Mode="In" />
+          <Parameter Name="cel" Type="varchar" Mode="In" />
+          <Parameter Name="telComercial" Type="varchar" Mode="In" />
+          <Parameter Name="telExtra" Type="varchar" Mode="In" />
+          <Parameter Name="rua" Type="varchar" Mode="In" />
+          <Parameter Name="num" Type="int" Mode="In" />
+          <Parameter Name="compl" Type="varchar" Mode="In" />
+          <Parameter Name="bairro" Type="varchar" Mode="In" />
+          <Parameter Name="cidade" Type="varchar" Mode="In" />
+          <Parameter Name="uf" Type="char" Mode="In" />
+          <Parameter Name="pais" Type="varchar" Mode="In" />
+          <Parameter Name="cpfC" Type="varchar" Mode="In" />
+          <Parameter Name="rgC" Type="varchar" Mode="In" />
+          <Parameter Name="nomeC" Type="varchar" Mode="In" />
+          <Parameter Name="sexoC" Type="char" Mode="In" />
+          <Parameter Name="est_civilC" Type="varchar" Mode="In" />
+          <Parameter Name="ddiC" Type="varchar" Mode="In" />
+          <Parameter Name="dddC" Type="varchar" Mode="In" />
+          <Parameter Name="telC" Type="varchar" Mode="In" />
+          <Parameter Name="tel2C" Type="varchar" Mode="In" />
+          <Parameter Name="celC" Type="varchar" Mode="In" />
+          <Parameter Name="telComercialC" Type="varchar" Mode="In" />
+          <Parameter Name="telExtraC" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="usp_ProprietarioInserir" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="cpf" Type="varchar" Mode="In" />
+          <Parameter Name="rg" Type="varchar" Mode="In" />
+          <Parameter Name="nome" Type="varchar" Mode="In" />
+          <Parameter Name="sexo" Type="char" Mode="In" />
+          <Parameter Name="est_civil" Type="varchar" Mode="In" />
+          <Parameter Name="ddi" Type="varchar" Mode="In" />
+          <Parameter Name="ddd" Type="varchar" Mode="In" />
+          <Parameter Name="tel" Type="varchar" Mode="In" />
+          <Parameter Name="tel2" Type="varchar" Mode="In" />
+          <Parameter Name="cel" Type="varchar" Mode="In" />
+          <Parameter Name="telComercial" Type="varchar" Mode="In" />
+          <Parameter Name="telExtra" Type="varchar" Mode="In" />
+          <Parameter Name="rua" Type="varchar" Mode="In" />
+          <Parameter Name="num" Type="int" Mode="In" />
+          <Parameter Name="compl" Type="varchar" Mode="In" />
+          <Parameter Name="bairro" Type="varchar" Mode="In" />
+          <Parameter Name="cidade" Type="varchar" Mode="In" />
+          <Parameter Name="uf" Type="char" Mode="In" />
+          <Parameter Name="pais" Type="varchar" Mode="In" />
+        </Function>
+        <Function Name="usp_TransacaoApagar" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="cod" Type="int" Mode="In" />
+        </Function>
+        <Function Name="usp_TransacaoInserir" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="agencia" Type="varchar" Mode="In" />
+          <Parameter Name="num_conta" Type="varchar" Mode="In" />
+          <Parameter Name="digito" Type="varchar" Mode="In" />
+          <Parameter Name="tipo_conta" Type="varchar" Mode="In" />
+          <Parameter Name="nome_banco" Type="varchar" Mode="In" />
+          <Parameter Name="valor" Type="decimal" Mode="In" />
+        </Function>
+        <Function Name="usp_VendaApagar" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="cod" Type="int" Mode="In" />
+        </Function>
+        <Function Name="usp_VendaInserir" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="valor" Type="int" Mode="In" />
+          <Parameter Name="entrada" Type="int" Mode="In" />
+          <Parameter Name="data" Type="date" Mode="In" />
+          <Parameter Name="documentos" Type="varchar" Mode="In" />
+          <Parameter Name="vendedor" Type="int" Mode="In" />
+          <Parameter Name="porcenta_imobiliaria" Type="decimal" Mode="In" />
+          <Parameter Name="creci" Type="varchar" Mode="In" />
+          <Parameter Name="imovel_codigo" Type="int" Mode="In" />
+          <Parameter Name="despachante_codigo" Type="int" Mode="In" />
+          <Parameter Name="endereco_codigo" Type="int" Mode="In" />
+          <Parameter Name="comprador_codigo" Type="int" Mode="In" />
+          <Parameter Name="transacao_codigo" Type="int" Mode="In" />
+        </Function>
+        <EntityContainer Name="imobiliariaModelStoreContainer">
+          <EntitySet Name="vwCorretor" EntityType="Self.vwCorretor" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [vwCorretor].[CPF do(a) Corretor(a)] AS [CPF do(a) Corretor(a)], 
+    [vwCorretor].[RG do(a) Corretor(a)] AS [RG do(a) Corretor(a)], 
+    [vwCorretor].[Nome Completo] AS [Nome Completo], 
+    [vwCorretor].[Sexo] AS [Sexo], 
+    [vwCorretor].[Imobiliaria Vinculado] AS [Imobiliaria Vinculado], 
+    [vwCorretor].[Telefone da loja] AS [Telefone da loja], 
+    [vwCorretor].[Telefone 2] AS [Telefone 2], 
+    [vwCorretor].[Celular] AS [Celular], 
+    [vwCorretor].[Telefone comercial] AS [Telefone comercial], 
+    [vwCorretor].[Telefone extra] AS [Telefone extra], 
+    [vwCorretor].[R.\Av. do endereço] AS [R.\Av. do endereço], 
+    [vwCorretor].[Número do endereço] AS [Número do endereço], 
+    [vwCorretor].[Complemento do endereço] AS [Complemento do endereço], 
+    [vwCorretor].[Bairro do imóvel] AS [Bairro do imóvel], 
+    [vwCorretor].[Cidade do imóvel] AS [Cidade do imóvel], 
+    [vwCorretor].[Estado do imóvel] AS [Estado do imóvel]
+    FROM [dbo].[vwCorretor] AS [vwCorretor]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="vwDespachante" EntityType="Self.vwDespachante" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [vwDespachante].[Nome do Despachante] AS [Nome do Despachante], 
+    [vwDespachante].[Preço do Despachante] AS [Preço do Despachante], 
+    [vwDespachante].[Serviços já realizados] AS [Serviços já realizados], 
+    [vwDespachante].[Serviços Pendentes] AS [Serviços Pendentes], 
+    [vwDespachante].[Telefone do Despachante] AS [Telefone do Despachante], 
+    [vwDespachante].[Telefone 2 do Despachante] AS [Telefone 2 do Despachante], 
+    [vwDespachante].[Celular do Despachante] AS [Celular do Despachante], 
+    [vwDespachante].[Telefone comercial do Despachante] AS [Telefone comercial do Despachante], 
+    [vwDespachante].[Telefone extra do Despachante] AS [Telefone extra do Despachante], 
+    [vwDespachante].[R.\Av. do endereço] AS [R.\Av. do endereço], 
+    [vwDespachante].[Número do endereço] AS [Número do endereço], 
+    [vwDespachante].[Complemento do endereço] AS [Complemento do endereço], 
+    [vwDespachante].[Bairro do imóvel] AS [Bairro do imóvel], 
+    [vwDespachante].[Cidade do imóvel] AS [Cidade do imóvel], 
+    [vwDespachante].[Estado do imóvel] AS [Estado do imóvel]
+    FROM [dbo].[vwDespachante] AS [vwDespachante]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="vwImobiliaria" EntityType="Self.vwImobiliaria" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [vwImobiliaria].[Creci da Imobiliaria] AS [Creci da Imobiliaria], 
+    [vwImobiliaria].[Nome do CEO] AS [Nome do CEO], 
+    [vwImobiliaria].[Data da emissão CRECI] AS [Data da emissão CRECI], 
+    [vwImobiliaria].[Razão social] AS [Razão social], 
+    [vwImobiliaria].[Nome da loja] AS [Nome da loja], 
+    [vwImobiliaria].[Telefone da loja] AS [Telefone da loja], 
+    [vwImobiliaria].[Telefone 2] AS [Telefone 2], 
+    [vwImobiliaria].[Celular] AS [Celular], 
+    [vwImobiliaria].[Telefone comercial] AS [Telefone comercial], 
+    [vwImobiliaria].[Telefone extra] AS [Telefone extra], 
+    [vwImobiliaria].[Sócio Majoritário] AS [Sócio Majoritário], 
+    [vwImobiliaria].[Sócio Senior] AS [Sócio Senior], 
+    [vwImobiliaria].[R.\Av. do endereço] AS [R.\Av. do endereço], 
+    [vwImobiliaria].[Número do endereço] AS [Número do endereço], 
+    [vwImobiliaria].[Complemento do endereço] AS [Complemento do endereço], 
+    [vwImobiliaria].[Bairro do imóvel] AS [Bairro do imóvel], 
+    [vwImobiliaria].[Cidade do imóvel] AS [Cidade do imóvel], 
+    [vwImobiliaria].[Estado do imóvel] AS [Estado do imóvel]
+    FROM [dbo].[vwImobiliaria] AS [vwImobiliaria]</DefiningQuery>
+          </EntitySet>
+          <EntitySet Name="vwImovel" EntityType="Self.vwImovel" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [vwImovel].[Registro do Imóvel] AS [Registro do Imóvel], 
+    [vwImovel].[Frente do Imóvel] AS [Frente do Imóvel], 
+    [vwImovel].[Lado do Imóvel] AS [Lado do Imóvel], 
+    [vwImovel].[Capitador do Imóvel] AS [Capitador do Imóvel], 
+    [vwImovel].[Proprietário do Imóvel] AS [Proprietário do Imóvel], 
+    [vwImovel].[R.\Av. do endereço] AS [R.\Av. do endereço], 
+    [vwImovel].[Número do endereço] AS [Número do endereço], 
+    [vwImovel].[Complemento do endereço] AS [Complemento do endereço], 
+    [vwImovel].[Bairro do imóvel] AS [Bairro do imóvel], 
+    [vwImovel].[Cidade do imóvel] AS [Cidade do imóvel], 
+    [vwImovel].[Estado do imóvel] AS [Estado do imóvel]
+    FROM [dbo].[vwImovel] AS [vwImovel]</DefiningQuery>
+          </EntitySet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="imobiliariaModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="vwCorretor">
+          <Key>
+            <PropertyRef Name="CPF_do_a__Corretor_a_" />
+            <PropertyRef Name="RG_do_a__Corretor_a_" />
+            <PropertyRef Name="Nome_Completo" />
+          </Key>
+          <Property Name="CPF_do_a__Corretor_a_" Type="String" MaxLength="11" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="RG_do_a__Corretor_a_" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Nome_Completo" Type="String" MaxLength="150" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Sexo" Type="String" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="Imobiliaria_Vinculado" Type="String" MaxLength="80" FixedLength="false" Unicode="false" />
+          <Property Name="Telefone_da_loja" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Telefone_2" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Celular" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Telefone_comercial" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Telefone_extra" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="R__Av__do_endereço" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Número_do_endereço" Type="Int32" />
+          <Property Name="Complemento_do_endereço" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="Bairro_do_imóvel" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Cidade_do_imóvel" Type="String" MaxLength="80" FixedLength="false" Unicode="false" />
+          <Property Name="Estado_do_imóvel" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
+        </EntityType>
+        <EntityType Name="vwDespachante">
+          <Key>
+            <PropertyRef Name="Nome_do_Despachante" />
+          </Key>
+          <Property Name="Nome_do_Despachante" Type="String" MaxLength="120" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Preço_do_Despachante" Type="Decimal" Precision="10" Scale="2" />
+          <Property Name="Serviços_já_realizados" Type="Int16" />
+          <Property Name="Serviços_Pendentes" Type="Int16" />
+          <Property Name="Telefone_do_Despachante" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Telefone_2_do_Despachante" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Celular_do_Despachante" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Telefone_comercial_do_Despachante" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Telefone_extra_do_Despachante" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="R__Av__do_endereço" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Número_do_endereço" Type="Int32" />
+          <Property Name="Complemento_do_endereço" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="Bairro_do_imóvel" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Cidade_do_imóvel" Type="String" MaxLength="80" FixedLength="false" Unicode="false" />
+          <Property Name="Estado_do_imóvel" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
+        </EntityType>
+        <EntityType Name="vwImobiliaria">
+          <Key>
+            <PropertyRef Name="Creci_da_Imobiliaria" />
+            <PropertyRef Name="Nome_do_CEO" />
+            <PropertyRef Name="Data_da_emissão_CRECI" />
+            <PropertyRef Name="Razão_social" />
+            <PropertyRef Name="Sócio_Majoritário" />
+            <PropertyRef Name="Sócio_Senior" />
+          </Key>
+          <Property Name="Creci_da_Imobiliaria" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Nome_do_CEO" Type="String" MaxLength="120" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Data_da_emissão_CRECI" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="Razão_social" Type="String" MaxLength="120" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Nome_da_loja" Type="String" MaxLength="80" FixedLength="false" Unicode="false" />
+          <Property Name="Telefone_da_loja" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Telefone_2" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Celular" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Telefone_comercial" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Telefone_extra" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Sócio_Majoritário" Type="String" MaxLength="120" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Sócio_Senior" Type="String" MaxLength="120" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="R__Av__do_endereço" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Número_do_endereço" Type="Int32" />
+          <Property Name="Complemento_do_endereço" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="Bairro_do_imóvel" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Cidade_do_imóvel" Type="String" MaxLength="80" FixedLength="false" Unicode="false" />
+          <Property Name="Estado_do_imóvel" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
+        </EntityType>
+        <EntityType Name="vwImovel">
+          <Key>
+            <PropertyRef Name="Registro_do_Imóvel" />
+            <PropertyRef Name="Frente_do_Imóvel" />
+            <PropertyRef Name="Lado_do_Imóvel" />
+            <PropertyRef Name="Capitador_do_Imóvel" />
+          </Key>
+          <Property Name="Registro_do_Imóvel" Type="Int32" Nullable="false" />
+          <Property Name="Frente_do_Imóvel" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Lado_do_Imóvel" Type="String" MaxLength="12" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Capitador_do_Imóvel" Type="Int32" Nullable="false" />
+          <Property Name="Proprietário_do_Imóvel" Type="String" MaxLength="120" FixedLength="false" Unicode="false" />
+          <Property Name="R__Av__do_endereço" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Número_do_endereço" Type="Int32" />
+          <Property Name="Complemento_do_endereço" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="Bairro_do_imóvel" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Cidade_do_imóvel" Type="String" MaxLength="80" FixedLength="false" Unicode="false" />
+          <Property Name="Estado_do_imóvel" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
+        </EntityType>
+        <EntityContainer Name="imobiliariaEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="vwCorretor" EntityType="Self.vwCorretor" />
+          <EntitySet Name="vwDespachante" EntityType="Self.vwDespachante" />
+          <EntitySet Name="vwImobiliaria" EntityType="Self.vwImobiliaria" />
+          <EntitySet Name="vwImovel" EntityType="Self.vwImovel" />
+          <FunctionImport Name="stpConsulta_CEP" ReturnType="Collection(imobiliariaModel.stpConsulta_CEP_Result)">
+            <Parameter Name="Nr_CEP" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="usp_CompradorApagar" ReturnType="Collection(Int32)">
+            <Parameter Name="cod" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="usp_CompradorConjugeApagar" ReturnType="Collection(Int32)">
+            <Parameter Name="cod" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="usp_CompradoreConjugeInserir" ReturnType="Collection(Decimal)">
+            <Parameter Name="cpf" Mode="In" Type="String" />
+            <Parameter Name="rg" Mode="In" Type="String" />
+            <Parameter Name="nome" Mode="In" Type="String" />
+            <Parameter Name="sexo" Mode="In" Type="String" />
+            <Parameter Name="estado_Civil" Mode="In" Type="String" />
+            <Parameter Name="profissao" Mode="In" Type="String" />
+            <Parameter Name="renda_bruta" Mode="In" Type="Int32" />
+            <Parameter Name="fgts" Mode="In" Type="Decimal" />
+            <Parameter Name="ddi" Mode="In" Type="String" />
+            <Parameter Name="ddd" Mode="In" Type="String" />
+            <Parameter Name="tel" Mode="In" Type="String" />
+            <Parameter Name="tel2" Mode="In" Type="String" />
+            <Parameter Name="cel" Mode="In" Type="String" />
+            <Parameter Name="telComercial" Mode="In" Type="String" />
+            <Parameter Name="telExtra" Mode="In" Type="String" />
+            <Parameter Name="lista_intereste" Mode="In" Type="String" />
+            <Parameter Name="creci" Mode="In" Type="String" />
+            <Parameter Name="rua" Mode="In" Type="String" />
+            <Parameter Name="num" Mode="In" Type="Int32" />
+            <Parameter Name="compl" Mode="In" Type="String" />
+            <Parameter Name="bairro" Mode="In" Type="String" />
+            <Parameter Name="cidade" Mode="In" Type="String" />
+            <Parameter Name="uf" Mode="In" Type="String" />
+            <Parameter Name="pais" Mode="In" Type="String" />
+            <Parameter Name="cpfC" Mode="In" Type="String" />
+            <Parameter Name="rgC" Mode="In" Type="String" />
+            <Parameter Name="nomeC" Mode="In" Type="String" />
+            <Parameter Name="sexoC" Mode="In" Type="String" />
+            <Parameter Name="estado_CivilC" Mode="In" Type="String" />
+            <Parameter Name="profissaoC" Mode="In" Type="String" />
+            <Parameter Name="renda_brutaC" Mode="In" Type="Int32" />
+            <Parameter Name="fgtsC" Mode="In" Type="Decimal" />
+            <Parameter Name="ddiC" Mode="In" Type="String" />
+            <Parameter Name="dddC" Mode="In" Type="String" />
+            <Parameter Name="telC" Mode="In" Type="String" />
+            <Parameter Name="tel2C" Mode="In" Type="String" />
+            <Parameter Name="celC" Mode="In" Type="String" />
+            <Parameter Name="telComercialC" Mode="In" Type="String" />
+            <Parameter Name="telExtraC" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="usp_CompradorInserir" ReturnType="Collection(Decimal)">
+            <Parameter Name="cpf" Mode="In" Type="String" />
+            <Parameter Name="rg" Mode="In" Type="String" />
+            <Parameter Name="nome" Mode="In" Type="String" />
+            <Parameter Name="sexo" Mode="In" Type="String" />
+            <Parameter Name="estado_Civil" Mode="In" Type="String" />
+            <Parameter Name="profissao" Mode="In" Type="String" />
+            <Parameter Name="renda_bruta" Mode="In" Type="Int32" />
+            <Parameter Name="fgts" Mode="In" Type="Decimal" />
+            <Parameter Name="ddi" Mode="In" Type="String" />
+            <Parameter Name="ddd" Mode="In" Type="String" />
+            <Parameter Name="tel" Mode="In" Type="String" />
+            <Parameter Name="tel2" Mode="In" Type="String" />
+            <Parameter Name="cel" Mode="In" Type="String" />
+            <Parameter Name="telComercial" Mode="In" Type="String" />
+            <Parameter Name="telExtra" Mode="In" Type="String" />
+            <Parameter Name="lista_intereste" Mode="In" Type="String" />
+            <Parameter Name="creci" Mode="In" Type="String" />
+            <Parameter Name="rua" Mode="In" Type="String" />
+            <Parameter Name="num" Mode="In" Type="Int32" />
+            <Parameter Name="compl" Mode="In" Type="String" />
+            <Parameter Name="bairro" Mode="In" Type="String" />
+            <Parameter Name="cidade" Mode="In" Type="String" />
+            <Parameter Name="uf" Mode="In" Type="String" />
+            <Parameter Name="pais" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="usp_CorretorApagar" ReturnType="Collection(Int32)">
+            <Parameter Name="cod" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="usp_CorretorInserir" ReturnType="Collection(Decimal)">
+            <Parameter Name="cpf" Mode="In" Type="String" />
+            <Parameter Name="rg" Mode="In" Type="String" />
+            <Parameter Name="nome" Mode="In" Type="String" />
+            <Parameter Name="ddi" Mode="In" Type="String" />
+            <Parameter Name="ddd" Mode="In" Type="String" />
+            <Parameter Name="tel" Mode="In" Type="String" />
+            <Parameter Name="tel2" Mode="In" Type="String" />
+            <Parameter Name="cel" Mode="In" Type="String" />
+            <Parameter Name="telComercial" Mode="In" Type="String" />
+            <Parameter Name="telExtra" Mode="In" Type="String" />
+            <Parameter Name="sexo" Mode="In" Type="String" />
+            <Parameter Name="creci" Mode="In" Type="String" />
+            <Parameter Name="rua" Mode="In" Type="String" />
+            <Parameter Name="num" Mode="In" Type="Int32" />
+            <Parameter Name="compl" Mode="In" Type="String" />
+            <Parameter Name="bairro" Mode="In" Type="String" />
+            <Parameter Name="cidade" Mode="In" Type="String" />
+            <Parameter Name="uf" Mode="In" Type="String" />
+            <Parameter Name="pais" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="usp_DespachanteApagar" ReturnType="Collection(Int32)">
+            <Parameter Name="cod" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="usp_DespachanteInserir" ReturnType="Collection(Decimal)">
+            <Parameter Name="nome" Mode="In" Type="String" />
+            <Parameter Name="preco" Mode="In" Type="Decimal" />
+            <Parameter Name="servicos_completos" Mode="In" Type="Int16" />
+            <Parameter Name="servicos_pendentes" Mode="In" Type="Int16" />
+            <Parameter Name="ddi" Mode="In" Type="String" />
+            <Parameter Name="ddd" Mode="In" Type="String" />
+            <Parameter Name="tel" Mode="In" Type="String" />
+            <Parameter Name="tel2" Mode="In" Type="String" />
+            <Parameter Name="cel" Mode="In" Type="String" />
+            <Parameter Name="telComercial" Mode="In" Type="String" />
+            <Parameter Name="telExtra" Mode="In" Type="String" />
+            <Parameter Name="rua" Mode="In" Type="String" />
+            <Parameter Name="num" Mode="In" Type="Int32" />
+            <Parameter Name="compl" Mode="In" Type="String" />
+            <Parameter Name="bairro" Mode="In" Type="String" />
+            <Parameter Name="cidade" Mode="In" Type="String" />
+            <Parameter Name="uf" Mode="In" Type="String" />
+            <Parameter Name="pais" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="usp_ImobiliariaApagar" ReturnType="Collection(String)">
+            <Parameter Name="creci" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="usp_ImobiliariaInserir" ReturnType="Collection(Decimal)">
+            <Parameter Name="creci" Mode="In" Type="String" />
+            <Parameter Name="nome" Mode="In" Type="String" />
+            <Parameter Name="data_emissao" Mode="In" Type="DateTime" />
+            <Parameter Name="razao" Mode="In" Type="String" />
+            <Parameter Name="apelido" Mode="In" Type="String" />
+            <Parameter Name="ddi" Mode="In" Type="String" />
+            <Parameter Name="ddd" Mode="In" Type="String" />
+            <Parameter Name="tel" Mode="In" Type="String" />
+            <Parameter Name="tel2" Mode="In" Type="String" />
+            <Parameter Name="cel" Mode="In" Type="String" />
+            <Parameter Name="telComercial" Mode="In" Type="String" />
+            <Parameter Name="telExtra" Mode="In" Type="String" />
+            <Parameter Name="dono" Mode="In" Type="String" />
+            <Parameter Name="co_dono" Mode="In" Type="String" />
+            <Parameter Name="rua" Mode="In" Type="String" />
+            <Parameter Name="num" Mode="In" Type="Int32" />
+            <Parameter Name="compl" Mode="In" Type="String" />
+            <Parameter Name="bairro" Mode="In" Type="String" />
+            <Parameter Name="cidade" Mode="In" Type="String" />
+            <Parameter Name="uf" Mode="In" Type="String" />
+            <Parameter Name="pais" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="usp_ImovelApagar" ReturnType="Collection(Int32)">
+            <Parameter Name="cod" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="usp_ImovelInserir" ReturnType="Collection(Decimal)">
+            <Parameter Name="registro" Mode="In" Type="Int32" />
+            <Parameter Name="frente_lote" Mode="In" Type="String" />
+            <Parameter Name="lado_lote" Mode="In" Type="String" />
+            <Parameter Name="capitador" Mode="In" Type="Int32" />
+            <Parameter Name="cod_proprietario" Mode="In" Type="Int32" />
+            <Parameter Name="rua" Mode="In" Type="String" />
+            <Parameter Name="num" Mode="In" Type="Int32" />
+            <Parameter Name="compl" Mode="In" Type="String" />
+            <Parameter Name="bairro" Mode="In" Type="String" />
+            <Parameter Name="cidade" Mode="In" Type="String" />
+            <Parameter Name="uf" Mode="In" Type="String" />
+            <Parameter Name="pais" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="usp_indexesAll" ReturnType="Collection(imobiliariaModel.usp_indexesAll_Result)" />
+          <FunctionImport Name="usp_ProprietarioApagar" ReturnType="Collection(Int32)">
+            <Parameter Name="cod" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="usp_ProprietarioConjugeApagar" ReturnType="Collection(Int32)">
+            <Parameter Name="cod" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="usp_ProprietarioeConjugeInserir" ReturnType="Collection(Decimal)">
+            <Parameter Name="cpf" Mode="In" Type="String" />
+            <Parameter Name="rg" Mode="In" Type="String" />
+            <Parameter Name="nome" Mode="In" Type="String" />
+            <Parameter Name="sexo" Mode="In" Type="String" />
+            <Parameter Name="est_civil" Mode="In" Type="String" />
+            <Parameter Name="ddi" Mode="In" Type="String" />
+            <Parameter Name="ddd" Mode="In" Type="String" />
+            <Parameter Name="tel" Mode="In" Type="String" />
+            <Parameter Name="tel2" Mode="In" Type="String" />
+            <Parameter Name="cel" Mode="In" Type="String" />
+            <Parameter Name="telComercial" Mode="In" Type="String" />
+            <Parameter Name="telExtra" Mode="In" Type="String" />
+            <Parameter Name="rua" Mode="In" Type="String" />
+            <Parameter Name="num" Mode="In" Type="Int32" />
+            <Parameter Name="compl" Mode="In" Type="String" />
+            <Parameter Name="bairro" Mode="In" Type="String" />
+            <Parameter Name="cidade" Mode="In" Type="String" />
+            <Parameter Name="uf" Mode="In" Type="String" />
+            <Parameter Name="pais" Mode="In" Type="String" />
+            <Parameter Name="cpfC" Mode="In" Type="String" />
+            <Parameter Name="rgC" Mode="In" Type="String" />
+            <Parameter Name="nomeC" Mode="In" Type="String" />
+            <Parameter Name="sexoC" Mode="In" Type="String" />
+            <Parameter Name="est_civilC" Mode="In" Type="String" />
+            <Parameter Name="ddiC" Mode="In" Type="String" />
+            <Parameter Name="dddC" Mode="In" Type="String" />
+            <Parameter Name="telC" Mode="In" Type="String" />
+            <Parameter Name="tel2C" Mode="In" Type="String" />
+            <Parameter Name="celC" Mode="In" Type="String" />
+            <Parameter Name="telComercialC" Mode="In" Type="String" />
+            <Parameter Name="telExtraC" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="usp_ProprietarioInserir" ReturnType="Collection(Decimal)">
+            <Parameter Name="cpf" Mode="In" Type="String" />
+            <Parameter Name="rg" Mode="In" Type="String" />
+            <Parameter Name="nome" Mode="In" Type="String" />
+            <Parameter Name="sexo" Mode="In" Type="String" />
+            <Parameter Name="est_civil" Mode="In" Type="String" />
+            <Parameter Name="ddi" Mode="In" Type="String" />
+            <Parameter Name="ddd" Mode="In" Type="String" />
+            <Parameter Name="tel" Mode="In" Type="String" />
+            <Parameter Name="tel2" Mode="In" Type="String" />
+            <Parameter Name="cel" Mode="In" Type="String" />
+            <Parameter Name="telComercial" Mode="In" Type="String" />
+            <Parameter Name="telExtra" Mode="In" Type="String" />
+            <Parameter Name="rua" Mode="In" Type="String" />
+            <Parameter Name="num" Mode="In" Type="Int32" />
+            <Parameter Name="compl" Mode="In" Type="String" />
+            <Parameter Name="bairro" Mode="In" Type="String" />
+            <Parameter Name="cidade" Mode="In" Type="String" />
+            <Parameter Name="uf" Mode="In" Type="String" />
+            <Parameter Name="pais" Mode="In" Type="String" />
+          </FunctionImport>
+          <FunctionImport Name="usp_TransacaoApagar" ReturnType="Collection(Int32)">
+            <Parameter Name="cod" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="usp_TransacaoInserir" ReturnType="Collection(Decimal)">
+            <Parameter Name="agencia" Mode="In" Type="String" />
+            <Parameter Name="num_conta" Mode="In" Type="String" />
+            <Parameter Name="digito" Mode="In" Type="String" />
+            <Parameter Name="tipo_conta" Mode="In" Type="String" />
+            <Parameter Name="nome_banco" Mode="In" Type="String" />
+            <Parameter Name="valor" Mode="In" Type="Decimal" />
+          </FunctionImport>
+          <FunctionImport Name="usp_VendaApagar" ReturnType="Collection(Int32)">
+            <Parameter Name="cod" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="usp_VendaInserir" ReturnType="Collection(Decimal)">
+            <Parameter Name="valor" Mode="In" Type="Int32" />
+            <Parameter Name="entrada" Mode="In" Type="Int32" />
+            <Parameter Name="data" Mode="In" Type="DateTime" />
+            <Parameter Name="documentos" Mode="In" Type="String" />
+            <Parameter Name="vendedor" Mode="In" Type="Int32" />
+            <Parameter Name="porcenta_imobiliaria" Mode="In" Type="Decimal" />
+            <Parameter Name="creci" Mode="In" Type="String" />
+            <Parameter Name="imovel_codigo" Mode="In" Type="Int32" />
+            <Parameter Name="despachante_codigo" Mode="In" Type="Int32" />
+            <Parameter Name="endereco_codigo" Mode="In" Type="Int32" />
+            <Parameter Name="comprador_codigo" Mode="In" Type="Int32" />
+            <Parameter Name="transacao_codigo" Mode="In" Type="Int32" />
+          </FunctionImport>
+        </EntityContainer>
+        <ComplexType Name="stpConsulta_CEP_Result">
+          <Property Type="String" Name="CEP" Nullable="true" MaxLength="9" />
+          <Property Type="String" Name="Logradouro" Nullable="true" MaxLength="200" />
+          <Property Type="String" Name="Complemento" Nullable="true" MaxLength="200" />
+          <Property Type="String" Name="Bairro" Nullable="true" MaxLength="200" />
+          <Property Type="String" Name="Cidade" Nullable="true" MaxLength="200" />
+          <Property Type="String" Name="UF" Nullable="true" MaxLength="200" />
+          <Property Type="String" Name="IBGE" Nullable="true" MaxLength="200" />
+        </ComplexType>
+        <ComplexType Name="usp_indexesAll_Result">
+          <Property Type="Int32" Name="object_id" Nullable="false" />
+          <Property Type="String" Name="name" Nullable="true" MaxLength="128" />
+          <Property Type="Int32" Name="index_id" Nullable="false" />
+          <Property Type="Byte" Name="type" Nullable="false" />
+          <Property Type="String" Name="type_desc" Nullable="true" MaxLength="60" />
+          <Property Type="Boolean" Name="is_unique" Nullable="true" />
+          <Property Type="Int32" Name="data_space_id" Nullable="true" />
+          <Property Type="Boolean" Name="ignore_dup_key" Nullable="true" />
+          <Property Type="Boolean" Name="is_primary_key" Nullable="true" />
+          <Property Type="Boolean" Name="is_unique_constraint" Nullable="true" />
+          <Property Type="Byte" Name="fill_factor" Nullable="false" />
+          <Property Type="Boolean" Name="is_padded" Nullable="true" />
+          <Property Type="Boolean" Name="is_disabled" Nullable="true" />
+          <Property Type="Boolean" Name="is_hypothetical" Nullable="true" />
+          <Property Type="Boolean" Name="allow_row_locks" Nullable="true" />
+          <Property Type="Boolean" Name="allow_page_locks" Nullable="true" />
+          <Property Type="Boolean" Name="has_filter" Nullable="true" />
+          <Property Type="String" Name="filter_definition" Nullable="true" />
+        </ComplexType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="imobiliariaModelStoreContainer" CdmEntityContainer="imobiliariaEntities">
+          <EntitySetMapping Name="vwCorretor">
+            <EntityTypeMapping TypeName="imobiliariaModel.vwCorretor">
+              <MappingFragment StoreEntitySet="vwCorretor">
+                <ScalarProperty Name="CPF_do_a__Corretor_a_" ColumnName="CPF do(a) Corretor(a)" />
+                <ScalarProperty Name="RG_do_a__Corretor_a_" ColumnName="RG do(a) Corretor(a)" />
+                <ScalarProperty Name="Nome_Completo" ColumnName="Nome Completo" />
+                <ScalarProperty Name="Sexo" ColumnName="Sexo" />
+                <ScalarProperty Name="Imobiliaria_Vinculado" ColumnName="Imobiliaria Vinculado" />
+                <ScalarProperty Name="Telefone_da_loja" ColumnName="Telefone da loja" />
+                <ScalarProperty Name="Telefone_2" ColumnName="Telefone 2" />
+                <ScalarProperty Name="Celular" ColumnName="Celular" />
+                <ScalarProperty Name="Telefone_comercial" ColumnName="Telefone comercial" />
+                <ScalarProperty Name="Telefone_extra" ColumnName="Telefone extra" />
+                <ScalarProperty Name="R__Av__do_endereço" ColumnName="R.\Av. do endereço" />
+                <ScalarProperty Name="Número_do_endereço" ColumnName="Número do endereço" />
+                <ScalarProperty Name="Complemento_do_endereço" ColumnName="Complemento do endereço" />
+                <ScalarProperty Name="Bairro_do_imóvel" ColumnName="Bairro do imóvel" />
+                <ScalarProperty Name="Cidade_do_imóvel" ColumnName="Cidade do imóvel" />
+                <ScalarProperty Name="Estado_do_imóvel" ColumnName="Estado do imóvel" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="vwDespachante">
+            <EntityTypeMapping TypeName="imobiliariaModel.vwDespachante">
+              <MappingFragment StoreEntitySet="vwDespachante">
+                <ScalarProperty Name="Nome_do_Despachante" ColumnName="Nome do Despachante" />
+                <ScalarProperty Name="Preço_do_Despachante" ColumnName="Preço do Despachante" />
+                <ScalarProperty Name="Serviços_já_realizados" ColumnName="Serviços já realizados" />
+                <ScalarProperty Name="Serviços_Pendentes" ColumnName="Serviços Pendentes" />
+                <ScalarProperty Name="Telefone_do_Despachante" ColumnName="Telefone do Despachante" />
+                <ScalarProperty Name="Telefone_2_do_Despachante" ColumnName="Telefone 2 do Despachante" />
+                <ScalarProperty Name="Celular_do_Despachante" ColumnName="Celular do Despachante" />
+                <ScalarProperty Name="Telefone_comercial_do_Despachante" ColumnName="Telefone comercial do Despachante" />
+                <ScalarProperty Name="Telefone_extra_do_Despachante" ColumnName="Telefone extra do Despachante" />
+                <ScalarProperty Name="R__Av__do_endereço" ColumnName="R.\Av. do endereço" />
+                <ScalarProperty Name="Número_do_endereço" ColumnName="Número do endereço" />
+                <ScalarProperty Name="Complemento_do_endereço" ColumnName="Complemento do endereço" />
+                <ScalarProperty Name="Bairro_do_imóvel" ColumnName="Bairro do imóvel" />
+                <ScalarProperty Name="Cidade_do_imóvel" ColumnName="Cidade do imóvel" />
+                <ScalarProperty Name="Estado_do_imóvel" ColumnName="Estado do imóvel" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="vwImobiliaria">
+            <EntityTypeMapping TypeName="imobiliariaModel.vwImobiliaria">
+              <MappingFragment StoreEntitySet="vwImobiliaria">
+                <ScalarProperty Name="Creci_da_Imobiliaria" ColumnName="Creci da Imobiliaria" />
+                <ScalarProperty Name="Nome_do_CEO" ColumnName="Nome do CEO" />
+                <ScalarProperty Name="Data_da_emissão_CRECI" ColumnName="Data da emissão CRECI" />
+                <ScalarProperty Name="Razão_social" ColumnName="Razão social" />
+                <ScalarProperty Name="Nome_da_loja" ColumnName="Nome da loja" />
+                <ScalarProperty Name="Telefone_da_loja" ColumnName="Telefone da loja" />
+                <ScalarProperty Name="Telefone_2" ColumnName="Telefone 2" />
+                <ScalarProperty Name="Celular" ColumnName="Celular" />
+                <ScalarProperty Name="Telefone_comercial" ColumnName="Telefone comercial" />
+                <ScalarProperty Name="Telefone_extra" ColumnName="Telefone extra" />
+                <ScalarProperty Name="Sócio_Majoritário" ColumnName="Sócio Majoritário" />
+                <ScalarProperty Name="Sócio_Senior" ColumnName="Sócio Senior" />
+                <ScalarProperty Name="R__Av__do_endereço" ColumnName="R.\Av. do endereço" />
+                <ScalarProperty Name="Número_do_endereço" ColumnName="Número do endereço" />
+                <ScalarProperty Name="Complemento_do_endereço" ColumnName="Complemento do endereço" />
+                <ScalarProperty Name="Bairro_do_imóvel" ColumnName="Bairro do imóvel" />
+                <ScalarProperty Name="Cidade_do_imóvel" ColumnName="Cidade do imóvel" />
+                <ScalarProperty Name="Estado_do_imóvel" ColumnName="Estado do imóvel" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="vwImovel">
+            <EntityTypeMapping TypeName="imobiliariaModel.vwImovel">
+              <MappingFragment StoreEntitySet="vwImovel">
+                <ScalarProperty Name="Registro_do_Imóvel" ColumnName="Registro do Imóvel" />
+                <ScalarProperty Name="Frente_do_Imóvel" ColumnName="Frente do Imóvel" />
+                <ScalarProperty Name="Lado_do_Imóvel" ColumnName="Lado do Imóvel" />
+                <ScalarProperty Name="Capitador_do_Imóvel" ColumnName="Capitador do Imóvel" />
+                <ScalarProperty Name="Proprietário_do_Imóvel" ColumnName="Proprietário do Imóvel" />
+                <ScalarProperty Name="R__Av__do_endereço" ColumnName="R.\Av. do endereço" />
+                <ScalarProperty Name="Número_do_endereço" ColumnName="Número do endereço" />
+                <ScalarProperty Name="Complemento_do_endereço" ColumnName="Complemento do endereço" />
+                <ScalarProperty Name="Bairro_do_imóvel" ColumnName="Bairro do imóvel" />
+                <ScalarProperty Name="Cidade_do_imóvel" ColumnName="Cidade do imóvel" />
+                <ScalarProperty Name="Estado_do_imóvel" ColumnName="Estado do imóvel" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="stpConsulta_CEP" FunctionName="imobiliariaModel.Store.stpConsulta_CEP">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="imobiliariaModel.stpConsulta_CEP_Result">
+                <ScalarProperty Name="CEP" ColumnName="CEP" />
+                <ScalarProperty Name="Logradouro" ColumnName="Logradouro" />
+                <ScalarProperty Name="Complemento" ColumnName="Complemento" />
+                <ScalarProperty Name="Bairro" ColumnName="Bairro" />
+                <ScalarProperty Name="Cidade" ColumnName="Cidade" />
+                <ScalarProperty Name="UF" ColumnName="UF" />
+                <ScalarProperty Name="IBGE" ColumnName="IBGE" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_CompradorApagar" FunctionName="imobiliariaModel.Store.usp_CompradorApagar" />
+          <FunctionImportMapping FunctionImportName="usp_CompradorConjugeApagar" FunctionName="imobiliariaModel.Store.usp_CompradorConjugeApagar" />
+          <FunctionImportMapping FunctionImportName="usp_CompradoreConjugeInserir" FunctionName="imobiliariaModel.Store.usp_CompradoreConjugeInserir" />
+          <FunctionImportMapping FunctionImportName="usp_CompradorInserir" FunctionName="imobiliariaModel.Store.usp_CompradorInserir" />
+          <FunctionImportMapping FunctionImportName="usp_CorretorApagar" FunctionName="imobiliariaModel.Store.usp_CorretorApagar" />
+          <FunctionImportMapping FunctionImportName="usp_CorretorInserir" FunctionName="imobiliariaModel.Store.usp_CorretorInserir" />
+          <FunctionImportMapping FunctionImportName="usp_DespachanteApagar" FunctionName="imobiliariaModel.Store.usp_DespachanteApagar" />
+          <FunctionImportMapping FunctionImportName="usp_DespachanteInserir" FunctionName="imobiliariaModel.Store.usp_DespachanteInserir" />
+          <FunctionImportMapping FunctionImportName="usp_ImobiliariaApagar" FunctionName="imobiliariaModel.Store.usp_ImobiliariaApagar" />
+          <FunctionImportMapping FunctionImportName="usp_ImobiliariaInserir" FunctionName="imobiliariaModel.Store.usp_ImobiliariaInserir" />
+          <FunctionImportMapping FunctionImportName="usp_ImovelApagar" FunctionName="imobiliariaModel.Store.usp_ImovelApagar" />
+          <FunctionImportMapping FunctionImportName="usp_ImovelInserir" FunctionName="imobiliariaModel.Store.usp_ImovelInserir" />
+          <FunctionImportMapping FunctionImportName="usp_indexesAll" FunctionName="imobiliariaModel.Store.usp_indexesAll">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="imobiliariaModel.usp_indexesAll_Result">
+                <ScalarProperty Name="object_id" ColumnName="object_id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="index_id" ColumnName="index_id" />
+                <ScalarProperty Name="type" ColumnName="type" />
+                <ScalarProperty Name="type_desc" ColumnName="type_desc" />
+                <ScalarProperty Name="is_unique" ColumnName="is_unique" />
+                <ScalarProperty Name="data_space_id" ColumnName="data_space_id" />
+                <ScalarProperty Name="ignore_dup_key" ColumnName="ignore_dup_key" />
+                <ScalarProperty Name="is_primary_key" ColumnName="is_primary_key" />
+                <ScalarProperty Name="is_unique_constraint" ColumnName="is_unique_constraint" />
+                <ScalarProperty Name="fill_factor" ColumnName="fill_factor" />
+                <ScalarProperty Name="is_padded" ColumnName="is_padded" />
+                <ScalarProperty Name="is_disabled" ColumnName="is_disabled" />
+                <ScalarProperty Name="is_hypothetical" ColumnName="is_hypothetical" />
+                <ScalarProperty Name="allow_row_locks" ColumnName="allow_row_locks" />
+                <ScalarProperty Name="allow_page_locks" ColumnName="allow_page_locks" />
+                <ScalarProperty Name="has_filter" ColumnName="has_filter" />
+                <ScalarProperty Name="filter_definition" ColumnName="filter_definition" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="usp_ProprietarioApagar" FunctionName="imobiliariaModel.Store.usp_ProprietarioApagar" />
+          <FunctionImportMapping FunctionImportName="usp_ProprietarioConjugeApagar" FunctionName="imobiliariaModel.Store.usp_ProprietarioConjugeApagar" />
+          <FunctionImportMapping FunctionImportName="usp_ProprietarioeConjugeInserir" FunctionName="imobiliariaModel.Store.usp_ProprietarioeConjugeInserir" />
+          <FunctionImportMapping FunctionImportName="usp_ProprietarioInserir" FunctionName="imobiliariaModel.Store.usp_ProprietarioInserir" />
+          <FunctionImportMapping FunctionImportName="usp_TransacaoApagar" FunctionName="imobiliariaModel.Store.usp_TransacaoApagar" />
+          <FunctionImportMapping FunctionImportName="usp_TransacaoInserir" FunctionName="imobiliariaModel.Store.usp_TransacaoInserir" />
+          <FunctionImportMapping FunctionImportName="usp_VendaApagar" FunctionName="imobiliariaModel.Store.usp_VendaApagar" />
+          <FunctionImportMapping FunctionImportName="usp_VendaInserir" FunctionName="imobiliariaModel.Store.usp_VendaInserir" />
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

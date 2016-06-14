@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BLL
 {
-    public class ClsImovel
+    sealed public class ClsImovel
     {
         #region Variaveis
         public int codigo { get; set; }

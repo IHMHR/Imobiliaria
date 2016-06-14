@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BLL
 {
-    public class ClsProprietarioConjuge
+    sealed public class ClsProprietarioConjuge
     {
         #region Variaveis
         public int codigo { get; set; }
