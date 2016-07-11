@@ -64,72 +64,20 @@
     <Compile Include="ClsAcessoMySql.cs" />
     <Compile Include="ClsAcessoSQLite.cs" />
     <Compile Include="ClsAcessoSqlServer.cs" />
-    <Compile Include="imobiliariaModel.Context.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>imobiliariaModel.Context.tt</DependentUpon>
-    </Compile>
-    <Compile Include="imobiliariaModel.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>imobiliariaModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="imobiliariaModel.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>imobiliariaModel.edmx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="stpConsulta_CEP_Result.cs">
-      <DependentUpon>imobiliariaModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="usp_indexesAll_Result.cs">
-      <DependentUpon>imobiliariaModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="vwCorretor.cs">
-      <DependentUpon>imobiliariaModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="vwDespachante.cs">
-      <DependentUpon>imobiliariaModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="vwImobiliaria.cs">
-      <DependentUpon>imobiliariaModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="vwImovel.cs">
-      <DependentUpon>imobiliariaModel.tt</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <EntityDeploy Include="imobiliariaModel.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>imobiliariaModel.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-    <None Include="imobiliariaModel.edmx.diagram">
-      <DependentUpon>imobiliariaModel.edmx</DependentUpon>
-    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="imobiliariaModel.Context.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>imobiliariaModel.edmx</DependentUpon>
-      <LastGenOutput>imobiliariaModel.Context.cs</LastGenOutput>
-    </Content>
-    <Content Include="imobiliariaModel.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>imobiliariaModel.edmx</DependentUpon>
-      <LastGenOutput>imobiliariaModel.cs</LastGenOutput>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

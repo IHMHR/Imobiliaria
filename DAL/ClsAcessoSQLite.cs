@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
 using System.Data.SQLite;
 
@@ -39,6 +35,11 @@ namespace DAL
                         ComandoSQL += ";";
                     com.CommandText = ComandoSQL;
                     com.ExecuteNonQuery();
+
+                    con.Close();
+                    con.Dispose();
+                    com.Dispose();
+
                     return true;
                 }
             }
@@ -69,6 +70,11 @@ namespace DAL
                     DataTable RESP = new DataTable();
                     RESP.Load(rquery);
 
+                    con.Close();
+                    con.Dispose();
+                    com.Dispose();
+                    rquery.Dispose();
+                    
                     return RESP;
                 }
             }

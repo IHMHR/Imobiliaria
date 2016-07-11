@@ -22,7 +22,7 @@ namespace BLL
         ClsAcessoSqlServer sqlserver = new ClsAcessoSqlServer();
         ClsAcessoMySql mysql = new ClsAcessoMySql();
 
-        public int RecuperarCodigo()
+        public string RecuperarCodigo()
         {
             try
             {
@@ -55,7 +55,7 @@ namespace BLL
                     pais = "NULL";
                 else
                     sqlserver.AdicionarParametro("uf", uf);
-                return int.Parse(sqlserver.ExecutarConsulta(System.Data.CommandType.StoredProcedure, "usp_EnderecoCodigo").Rows[0][0].ToString());
+                return sqlserver.ExecutarConsulta(System.Data.CommandType.StoredProcedure, "usp_EnderecoCodigo").ToString();
             }
             catch (Exception)
             {

@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{25E1569A-2DDA-4CA3-BE7B-42DAE7EA3702}</ProjectGuid>
+    <ProjectGuid>{46075CBC-625E-487E-AB64-9D6BE0EC397A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BLL</RootNamespace>
@@ -30,7 +30,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -40,7 +48,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClsComprador.cs" />
-    <Compile Include="Conexoes.cs" />
+    <Compile Include="ClsCompradorConjuge.cs" />
+    <Compile Include="ClsCorretor.cs" />
+    <Compile Include="ClsDespachante.cs" />
+    <Compile Include="ClsEndereco.cs" />
+    <Compile Include="ClsImobiliaria.cs" />
+    <Compile Include="ClsImovel.cs" />
+    <Compile Include="ClsProprietario.cs" />
+    <Compile Include="ClsProprietarioConjuge.cs" />
+    <Compile Include="ClsTelefone.cs" />
+    <Compile Include="ClsTransacaoBancaria.cs" />
+    <Compile Include="ClsVenda.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -50,7 +68,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="DiagramaClasse.cd" />
+    <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

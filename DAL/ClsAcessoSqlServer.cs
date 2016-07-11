@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -10,6 +6,18 @@ namespace DAL
 {
     public class ClsAcessoSqlServer
     {
+        //Contrutor da classe
+        public ClsAcessoSqlServer()
+        {
+            try
+            {
+                CriarConexao();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message.ToString());
+            }
+        }
         //Criação da Conexão
         private SqlConnection CriarConexao()
         {
@@ -83,7 +91,45 @@ namespace DAL
                 throw new Exception(ex.Message.ToString());
             }
         }
-        public DataTable ExecutarConsulta(CommandType tipoComando, string nomeProcedure)
+        /*public DataTable ExecutarConsulta(string nomeProcedure)
+        {
+            try
+            {
+                //criando a conexao
+                SqlConnection con = CriarConexao();
+                //Abrindo a conexao
+                con.Open();
+                //criando o comando
+                SqlCommand comando = con.CreateCommand();
+                //Configurando o comando
+                comando.CommandType = CommandType.StoredProcedure;
+                comando.CommandTimeout = 200;//em segundos
+                comando.CommandText = nomeProcedure;
+
+                //populando o comando
+                foreach (SqlParameter sql in Parametros)
+                {
+                    comando.Parameters.Add(new SqlParameter(sql.ParameterName, sql.Value));
+                }
+
+                //criando um adaptador
+                SqlDataAdapter da = new SqlDataAdapter(comando);
+
+                //criando um datatable
+                DataTable dt = new DataTable();
+
+                //populando o datatable
+                da.Fill(dt);
+
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message.ToString());
+            }
+        }*/
+
+        public DataTable ExecutarConsulta(string nomeProcedure, CommandType tipoComando = CommandType.StoredProcedure)
         {
             try
             {
@@ -121,9 +167,36 @@ namespace DAL
             }
         }
 
-        public object ExecutarConsulta()
+        public DataTable ExecutarConsulta(string Query)
         {
-            throw new NotImplementedException();
+            try
+            {
+                //criando a conexao
+                SqlConnection con = CriarConexao();
+                //Abrindo a conexao
+                con.Open();
+                //criando o comando
+                SqlCommand comando = con.CreateCommand();
+                //Configurando o comando
+                comando.CommandType = CommandType.Text;
+                comando.CommandTimeout = 200;//em segundos
+                comando.CommandText = Query;
+
+                //criando um adaptador
+                SqlDataAdapter da = new SqlDataAdapter(comando);
+
+                //criando um datatable
+                DataTable dt = new DataTable();
+
+                //populando o datatable
+                da.Fill(dt);
+
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message.ToString());
+            }
         }
     }
 }

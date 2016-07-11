@@ -47,7 +47,9 @@ namespace ApresentacaoWindows
                 comprador.tel2 = txttel2.Text.Equals(string.Empty) ? comprador.tel2 = "NULL" : txttel2.Text.Replace("(", "").Replace(")", "").Replace("_", "").Replace(" ", "").Replace("-", "");
                 comprador.telComercial = txttelcomercial.Text.Equals(string.Empty) ? comprador.telComercial = "NULL" : txttelcomercial.Text.Replace("(", "").Replace(")", "").Replace("_", "").Replace(" ", "").Replace("-", "");
                 comprador.uf = txtuf.Text.Equals(string.Empty) ? comprador.uf = "NULL" : txtuf.Text.ToUpper();
-                MessageBox.Show("Código do comprador: " + comprador.NovoComprador().ToString() + ".");
+                //MessageBox.Show("Código do comprador: " + comprador.NovoComprador().ToString() + ".");
+                comprador.InserirComprador();
+                MessageBox.Show("OK");
             }
             catch (FormatException)
             {

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
 using MySql.Data.MySqlClient;
 
@@ -24,7 +20,7 @@ namespace DAL
         }
 
         //Parametros para o BD
-        private MySqlParameterCollection Parametros = new  MySqlCommand().Parameters;
+        private MySqlParameterCollection Parametros = new MySqlCommand().Parameters;
 
         //Limpeza dos parametros
         public void LimparParametros()
@@ -45,7 +41,6 @@ namespace DAL
             try
             {
                 Parametros.Add(new MySqlParameter(nomeParametro, valorParamentro));
-
             }
             catch (Exception ex)
             {
@@ -54,7 +49,7 @@ namespace DAL
         }
 
         //Persistencia de dados
-        public object ExecutarPersistencia(CommandType tipoComando, string nomeProcedure)
+        public object ExecutarPersistencia(string nomeProcedure)
         {
             try
             {
@@ -75,6 +70,10 @@ namespace DAL
                     comando.Parameters.Add(new MySqlParameter(sql.ParameterName, sql.Value));
                 }
 
+                con.Close();
+                con.Dispose();
+                comando.Dispose();
+
                 //retorno do codigo cadastrado no banco
                 return comando.ExecuteScalar();
             }
@@ -84,7 +83,7 @@ namespace DAL
             }
         }
 
-        public DataTable ExecutarConsulta(CommandType tipoComando, string nomeProcedure)
+        public DataTable ExecutarConsulta(string nomeProcedure, CommandType tipoComando = CommandType.StoredProcedure)
         {
             try
             {
@@ -113,6 +112,48 @@ namespace DAL
 
                 //populando o datatable
                 da.Fill(dt);
+
+                con.Close();
+                con.Dispose();
+                comando.Dispose();
+                da.Dispose();
+
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message.ToString());
+            }
+        }
+
+        public DataTable ExecutarConsulta(string Query)
+        {
+            try
+            {
+                //criando a conexao
+                MySqlConnection con = CriarConexao();
+                //Abrindo a conexao
+                con.Open();
+                //criando o comando
+                MySqlCommand comando = con.CreateCommand();
+                //Configurando o comando
+                comando.CommandType = CommandType.Text;
+                comando.CommandTimeout = 200;//em segundos
+                comando.CommandText = Query;
+
+                //criando um adaptador
+                MySqlDataAdapter da = new MySqlDataAdapter(comando);
+
+                //criando um datatable
+                DataTable dt = new DataTable();
+
+                //populando o datatable
+                da.Fill(dt);
+
+                con.Close();
+                con.Dispose();
+                comando.Dispose();
+                da.Dispose();
 
                 return dt;
             }
