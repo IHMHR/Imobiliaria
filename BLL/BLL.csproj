@@ -40,6 +40,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClsComprador.cs" />
+    <Compile Include="ClsCorretor.cs" />
+    <Compile Include="ClsImobiliaria.cs" />
     <Compile Include="Conexoes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
