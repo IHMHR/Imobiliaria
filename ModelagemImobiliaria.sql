@@ -452,7 +452,7 @@ CREATE PROCEDURE usp_CorretorInserir
   @telComercial VARCHAR(14) = NULL,
   @telExtra VARCHAR(14) = NULL,
   @sexo CHAR(1),
-  @etado_civil VARCHAR(15),
+  @estado_civil VARCHAR(15),
   @creci VARCHAR(10) = NULL,
   @rua VARCHAR(100),
   @num INT,
@@ -948,6 +948,7 @@ CREATE PROCEDURE usp_CompradorAlterar
   @cpf VARCHAR(11) = NULL,
   @rg VARCHAR(10) = NULL,
   @nome VARCHAR(120) = NULL,
+  @sexo CHAR(1) = NULL,
   @estado_Civil VARCHAR(15) = NULL,
   @profissao varchar(45) = NULL,
   @renda_bruta INT = NULL,
@@ -1673,6 +1674,31 @@ AS
 GO
 
 SELECT * FROM vwImovel
+
+CREATE VIEW vwComprador WITH SCHEMABINDING
+AS
+  SELECT 
+    comprador.codigo AS 'Código do comprador',
+	nome AS 'Nome do comprador',
+	profissao AS 'Profissão do comprador',
+	(ddd + ' ' + telefone) AS 'Telefone comprador',
+	(ddd + ' ' + telefone2) AS 'Telefone 2 comprador',
+	(ddd + ' ' + celular) AS 'Celular comprador',
+	(ddd + ' ' + tel_comercial) AS 'Telefone comercial comprador',
+	(ddd + ' ' + telefone_extra) AS 'Telefone extra comprador',
+	lista_intereste AS 'Lista de interesses',
+	imobiliaria.apelido AS 'Imobiliária envolvida',
+	endereco.logradouro AS 'R.\Av. do imóvel',
+	endereco.numero AS 'Número do imóvel',
+	endereco.complemento AS 'Complemento do imóvel',
+	endereco.bairro AS 'Bairro do imóvel',endereco.cidade AS 'Cidade do imóvel',endereco.uf AS 'Estado do imóvel' 
+  FROM dbo.comprador 
+  LEFT JOIN dbo.imobiliaria ON comprador.imobiliaria_creci = imobiliaria.creci 
+  LEFT JOIN dbo.endereco ON comprador.endereco_codigo = endereco.codigo 
+  LEFT JOIN dbo.telefone ON comprador.telefone_codigo = telefone.codigo
+GO
+
+SELECT * FROM vwComprador
 
 -- OCULTANDO CAMPOS NULOS --
 DECLARE @sql VARCHAR(MAX) = (SELECT CONCAT('SELECT ',

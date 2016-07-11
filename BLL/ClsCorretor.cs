@@ -2,18 +2,14 @@
 
 namespace BLL
 {
-    sealed public class ClsComprador
+    sealed public class ClsCorretor
     {
         #region Variaveis
         public int codigo { get; set; }
         public string cpf { get; set; }
         public string rg { get; set; }
         public string nome { get; set; }
-        public char sexo { get; set; }
         public string estadoCivil { get; set; }
-        public string profissao { get; set; }
-        public int renda { get; set; }
-        public decimal fgts { get; set; }
         public string ddi { get; set; }
         public string ddd { get; set; }
         public string tel { get; set; }
@@ -21,7 +17,7 @@ namespace BLL
         public string cel { get; set; }
         public string telComercial { get; set; }
         public string telExtra { get; set; }
-        public string listaIntereste { get; set; }
+        public char sexo { get; set; }
         public string creci { get; set; }
         public string logradouro { get; set; }
         public int numero { get; set; }
@@ -46,9 +42,6 @@ namespace BLL
                 Conexoes.SqlServer.AdicionarParametro("nome", nome.Trim().Replace("'", @"\'"));
                 Conexoes.SqlServer.AdicionarParametro("sexo", sexo);
                 Conexoes.SqlServer.AdicionarParametro("estado_civil", estadoCivil.Trim());
-                Conexoes.SqlServer.AdicionarParametro("profissao", profissao.Trim());
-                Conexoes.SqlServer.AdicionarParametro("renda_bruta", renda.ToString().Trim().Replace(",", "."));
-                Conexoes.SqlServer.AdicionarParametro("fgts", fgts.ToString().Trim().Replace(",", "."));
                 Conexoes.SqlServer.AdicionarParametro("ddi", ddi.Trim().Replace("(", "").Replace(")", ",").Replace("+", ""));
                 Conexoes.SqlServer.AdicionarParametro("ddd", ddd.Trim().Replace("(", "").Replace(")", ",").Replace("+", ""));
                 Conexoes.SqlServer.AdicionarParametro("tel", tel.Trim().Replace("(", "").Replace(")", ",").Replace("+", "").Replace("-", "").Replace(".", ""));
@@ -56,7 +49,6 @@ namespace BLL
                 Conexoes.SqlServer.AdicionarParametro("cel", cel.Trim().Replace("(", "").Replace(")", ",").Replace("+", "").Replace("-", "").Replace(".", ""));
                 Conexoes.SqlServer.AdicionarParametro("telComercial", telComercial.Trim().Replace("(", "").Replace(")", ",").Replace("+", "").Replace("-", "").Replace(".", ""));
                 Conexoes.SqlServer.AdicionarParametro("telExtra", telExtra.Trim().Replace("(", "").Replace(")", ",").Replace("+", "").Replace("-", "").Replace(".", ""));
-                Conexoes.SqlServer.AdicionarParametro("lista_intereste", listaIntereste.Trim());
                 Conexoes.SqlServer.AdicionarParametro("creci", creci.Trim().Replace("(", "").Replace(")", ",").Replace("+", "").Replace("-", "").Replace(".", ""));
                 Conexoes.SqlServer.AdicionarParametro("rua", logradouro.Trim().Replace("'", @"\'"));
                 Conexoes.SqlServer.AdicionarParametro("numero", numero);
@@ -67,8 +59,8 @@ namespace BLL
                 Conexoes.SqlServer.AdicionarParametro("pais", pais.Trim().Replace("'", @"\'"));
                 //Conexoes.SqlServer.AdicionarParametro(cep,cep);
 
-                //codigo = Conexoes.SqlServer.ExecutarPersistencia(System.Data.CommandType.StoredProcedure, "usp_CompradorInserir");
-                Conexoes.SqlServer.ExecutarPersistencia(System.Data.CommandType.StoredProcedure, "usp_CompradorInserir");
+                //codigo = Conexoes.SqlServer.ExecutarPersistencia(System.Data.CommandType.StoredProcedure, "usp_CorretorInserir");
+                Conexoes.SqlServer.ExecutarPersistencia(System.Data.CommandType.StoredProcedure, "usp_CorretorInserir");
             }
             catch (Exception ex)
             {
@@ -84,7 +76,7 @@ namespace BLL
 
                 Conexoes.SqlServer.AdicionarParametro("cod", codigo.ToString().Trim());
 
-                Conexoes.SqlServer.ExecutarPersistencia(System.Data.CommandType.StoredProcedure, "usp_CompradorApagar");
+                Conexoes.SqlServer.ExecutarPersistencia(System.Data.CommandType.StoredProcedure, "usp_CorretorApagar");
             }
             catch (Exception ex)
             {
@@ -102,16 +94,13 @@ namespace BLL
                 }
 
                 Conexoes.SqlServer.LimparParametros();
-                
+
                 Conexoes.SqlServer.AdicionarParametro("cod", codigo);
                 Conexoes.SqlServer.AdicionarParametro("cpf", cpf.Trim().Replace(",", "").Replace("-", "").Replace(" ", ""));
                 Conexoes.SqlServer.AdicionarParametro("rg", rg.Trim().Replace(",", "").Replace("-", "").Replace(" ", ""));
                 Conexoes.SqlServer.AdicionarParametro("nome", nome.Trim().Replace("'", @"\'"));
                 Conexoes.SqlServer.AdicionarParametro("sexo", sexo);
                 Conexoes.SqlServer.AdicionarParametro("estado_civil", estadoCivil.Trim());
-                Conexoes.SqlServer.AdicionarParametro("profissao", profissao.Trim());
-                Conexoes.SqlServer.AdicionarParametro("renda_bruta", renda.ToString().Trim().Replace(",", "."));
-                Conexoes.SqlServer.AdicionarParametro("fgts", fgts.ToString().Trim().Replace(",", "."));
                 Conexoes.SqlServer.AdicionarParametro("ddi", ddi.Trim().Replace("(", "").Replace(")", ",").Replace("+", ""));
                 Conexoes.SqlServer.AdicionarParametro("ddd", ddd.Trim().Replace("(", "").Replace(")", ",").Replace("+", ""));
                 Conexoes.SqlServer.AdicionarParametro("tel", tel.Trim().Replace("(", "").Replace(")", ",").Replace("+", "").Replace("-", "").Replace(".", ""));
@@ -119,7 +108,6 @@ namespace BLL
                 Conexoes.SqlServer.AdicionarParametro("cel", cel.Trim().Replace("(", "").Replace(")", ",").Replace("+", "").Replace("-", "").Replace(".", ""));
                 Conexoes.SqlServer.AdicionarParametro("telComercial", telComercial.Trim().Replace("(", "").Replace(")", ",").Replace("+", "").Replace("-", "").Replace(".", ""));
                 Conexoes.SqlServer.AdicionarParametro("telExtra", telExtra.Trim().Replace("(", "").Replace(")", ",").Replace("+", "").Replace("-", "").Replace(".", ""));
-                Conexoes.SqlServer.AdicionarParametro("lista_intereste", listaIntereste.Trim());
                 Conexoes.SqlServer.AdicionarParametro("creci", creci.Trim().Replace("(", "").Replace(")", ",").Replace("+", "").Replace("-", "").Replace(".", ""));
                 Conexoes.SqlServer.AdicionarParametro("rua", logradouro.Trim().Replace("'", @"\'"));
                 Conexoes.SqlServer.AdicionarParametro("numero", numero);
@@ -129,8 +117,8 @@ namespace BLL
                 Conexoes.SqlServer.AdicionarParametro("uf", uf.Trim().Replace("'", @"\'"));
                 Conexoes.SqlServer.AdicionarParametro("pais", pais.Trim().Replace("'", @"\'"));
                 //Conexoes.SqlServer.AdicionarParametro(cep,cep);
-                
-                Conexoes.SqlServer.ExecutarPersistencia(System.Data.CommandType.StoredProcedure, "usp_CompradorAlterar");
+
+                Conexoes.SqlServer.ExecutarPersistencia(System.Data.CommandType.StoredProcedure, "usp_CorretorAlterar");
             }
             catch (Exception ex)
             {
@@ -142,7 +130,7 @@ namespace BLL
         {
             try
             {
-                return Conexoes.SqlServer.ExecutarConsulta("SELECT * FROM vwComprador");
+                return Conexoes.SqlServer.ExecutarConsulta("SELECT * FROM vwCorretor");
             }
             catch (Exception ex)
             {
