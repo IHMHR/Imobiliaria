@@ -11,8 +11,10 @@ namespace BLL
         public string registro { get; set; }
         public string frenteLote { get; set; }
         public string ladoLote { get; set; }
-        public ClsCorretor capitador { get; set; }
-        public ClsProprietario proprietário { get; set; }
+        //public ClsCorretor capitador { get; set; }
+        public int capitador { get; set; }
+        //public ClsProprietario proprietário { get; set; }
+        public int proprietário { get; set; }
         public string logradouro { get; set; }
         public int numero { get; set; }
         public string complemento { get; set; }
@@ -34,8 +36,8 @@ namespace BLL
                 Conexoes.SqlServer.AdicionarParametro("registro", registro.Trim());
                 Conexoes.SqlServer.AdicionarParametro("frente_lote",frenteLote.Trim().Replace(",","."));
                 Conexoes.SqlServer.AdicionarParametro("lado_lote", ladoLote.Trim().Replace(",", "."));
-                Conexoes.SqlServer.AdicionarParametro("capitador", capitador.codigo);
-                Conexoes.SqlServer.AdicionarParametro("cod_proprietario",proprietário.codigo);
+                Conexoes.SqlServer.AdicionarParametro("capitador", capitador);
+                Conexoes.SqlServer.AdicionarParametro("cod_proprietario",proprietário);
                 Conexoes.SqlServer.AdicionarParametro("rua", logradouro.Trim().Replace("'", @"\'"));
                 Conexoes.SqlServer.AdicionarParametro("numero", numero);
                 Conexoes.SqlServer.AdicionarParametro("compl", complemento.Trim().Replace("'", @"\'"));
@@ -82,8 +84,8 @@ namespace BLL
                 Conexoes.SqlServer.AdicionarParametro("registro", registro.Trim());
                 Conexoes.SqlServer.AdicionarParametro("frente_lote", frenteLote.Trim().Replace(",", "."));
                 Conexoes.SqlServer.AdicionarParametro("lado_lote", ladoLote.Trim().Replace(",", "."));
-                Conexoes.SqlServer.AdicionarParametro("capitador", capitador.codigo);
-                Conexoes.SqlServer.AdicionarParametro("cod_proprietario", proprietário.codigo);
+                Conexoes.SqlServer.AdicionarParametro("capitador", capitador);
+                Conexoes.SqlServer.AdicionarParametro("cod_proprietario", proprietário);
                 Conexoes.SqlServer.AdicionarParametro("rua", logradouro.Trim().Replace("'", @"\'"));
                 Conexoes.SqlServer.AdicionarParametro("numero", numero);
                 Conexoes.SqlServer.AdicionarParametro("compl", complemento.Trim().Replace("'", @"\'"));
