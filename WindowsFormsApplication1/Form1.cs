@@ -57,14 +57,14 @@ namespace WindowsFormsApplication1
             else
             {
                 imovel.bairro = textBox7.Text;
-                imovel.capitador = (ClsCorretor)corretor.infoCorretor(comboBox1.SelectedIndex);
+                imovel.capitador = comboBox1.SelectedIndex;
                 imovel.cidade = textBox8.Text;
                 imovel.frenteLote = textBox3.Text;
                 imovel.ladoLote = textBox2.Text;
                 imovel.logradouro = textBox5.Text;
                 imovel.numero = int.Parse(textBox6.Text);
                 imovel.pais = textBox10.Text;
-                imovel.proprietário = (ClsProprietario)proprietario.infoProprietario(comboBox2.SelectedIndex);
+                imovel.proprietário = comboBox2.SelectedIndex;
                 imovel.registro = textBox1.Text;
                 imovel.uf = textBox9.Text;
 
