@@ -118,7 +118,7 @@ namespace BLL
         {
             try
             {
-                return Conexoes.SqlServer.ExecutarConsulta("SELECT c.codigo AS cod, c.nome_completo AS nome FROM imovel i INNER JOIN corretor c ON c.codigo = i.capitador");
+                return Conexoes.SqlServer.ExecutarConsulta("SELECT c.codigo AS cod, c.nome_completo AS nome FROM corretor c");
             }
             catch (Exception ex)
             {

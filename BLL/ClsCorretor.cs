@@ -138,5 +138,20 @@ namespace BLL
             }
         }
         #endregion
+
+        #region Regras Negocios
+        public System.Object infoCorretor(int cod)
+        {
+            try
+            {
+                return Conexoes.SqlServer.ExecutarConsulta("SELECT * FROM corretor WHERE codigo = " + cod);
+            }
+            catch (Exception ex)
+            {
+                throw new NotImplementedException("NEED TO BUILD IT, Error: " + ex.Message.ToString());
+            }
+        }
+
+        #endregion
     }
 }

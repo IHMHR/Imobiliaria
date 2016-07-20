@@ -15,6 +15,7 @@ namespace WindowsFormsApplication1
     {
         private static ClsImovel imovel = new ClsImovel();
         private static ClsProprietario proprietario = new ClsProprietario();
+        private static ClsCorretor corretor = new ClsCorretor();
         public Form1()
         {
             InitializeComponent();
@@ -26,7 +27,7 @@ namespace WindowsFormsApplication1
             comboBox1.DisplayMember = "nome";
             comboBox1.ValueMember = "cod";
 
-            comboBox2.DataSource = proprietario.Visualizar();
+            comboBox2.DataSource = proprietario.ListaProprietarios();
             comboBox2.DisplayMember = "nome";
             comboBox2.ValueMember = "cod";
         }
@@ -44,6 +45,30 @@ namespace WindowsFormsApplication1
                 textBox11.Text = "+ 055";
 
                 textBox6.Focus();
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (textBox4.Text == string.Empty || textBox1.Text == string.Empty)
+            {
+                MessageBox.Show("Ainda existem campos não preenchidos.", "Preencha os campos", MessageBoxButtons.OK);
+            }
+            else
+            {
+                imovel.bairro = textBox7.Text;
+                imovel.capitador = (ClsCorretor)corretor.infoCorretor(comboBox1.SelectedIndex);
+                imovel.cidade = textBox8.Text;
+                imovel.frenteLote = textBox3.Text;
+                imovel.ladoLote = textBox2.Text;
+                imovel.logradouro = textBox5.Text;
+                imovel.numero = int.Parse(textBox6.Text);
+                imovel.pais = textBox10.Text;
+                imovel.proprietário = (ClsProprietario)proprietario.infoProprietario(comboBox2.SelectedIndex);
+                imovel.registro = textBox1.Text;
+                imovel.uf = textBox9.Text;
+
+                imovel.Inserir();
             }
         }
     }

@@ -155,6 +155,18 @@ namespace BLL
             }
         }
 
+        public System.Object infoProprietario(int cod)
+        {
+            try
+            {
+                return Conexoes.SqlServer.ExecutarConsulta("SELECT * FROM proprietario WHERE codigo = " + cod);
+            }
+            catch (Exception ex)
+            {
+                throw new NotImplementedException("NEED TO BUILD IT, Error: " + ex.Message.ToString());
+            }
+        }
+
         #endregion
     }
 }
