@@ -112,5 +112,20 @@ namespace BLL
             }
         }
         #endregion
+
+        #region Regras Negocios
+        public System.Data.DataTable ListaCapitadores()
+        {
+            try
+            {
+                return Conexoes.SqlServer.ExecutarConsulta("SELECT c.codigo AS cod, c.nome_completo AS nome FROM imovel i INNER JOIN corretor c ON c.codigo = i.capitador");
+            }
+            catch (Exception ex)
+            {
+                throw new NotImplementedException("NEED TO BUILD IT, Error: " + ex.Message.ToString());
+            }
+        }
+
+        #endregion
     }
 }

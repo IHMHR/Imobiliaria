@@ -141,5 +141,20 @@ namespace BLL
             }
         }
         #endregion
+
+        #region Regras Negocios
+        public System.Data.DataTable ListaProprietarios()
+        {
+            try
+            {
+                return Conexoes.SqlServer.ExecutarConsulta("SELECT codigo AS cod, nome  FROM proprietario");
+            }
+            catch (Exception ex)
+            {
+                throw new NotImplementedException("NEED TO BUILD IT, Error: " + ex.Message.ToString());
+            }
+        }
+
+        #endregion
     }
 }
