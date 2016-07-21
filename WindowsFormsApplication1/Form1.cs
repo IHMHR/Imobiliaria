@@ -57,19 +57,36 @@ namespace WindowsFormsApplication1
             else
             {
                 imovel.bairro = textBox7.Text;
-                imovel.capitador = comboBox1.SelectedIndex;
+                imovel.capitador = (int)comboBox1.SelectedValue;
                 imovel.cidade = textBox8.Text;
                 imovel.frenteLote = textBox3.Text;
                 imovel.ladoLote = textBox2.Text;
                 imovel.logradouro = textBox5.Text;
                 imovel.numero = int.Parse(textBox6.Text);
                 imovel.pais = textBox10.Text;
-                imovel.proprietário = comboBox2.SelectedIndex;
+                imovel.proprietário = (int)comboBox2.SelectedValue;
                 imovel.registro = textBox1.Text;
                 imovel.uf = textBox9.Text;
 
                 imovel.Inserir();
             }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            textBox1.Clear();
+            textBox2.Clear();
+            textBox3.Clear();
+            textBox4.Clear();
+            textBox5.Clear();
+            textBox6.Clear();
+            textBox7.Clear();
+            textBox8.Clear();
+            textBox9.Clear();
+            textBox10.Clear();
+            textBox11.Clear();
+            comboBox1.SelectedIndex = -1;
+            comboBox2.SelectedIndex = -1;
         }
     }
 }
